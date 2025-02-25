@@ -17,8 +17,9 @@ const setupSocket = (server) => {
     });
 
     // Handle private messages
-    socket.on('privateMessage', ({ room, message }) => {
-      io.to(room).emit('privateMessage', message);
+    socket.on('privateMessage', ({ room, message, username }) => {
+      const timestamp = new Date().toISOString(); // Send timestamp as ISO string
+      io.to(room).emit('privateMessage', { username, message, timestamp });
     });
 
     socket.on('disconnect', () => {
