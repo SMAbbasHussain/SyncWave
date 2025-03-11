@@ -1,48 +1,62 @@
-.private-chats-container {
-  width: 75%;
-  height: 18vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 0;
-  position: relative;
-  background: rgba(50, 58, 70, 0.5); 
-  border-radius: 8px;
+* {
+  box-sizing: border-box;
 }
 
+.private-chats-container {
+  width: 80%;
+  height: 15vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  position: relative;
+  background: rgba(50, 58, 70, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
 
 .content-wrapper {
   display: flex;
   flex: 1;
-  position: relative;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .chats-section {
   flex: 1;
   transition: flex 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 12px;
 }
 
 .chats-section.reduced-width {
-  flex: 0.6; 
+  flex: 0.6;
 }
 
 .chats-wrapper {
-  display: flex;
-  align-items: center;
   width: 100%;
   height: 100%;
-  background: transparent; 
+  display: flex;
+  justify-content: flex-start; /* Align chats to the start for consistent spacing */
+  align-items: center;
   overflow: hidden;
+  position: relative;
 }
 
 .chat-container {
   display: flex;
   align-items: center;
   overflow-x: auto;
-  scroll-behavior: smooth;
   width: 100%;
   height: 100%;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .chat-container::-webkit-scrollbar {
@@ -53,13 +67,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 10px;
+  margin: 0 5px; /* Increased and fixed margin for consistent spacing */
   flex-shrink: 0;
+  min-width: 60px; /* Increased min-width to accommodate 5-char names with ".." */
 }
 
 .chat-pic {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #00ffff80;
@@ -68,109 +83,80 @@
 .chat-name {
   color: #ccc;
   font-size: 0.8rem;
-  margin-top: 5px;
+  margin-top: 2px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.scroll-button {
-  background: rgba(211, 211, 211, 0.1);
-  border: none;
-  color: #00ffff80;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  transition: opacity 0.3s ease, background 0.3s ease;
-}
-
-.scroll-button.left {
-  left: 5px;
-}
-
-.scroll-button.right {
-  right: 5px;
-}
-
-.scroll-button:hover:not(.disabled) {
-  background: rgba(211, 211, 211, 0.2);
-}
-
-.scroll-button.disabled {
-  opacity: 0.3;
-  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50px;
 }
 
 .separator {
   width: 1px;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  position: absolute;
-  left: 60%;
-  top: 0;
-  transition: left 0.3s ease;
-}
-
-.chats-section.reduced-width + .separator {
-  left: 60%; 
+  height: 60%;
+  background: #00ffff80;
+  margin: 0 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .search-section {
-  flex: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-left: 10px;
+  align-items: center;
   transition: flex 0.3s ease;
-  width: 40%; 
-  opacity: 0;
-  pointer-events: none;
+  flex: 0.15;
+  min-width: 45px;
+  padding: 0 6px;
 }
 
 .search-section.expanded {
-  flex: 0.4; 
-  opacity: 1;
-  pointer-events: auto;
+  flex: 0.4;
+  min-width: 0;
 }
 
 .search-toggle {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin: 0 6px;
+  height: 100%;
 }
 
 .search-toggle-icon {
   color: #00ffff80;
-  font-size: 1.2rem;
-  margin-right: 5px;
+  font-size: 1.1rem;
+  margin-bottom: 2px;
 }
 
-.search-toggle span {
+.search-toggle-span {
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .search-container {
   position: relative;
   width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 6px;
 }
 
 .search-input {
   width: 100%;
-  height: 6vh;
-  padding: 10px 10px 10px 35px;
-  font-size: 1rem;
-  border-radius: 5px;
+  height: 30px;
+  padding: 5px 10px 5px 30px;
+  font-size: 0.9rem;
+  border-radius: 4px;
   border: 2px solid transparent;
   background: rgba(211, 211, 211, 0.135);
-  color: #ffffff;
+  color: #ccc;
   outline: none;
   transition: border 0.3s ease, background 0.3s ease;
 }
@@ -181,7 +167,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .search-input::placeholder {
@@ -195,9 +181,9 @@
 
 .no-results {
   width: 100%;
-  padding: 15px;
+  padding: 8px;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   text-align: center;
   background: rgba(211, 211, 211, 0.1);
 }

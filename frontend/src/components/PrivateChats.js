@@ -1,71 +1,58 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/PrivateChats.css";
-import { FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 
 function PrivateChats() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const chatContainerRef = useRef(null);
-  const [scrollButtonsVisible, setScrollButtonsVisible] = useState({
-    left: false,
-    right: true,
-  });
+  const searchContainerRef = useRef(null);
 
   const privateChats = [
-    { id: 1, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 2, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 3, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 4, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 5, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 6, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 7, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 8, name: "Name", image: "https://via.placeholder.com/40" },
+    { id: 1, name: "aleen", image: "https://via.placeholder.com/40" },
+    { id: 2, name: "zayr", image: "https://via.placeholder.com/40" },
+    { id: 3, name: "saleeha", image: "https://via.placeholder.com/40" },
+    { id: 4, name: "zayn uhj2", image: "https://via.placeholder.com/40" },
+    { id: 5, name: "Johjnjn Doe", image: "https://via.placeholder.com/40" }, // Two-word name
+    { id: 6, name: "Jane Smith", image: "https://via.placeholder.com/40" }, // Two-word name
+    { id: 7, name: "mynameiszain", image: "https://via.placeholder.com/40" }, // Long name
+    { id: 8, name: "Namesi ", image: "https://via.placeholder.com/40" },
     { id: 9, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 10, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 11, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 12, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 13, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 14, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 15, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 16, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 17, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 18, name: "Name", image: "https://via.placeholder.com/40" },
+    { id: 10, name: "Nail", image: "https://via.placeholder.com/40" },
   ];
 
   const filteredChats = privateChats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const scrollLeft = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollLeft -= 100;
-      checkScrollPosition();
-    }
-  };
-
-  const scrollRight = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollLeft += 100;
-      checkScrollPosition();
-    }
-  };
-
-  const checkScrollPosition = () => {
-    if (chatContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = chatContainerRef.current;
-      setScrollButtonsVisible({
-        left: scrollLeft > 0,
-        right: scrollLeft < scrollWidth - clientWidth,
-      });
-    }
-  };
-
   useEffect(() => {
-    checkScrollPosition();
+    const handleClickOutside = (e) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target) &&
+        !e.target.classList.contains("search-toggle-icon") &&
+        !e.target.classList.contains("search-toggle") &&
+        !e.target.classList.contains("search-toggle-span")
+      ) {
+        setIsSearchVisible(false);
+        setSearchQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);
+  };
+
+  const formatChatName = (name) => {
+    if (name.length > 7) {
+      return name.slice(0, 7) + "..";
+    }
+    return name;
   };
 
   return (
@@ -73,25 +60,19 @@ function PrivateChats() {
       <div className="content-wrapper">
         <div className={`chats-section ${isSearchVisible ? "reduced-width" : ""}`}>
           <div className="chats-wrapper">
-            <button
-              className={`scroll-button left ${!scrollButtonsVisible.left ? "disabled" : ""}`}
-              onClick={scrollLeft}
-            >
-              <FaChevronLeft />
-            </button>
-            <div className="chat-container" ref={chatContainerRef} onScroll={checkScrollPosition}>
+            <div className="chat-container" ref={chatContainerRef}>
               {isSearchVisible && searchQuery.trim() === ""
                 ? privateChats.map((chat) => (
                     <div key={chat.id} className="chat-item">
                       <img src={chat.image} alt={chat.name} className="chat-pic" />
-                      <div className="chat-name">{chat.name}</div>
+                      <div className="chat-name">{formatChatName(chat.name)}</div>
                     </div>
                   ))
                 : filteredChats.length > 0
                 ? filteredChats.map((chat) => (
                     <div key={chat.id} className="chat-item">
                       <img src={chat.image} alt={chat.name} className="chat-pic" />
-                      <div className="chat-name">{chat.name}</div>
+                      <div className="chat-name">{formatChatName(chat.name)}</div>
                     </div>
                   ))
                 : (
@@ -100,20 +81,16 @@ function PrivateChats() {
                     </div>
                   )}
             </div>
-            <button
-              className={`scroll-button right ${!scrollButtonsVisible.right ? "disabled" : ""}`}
-              onClick={scrollRight}
-            >
-              <FaChevronRight />
-            </button>
           </div>
         </div>
         <div className="separator"></div>
-        <div className={`search-section ${isSearchVisible ? "expanded" : ""}`}>
-          <div className="search-toggle" onClick={toggleSearch}>
-            <FaSearch className="search-toggle-icon" />
-            <span>Search</span>
-          </div>
+        <div className={`search-section ${isSearchVisible ? "expanded" : ""}`} ref={searchContainerRef}>
+          {!isSearchVisible && (
+            <div className="search-toggle" onClick={toggleSearch}>
+              <FaSearch className="search-toggle-icon" />
+              <span className="search-toggle-span">Search</span>
+            </div>
+          )}
           {isSearchVisible && (
             <div className="search-container">
               <FaSearch className="search-icon" />
