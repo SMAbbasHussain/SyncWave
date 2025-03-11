@@ -1,0 +1,126 @@
+.login-container {
+  width: 35vw !important;
+  height: 90vh !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.login-head-text {
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.login-input-container{
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.login-input-container input {
+  width: 25vw;
+  height: 10vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 10px 0px 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  background-color: rgba(211, 211, 211, 0.135);
+  color: #ffffff;
+  outline: none;
+  transition: border 0.3s ease, background 0.3s ease;
+}
+
+.login-input-container input:focus {
+  border: 2px solid #00ffff80;
+  background: rgba(211, 211, 211, 0.275);
+}
+
+.login-input-container input:not(:placeholder-shown) {
+  background: #cecece44;
+}
+
+.login-input-container label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #aaa;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: transparent;
+  padding: 0 5px;
+}
+
+.login-input-container input:focus + label,
+.login-input-container input:not(:placeholder-shown) + label {
+  top: 12px;
+  font-size: 0.8rem;
+  color: #00ffffe2;
+}
+
+.login-captcha-container {
+  margin: 5px 0 18px 0;
+  display: flex;
+  justify-content: center;
+  width: 25vw;
+  height: 10vh;
+}
+
+.login-btn-login, .login-btn-google {
+  cursor: pointer;
+  color: #ffffff;
+  font-weight: 500;
+  background-color: #5f8cbcd6;
+  transition: transform 0.3s ease;
+  height: 10vh;
+  width: 25vw;
+  margin-top: 15px;
+  border: none;
+  border-radius: 5px;
+}
+
+.login-btn-google {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background-color: #cdcdcd;
+  color: #222;
+}
+
+.login-btn-google img {
+  width: 40px;
+  height: 40px;
+}
+
+.login-btn-login:hover {
+  transform: scale(1.025);
+}
+
+.login-else-text {
+  margin-top: 15px;
+  color: #ffffff;
+}
+
+.login-else-text a {
+  color: #00ffffe2;
+  text-decoration: none;
+}
+
+.login-else-text a:hover {
+  text-decoration: underline;
+}
