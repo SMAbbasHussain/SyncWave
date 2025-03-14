@@ -9,21 +9,37 @@ function PrivateChats() {
   const searchContainerRef = useRef(null);
 
   const privateChats = [
-    { id: 1, name: "aleen", image: "https://via.placeholder.com/40" },
-    { id: 2, name: "zayr", image: "https://via.placeholder.com/40" },
-    { id: 3, name: "saleeha", image: "https://via.placeholder.com/40" },
-    { id: 4, name: "zayn uhj2", image: "https://via.placeholder.com/40" },
-    { id: 5, name: "Johjnjn Doe", image: "https://via.placeholder.com/40" }, // Two-word name
-    { id: 6, name: "Jane Smith", image: "https://via.placeholder.com/40" }, // Two-word name
-    { id: 7, name: "mynameiszain", image: "https://via.placeholder.com/40" }, // Long name
-    { id: 8, name: "Namesi ", image: "https://via.placeholder.com/40" },
+    { id: 1, name: "aleena", image: "https://via.placeholder.com/40" },
+    { id: 2, name: "salman", image: "https://via.placeholder.com/40" },
+    { id: 3, name: "Abbas hussain", image: "https://via.placeholder.com/40" },
+    { id: 4, name: "zayn abbas", image: "https://via.placeholder.com/40" },
+    { id: 5, name: "Johnson", image: "https://via.placeholder.com/40" },
+    { id: 6, name: "Jane Smith", image: "https://via.placeholder.com/40" },
+    { id: 7, name: "mynamezain", image: "https://via.placeholder.com/40" },
+    { id: 8, name: "Namesare", image: "https://via.placeholder.com/40" },
     { id: 9, name: "Name", image: "https://via.placeholder.com/40" },
     { id: 10, name: "Nail", image: "https://via.placeholder.com/40" },
+    { id: 11, name: "Jane Smith", image: "https://via.placeholder.com/40" },
+    { id: 12, name: "mynamezain", image: "https://via.placeholder.com/40" },
+    { id: 13, name: "Namesare", image: "https://via.placeholder.com/40" },
+    { id: 14, name: "Name", image: "https://via.placeholder.com/40" }
   ];
 
   const filteredChats = privateChats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const shouldTextScroll = (text) => {
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.fontSize = '0.8rem';
+    tempSpan.style.whiteSpace = 'nowrap';
+    tempSpan.innerText = text;
+    document.body.appendChild(tempSpan);
+    const width = tempSpan.offsetWidth;
+    document.body.removeChild(tempSpan);
+    return width > 45;
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -48,13 +64,6 @@ function PrivateChats() {
     setIsSearchVisible(!isSearchVisible);
   };
 
-  const formatChatName = (name) => {
-    if (name.length > 7) {
-      return name.slice(0, 7) + "..";
-    }
-    return name;
-  };
-
   return (
     <div className="private-chats-container">
       <div className="content-wrapper">
@@ -63,19 +72,23 @@ function PrivateChats() {
             <div className="chat-container" ref={chatContainerRef}>
               {isSearchVisible && searchQuery.trim() === ""
                 ? privateChats.map((chat) => (
-                    <div key={chat.id} className="chat-item">
-                      <img src={chat.image} alt={chat.name} className="chat-pic" />
-                      <div className="chat-name">{formatChatName(chat.name)}</div>
+                  <div key={chat.id} className="chat-item">
+                    <img src={chat.image} alt={chat.name} className="chat-pic" />
+                    <div className="chat-name" data-should-scroll={shouldTextScroll(chat.name)}>
+                      <span className="chat-name-inner">{chat.name}</span>
                     </div>
-                  ))
+                  </div>
+                ))
                 : filteredChats.length > 0
-                ? filteredChats.map((chat) => (
+                  ? filteredChats.map((chat) => (
                     <div key={chat.id} className="chat-item">
                       <img src={chat.image} alt={chat.name} className="chat-pic" />
-                      <div className="chat-name">{formatChatName(chat.name)}</div>
+                      <div className="chat-name" data-should-scroll={shouldTextScroll(chat.name)}>
+                        <span className="chat-name-inner">{chat.name}</span>
+                      </div>
                     </div>
                   ))
-                : (
+                  : (
                     <div className="no-results">
                       No chats found matching "{searchQuery}"
                     </div>

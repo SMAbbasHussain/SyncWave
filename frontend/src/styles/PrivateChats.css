@@ -32,18 +32,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 8px;
 }
 
 .chats-section.reduced-width {
-  flex: 0.6;
+  flex: 0.75;
 }
 
 .chats-wrapper {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: flex-start; /* Align chats to the start for consistent spacing */
+  justify-content: flex-start;
   align-items: center;
   overflow: hidden;
   position: relative;
@@ -67,17 +67,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 5px; /* Increased and fixed margin for consistent spacing */
+  margin: 0 3px;
   flex-shrink: 0;
-  min-width: 60px; /* Increased min-width to accommodate 5-char names with ".." */
+  min-width: 50px;
+  width: 60px;
 }
 
 .chat-pic {
-  width: 40px;
-  height: 40px;
+  width: 43px;
+  height: 43px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #00ffff80;
+  border: 1px solid #00ffff80;
 }
 
 .chat-name {
@@ -87,15 +88,53 @@
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 50px;
+  width: 45px;
+  transition: color 0.3s ease;
+}
+
+.chat-name-inner {
+  display: inline-block;
+  white-space: nowrap;
+  position: relative;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.chat-name[data-should-scroll="true"]:hover .chat-name-inner {
+  animation: scroll-name 3s linear infinite alternate;
+}
+
+.chat-name[data-should-scroll="false"]:hover .chat-name-inner {
+  animation: none;
+}
+
+@keyframes scroll-name {
+  0% {
+    transform: translateX(0);
+  }
+
+  10% {
+    transform: translateX(0);
+  }
+
+  90% {
+    transform: translateX(calc(-100% + 45px));
+  }
+
+  100% {
+    transform: translateX(calc(-100% + 45px));
+  }
+}
+
+.chat-item:hover .chat-name {
+  color: #00ffff;
 }
 
 .separator {
-  width: 1px;
-  height: 60%;
+  width: 2px;
+  height: 70%;
   background: #00ffff80;
-  margin: 0 6px;
+  margin: 0 4px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -107,9 +146,9 @@
   justify-content: center;
   align-items: center;
   transition: flex 0.3s ease;
-  flex: 0.15;
-  min-width: 45px;
-  padding: 0 6px;
+  flex: 0.12;
+  min-width: 35px;
+  padding: 0 5px;
 }
 
 .search-section.expanded {
@@ -125,17 +164,24 @@
   cursor: pointer;
   margin: 0 6px;
   height: 100%;
+  transition: transform 0.5s ease;
+}
+
+.search-toggle:hover {
+  transform: scale(1.05);
 }
 
 .search-toggle-icon {
   color: #00ffff80;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   margin-bottom: 2px;
+  transition: transform 0.3s ease;
 }
 
 .search-toggle-span {
   color: #fff;
   font-size: 0.9rem;
+  transition: transform 0.3s ease;
 }
 
 .search-container {

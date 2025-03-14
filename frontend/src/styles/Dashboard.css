@@ -1,10 +1,16 @@
 .dashboard-container {
-    width: calc(100vw - 22vw - 15px); 
-    height: 95vh;
-    display: flex;
-    flex-direction: column;
-    background: rgba(2, 10, 33, 0.345);
-    border-radius: 8px;
-    padding: 15px;
-    overflow: hidden;
-  }
+  width: calc(100vw - 22vw - 15px);
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(2, 10, 33, 0.345);
+  border-radius: 8px;
+  padding: 15px;
+  overflow: hidden;
+}
+
+.top-section {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
