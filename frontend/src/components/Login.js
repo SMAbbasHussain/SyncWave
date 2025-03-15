@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import "../styles/login.css";
 
@@ -12,11 +13,7 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (email && password) {
-      setFieldsFilled(true);
-    } else {
-      setFieldsFilled(false);
-    }
+    setFieldsFilled(email !== "" && password !== "");
   }, [email, password]);
 
   const handleCaptchaChange = (value) => {
@@ -25,7 +22,7 @@ function Login() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!captchaVerified) {
@@ -33,10 +30,19 @@ function Login() {
       return;
     }
 
-    if (email === "test@example.com" && password === "password123") {
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      // Store token in localStorage
+      localStorage.setItem("token", response.data.token);
+
+      // Redirect to home page
       navigate("/home");
-    } else {
-      alert("Invalid credentials, please try again.");
+    } catch (error) {
+      alert(error.response?.data?.error || "Login failed. Try again.");
     }
   };
 
@@ -69,7 +75,7 @@ function Login() {
           <div className="login-captcha-container">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="YOUR_SITE_KEY" // Replace with your Site Key
+              sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Replace with your actual key
               onChange={handleCaptchaChange}
             />
           </div>
@@ -79,7 +85,7 @@ function Login() {
           Login
         </button>
       </form>
-      <button className="login-btn-google">
+      <button className="login-btn-google" onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}>
         <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
         Login with Google
       </button>
