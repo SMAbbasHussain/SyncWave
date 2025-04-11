@@ -24,27 +24,9 @@ function Dashboard() {
                     <PrivateChats />
                     <Profile />
                 </div>
-
                 <div className="bottom-section">
-                    <div className={`ai-chat-container ${!isAiChatVisible ? "hidden" : ""}`}>
-                        <div className="section-header">
-                            <h2>AI Chat</h2>
-                            <button className="toggle-btn" onClick={toggleAiChat}>
-                                {isAiChatVisible ? "Hide" : "Show"}
-                            </button>
-                        </div>
-                        <AiChat />
-                    </div>
-
-                    <div className={`anon-groups-container ${!isAnonGroupsVisible ? "hidden" : ""}`}>
-                        <div className="section-header">
-                            <h2>Anonymous Groups</h2>
-                            <button className="toggle-btn" onClick={toggleAnonGroups}>
-                                {isAnonGroupsVisible ? "Hide" : "Show"}
-                            </button>
-                        </div>
-                        <AnonymousGroups />
-                    </div>
+                    <AiChat />
+                    <AnonymousGroups />
                 </div>
             </div>
         </div>
