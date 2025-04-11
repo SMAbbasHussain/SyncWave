@@ -18,25 +18,19 @@ function ProfileSetup() {
     }
   };
 
-  const handleContinue = () => {
-    navigate("/home");
-  };
-
-  const handleSkip = () => {
-    navigate("/home");
-  };
+  const isContinueEnabled = profilePic !== null || bio.trim() !== "";
 
   return (
     <div className="container profile-setup-container">
       <h2 className="profile-setup-head-text">Complete Your Profile</h2>
-      <div className="profile-pic-container">
-        <div className="profile-pic-circle">
+      <div className="setup-profile-pic-container">
+        <div className="setup-profile-pic-circle">
           <img
-            src={profilePic || "/PFP2.png"}// Placeholder image
+            src={profilePic || "/PFP2.png"}
             alt="Profile"
-            className="profile-pic"
+            className="setup-profile-pic"
           />
-          <label htmlFor="profile-pic-upload" className="profile-pic-edit-label">
+          <label htmlFor="profile-pic-upload" className="setup-profile-pic-edit-label">
             Edit
           </label>
           <input
@@ -44,10 +38,11 @@ function ProfileSetup() {
             id="profile-pic-upload"
             accept="image/*"
             onChange={handleImageChange}
-            className="profile-pic-upload"
+            className="setup-profile-pic-upload"
           />
         </div>
       </div>
+
       <div className="bio-input-container">
         <textarea
           value={bio}
@@ -56,14 +51,15 @@ function ProfileSetup() {
           rows="4"
         />
       </div>
+
       <div className="profile-setup-actions">
-        <button className="skip-btn" onClick={handleSkip}>
+        <button className="skip-btn" onClick={() => navigate("/home")}>
           Skip
         </button>
         <button
           className="continue-btn"
-          onClick={handleContinue}
-          disabled={!profilePic && !bio}
+          onClick={() => navigate("/home")}
+          disabled={!isContinueEnabled}
         >
           Continue
         </button>

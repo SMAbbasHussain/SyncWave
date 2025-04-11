@@ -1,6 +1,6 @@
 .login-container {
   width: 35vw !important;
-  height: 90vh !important;
+  height: 80vh !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,7 +13,7 @@
   color: #ffffff;
 }
 
-.login-input-container{
+.login-input-container {
   position: relative;
   margin-bottom: 15px;
 }
@@ -64,8 +64,8 @@
   padding: 0 5px;
 }
 
-.login-input-container input:focus + label,
-.login-input-container input:not(:placeholder-shown) + label {
+.login-input-container input:focus+label,
+.login-input-container input:not(:placeholder-shown)+label {
   top: 12px;
   font-size: 0.8rem;
   color: #00ffffe2;
@@ -79,7 +79,8 @@
   height: 10vh;
 }
 
-.login-btn-login, .login-btn-google {
+.login-btn-login,
+.login-btn-google {
   cursor: pointer;
   color: #ffffff;
   font-weight: 500;
@@ -123,4 +124,11 @@
 
 .login-else-text a:hover {
   text-decoration: underline;
+}
+
+.google-error-message {
+  color: #ff4444;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 0;
 }

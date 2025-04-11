@@ -1,0 +1,252 @@
+.anon-groups-container {
+    width: 35%;
+    height: calc(85vh - 72px);
+    background: rgba(16, 19, 26, 0.99);
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    margin-left: auto;
+    margin-right: 0;
+    overflow: hidden;
+    margin-bottom: 15px;
+    z-index: 1;
+}
+
+.anon-groups-container.hidden {
+    height: 60px;
+    margin-top: auto;
+    margin-bottom: 15px;
+    margin-right: 0;
+    background: rgb(10, 12, 16);
+    position: relative;
+    overflow: hidden;
+}
+
+.anon-groups-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    background: rgba(16, 19, 26, 0.95);
+    height: 60px;
+    z-index: 2;
+}
+
+.anon-groups-header h2 {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.anon-groups-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.anon-action-btn {
+    background: transparent;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.action-icon {
+    color: #ccc;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+/* Create button styles */
+.create-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+}
+
+.create-btn:hover .action-icon {
+    color: #00ffff;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+}
+
+/* Refresh button styles */
+.refresh-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+}
+
+.refresh-btn:hover .action-icon {
+    color: #00ffff;
+    transform: rotate(180deg);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+}
+
+/* Category button styles */
+.anon-category-container {
+    position: relative;
+}
+
+.category-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+}
+
+.category-btn:hover .action-icon {
+    color: #00ffff;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+}
+
+.anon-category-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    width: 180px;
+    background: rgba(16, 19, 26, 0.95);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.3) transparent;
+}
+
+.anon-category-dropdown::-webkit-scrollbar {
+    width: 5px;
+}
+
+.anon-category-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.anon-category-dropdown::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+}
+
+.category-option {
+    padding: 10px 15px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.category-option:last-child {
+    border-bottom: none;
+}
+
+.category-option:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: #00ffff;
+}
+
+/* Visibility button styles */
+.visibility-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.1));
+    z-index: 2;
+}
+
+.visibility-btn:hover .action-icon {
+    color: #00ffff;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+}
+
+/* Groups list styles */
+.anon-groups-list {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.3) transparent;
+}
+
+.anon-groups-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.anon-groups-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.anon-groups-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+}
+
+.anon-group-item {
+    flex-shrink: 0;
+    /* Prevent items from shrinking */
+    padding: 15px;
+    margin-bottom: 10px;
+    background: rgba(211, 211, 211, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.anon-group-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.anon-group-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.anon-group-name {
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.anon-group-members {
+    color: #ccc;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Collapsed state styles */
+.anon-groups-collapsed {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+}
+
+.collapsed-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.collapsed-content h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.collapsed-actions {
+    display: flex;
+    gap: 15px;
+}
