@@ -10,7 +10,7 @@ function Signup() {
     password: "",
     confirmPassword: "",
   });
-
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,13 +20,13 @@ function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
     if (formData.email && formData.password) {
       navigate("/profile-setup");
     } else {
-      alert("Please fill in all required fields.");
+      setError("Please fill in all required fields.");
     }
   };
 
@@ -99,11 +99,14 @@ function Signup() {
           </div>
         </div>
 
+        {error && <p className="error-message">{error}</p>}
+
         {/* Submit Button */}
         <button className="signup-btn-signup" type="submit">
           Submit
         </button>
       </form>
+
       <p className="signup-else-text">
         Already have an account? <Link to="/login">Go to Login</Link>
       </p>
