@@ -17,7 +17,6 @@ function ProfileSetup() {
       reader.readAsDataURL(file);
     }
   };
-<<<<<<< HEAD
   const handleContinue = async () => {
     const token = localStorage.getItem("token");
   
@@ -53,10 +52,6 @@ function ProfileSetup() {
   const handleSkip = () => {
     navigate("/home");
   };
-=======
-
-  const isContinueEnabled = profilePic !== null || bio.trim() !== "";
->>>>>>> 32dbf6bb039be9540d68430f3aa6b3c9c72d3612
 
   return (
     <div className="container profile-setup-container">
@@ -91,16 +86,13 @@ function ProfileSetup() {
       </div>
 
       <div className="profile-setup-actions">
-        <button className="skip-btn" onClick={() => navigate("/home")}>
-          Skip
-        </button>
-        <button
-          className="continue-btn"
-          onClick={() => navigate("/home")}
-          disabled={!isContinueEnabled}
-        >
-          Continue
-        </button>
+      <button className="skip-btn" onClick={handleSkip}>
+  Skip
+</button>
+<button className="continue-btn" onClick={handleContinue}>
+  Continue
+</button>
+
       </div>
     </div>
   );
