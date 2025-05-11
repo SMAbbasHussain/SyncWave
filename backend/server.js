@@ -5,6 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const setupSocket = require('./services/socket');
 require('./services/passport'); // Import Google OAuth strategy
 dotenv.config({ path: './.env' }); // Explicitly specify the path
@@ -35,6 +36,8 @@ mongoose
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use("/api/user", userRoutes);
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;

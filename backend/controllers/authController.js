@@ -4,7 +4,7 @@ const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 
 const signup = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password,phoneNo } = req.body;
   try {
     // Check if user already exists
     let existingUser = await User.findOne({ email });
@@ -13,7 +13,7 @@ const signup = async (req, res) => {
     }
 
     // Create new user
-    const user = new User({ username, email, password });
+    const user = new User({ username, email, password,phoneNo });
     await user.save();
 
     const token = generateToken(user._id);
