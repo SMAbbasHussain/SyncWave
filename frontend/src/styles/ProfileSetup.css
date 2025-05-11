@@ -1,141 +1,164 @@
 .profile-setup-container {
-    width: 60vw !important;
-    height: 80vh !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    background: rgba(50, 58, 70, 0.406);
-    backdrop-filter: blur(1000px);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-  }
-  
-  .profile-setup-head-text {
-    margin-bottom: 1rem;
-    color: #ffffff;
-  }
-  
-  .profile-pic-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .profile-pic-circle {
-    width: 150px; /* Updated to 180px radius */
-    height: 150px; /* Updated to 180px radius */
-    border-radius: 50%;
-    background-color: rgba(211, 211, 211, 0.135);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  
-  .profile-pic-circle:hover .profile-pic-edit-label {
-    opacity: 1;
-  }
-  
-  .profile-pic {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-  }
-  
-  .profile-pic-edit-label {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.6);
-    color: #ffffff;
-    font-size: 0.8rem;
-    padding: 5px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .profile-pic-upload {
-    display: none;
-  }
-  
-  .bio-input-container {
-    width: 60%; /* Updated width to 60% */
-    margin-bottom: 20px;
-    position: relative; /* Added for label positioning */
-  }
-  
-  .bio-input-container textarea {
-    width: 100%;
-    height: 15vh; /* Updated height to 15vh */
-    padding: 15px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: none;
-    background: rgba(211, 211, 211, 0.135);
-    color: #ffffff;
-    outline: none;
-    transition: border 0.3s ease, background 0.3s ease;
-    resize: none;
-  }
-  
-  .bio-input-container textarea:focus {
-    border: 2px solid #00ffff80;
-    background: rgba(211, 211, 211, 0.275);
-  }
-  
-  .bio-input-container label {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    font-size: 1rem;
-    color: #aaa;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    background: transparent;
-    padding: 0 5px;
-  }
-  
-  .bio-input-container textarea:focus + label,
-  .bio-input-container textarea:not(:placeholder-shown) + label {
-    top: 12px;
-    font-size: 0.8rem;
-    color: #00ffffe2; /* Same color as signup page labels */
-  }
-  
-  .profile-setup-actions {
-    position: absolute; /* Positioned at the bottom right */
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    gap: 20px;
-  }
-  
-  .skip-btn,
-  .continue-btn {
-    cursor: pointer;
-    color: #ffffff;
-    font-weight: 500;
-    background: transparent; /* Transparent background */
-    border: none;
-    font-size: 1rem;
-    transition: color 0.3s ease;
-  }
-  
-  .skip-btn:hover,
-  .continue-btn:hover {
-    color: #00ffffe2; /* Shiny color on hover */
-  }
-  
-  .continue-btn:disabled {
-    color: #5f8cbc80; /* Disabled color */
-    cursor: not-allowed;
-  }
+  width: 60vw !important;
+  height: 80vh !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: rgba(50, 58, 70, 0.406);
+  backdrop-filter: blur(1000px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.profile-setup-head-text {
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.setup-profile-pic-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 150px;
+  height: 150px;
+}
+
+.setup-profile-pic-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(211, 211, 211, 0.135);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.setup-profile-pic-circle:hover {
+  border-color: #00ffff80;
+}
+
+.setup-profile-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.setup-profile-pic-edit-label {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 0.8rem;
+  padding: 5px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.setup-profile-pic-circle:hover .setup-profile-pic-edit-label {
+  opacity: 1;
+}
+
+.setup-profile-pic-upload {
+  display: none;
+}
+
+.bio-input-container {
+  position: relative;
+  width: 30vw;
+  margin-bottom: 7px;
+}
+
+.bio-input-container input,
+.bio-input-container textarea {
+  width: 100%;
+  padding: 15px 10px 0px 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  background: rgba(211, 211, 211, 0.135);
+  color: #ffffff;
+  outline: none;
+  transition: border 0.3s ease, background 0.3s ease;
+}
+
+.bio-input-container input {
+  height: 10vh;
+}
+
+.bio-input-container textarea {
+  height: 15vh;
+  resize: none;
+}
+
+.bio-input-container input:focus,
+.bio-input-container textarea:focus {
+  border: 2px solid #00ffff80;
+  background: rgba(211, 211, 211, 0.275);
+}
+
+.bio-input-container input:not(:placeholder-shown),
+.bio-input-container textarea:not(:placeholder-shown) {
+  background: #cecece44;
+}
+
+.bio-input-container label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #aaa;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: transparent;
+  padding: 0 5px;
+}
+
+.bio-input-container input:focus+label,
+.bio-input-container input:not(:placeholder-shown)+label {
+  top: 12px;
+  font-size: 0.8rem;
+  color: #00ffffe2;
+}
+
+.profile-setup-actions {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.skip-btn,
+.continue-btn {
+  cursor: pointer;
+  color: #ffffff;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.skip-btn:hover,
+.continue-btn:hover:not(:disabled) {
+  color: #00ffffe2;
+}
+
+.continue-btn:disabled {
+  color: #5f8cbc80;
+  cursor: not-allowed;
+  opacity: 0.7;
+}

@@ -6,7 +6,6 @@
     position: relative;
     background: rgba(15, 18, 25, 0.888);
     border-radius: 8px;
-    overflow: hidden;
     cursor: pointer;
     padding-bottom: 20px;
 }
@@ -78,18 +77,19 @@
     height: calc(100% - 20px);
     gap: 12px;
     margin-top: 10px;
+    overflow: hidden;
 }
 
-.profile-pic-container {
+.home-profile-pic-container {
     position: relative;
-    width: 42px;
-    height: 42px;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
-    margin-top: 20px;
+    justify-content: center;
 }
 
-.profile-pic {
+.home-profile-pic {
     width: 100%;
     height: 100%;
     border-radius: 50%;
@@ -128,7 +128,7 @@
     color: #00ffff;
 }
 
-.profile-content:hover .profile-pic {
+.profile-content:hover .home-profile-pic {
     box-shadow: 0 0 0 2px #00ffff;
 }
 
@@ -162,11 +162,92 @@
 
 .profile-dropdown {
     position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: rgba(20, 24, 33, 0.95);
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    top: calc(100% + 5px);
+    right: 0;
+    width: 300px;
+    background: rgba(15, 18, 25, 0.97);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    padding: 12px 0;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.dropdown-account-info {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dropdown-profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.dropdown-user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dropdown-username {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.dropdown-email {
+    color: #ccc;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.dropdown-separator {
+    height: 1px;
+    width: 90%;
+    margin: 12px auto;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(0, 255, 255, 0.2) 20%,
+            rgba(0, 255, 255, 0.2) 80%,
+            transparent);
+}
+
+.dropdown-option {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dropdown-option:hover {
+    background: rgba(0, 255, 255, 0.1);
+}
+
+.dropdown-option-icon {
+    color: #ccc;
+    font-size: 1.25rem;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.dropdown-option:hover .dropdown-option-icon {
+    color: #00ffff;
+    opacity: 1;
+}
+
+.dropdown-option-text {
+    color: #ccc;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.dropdown-option:hover .dropdown-option-text {
+    color: #00ffff;
 }

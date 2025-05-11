@@ -75,7 +75,7 @@ function Login() {
           <div className="login-captcha-container">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Replace with your actual key
+              sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" 
               onChange={handleCaptchaChange}
             />
           </div>
