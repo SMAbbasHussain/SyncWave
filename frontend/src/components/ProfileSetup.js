@@ -17,10 +17,37 @@ function ProfileSetup() {
       reader.readAsDataURL(file);
     }
   };
-
-  const handleContinue = () => {
-    navigate("/home");
+  const handleContinue = async () => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      alert("You must be logged in to complete your profile.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ bio, profilePic }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        navigate("/home");
+      } else {
+        alert(data.error || "Failed to update profile.");
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+      alert("An error occurred while updating your profile.");
+    }
   };
+  
 
   const handleSkip = () => {
     navigate("/home");

@@ -17,19 +17,49 @@ function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    if (formData.email && formData.password) {
-      navigate("/profile-setup");
+  
+    if (formData.email && formData.password && formData.username && formData.phoneNo) {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            username: formData.username,
+            password: formData.password,
+            phoneNo: formData.phoneNo
+          }),
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          // ✅ Store the token in localStorage
+          localStorage.setItem("token", data.token);
+  
+          // ✅ Navigate to the next page
+          navigate("/profile-setup");
+        } else {
+          alert(data.error || "Signup failed");
+        }
+      } catch (err) {
+        console.error("Signup error:", err);
+        alert("An error occurred. Please try again.");
+      }
     } else {
       alert("Please fill in all required fields.");
     }
   };
-
+  
   return (
     <div className="container signup-container">
       <h2 className="signup-head-text">Create New Account</h2>

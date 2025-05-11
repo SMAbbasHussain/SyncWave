@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-const messageSchema = new mongoose.Schema({
-  senderId: {
+const groupMessageSchema = new mongoose.Schema({
+  groupId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Group',
     required: true
   },
-  receiverId: {
+  senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -16,16 +16,12 @@ const messageSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  isRead: {
-    type: Boolean,
-    default: false
-  },
   timestamp: {
     type: Date,
     default: Date.now
   }
 });
 
-const Message = mongoose.model('Message', messageSchema);
+const GroupMessage = mongoose.model('GroupMessage', groupMessageSchema);
 
-module.exports = Message;
+module.exports = GroupMessage; 
