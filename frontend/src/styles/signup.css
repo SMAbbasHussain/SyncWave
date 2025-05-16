@@ -7,6 +7,8 @@
   justify-content: center;
   background: linear-gradient(135deg, #1a1f2c 0%, #0f1218 100%);
   padding: 2rem;
+  margin-top: 22vh;
+
   gap: 1rem;
 }
 
