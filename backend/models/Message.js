@@ -14,18 +14,42 @@ const messageSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    maxlength: 2000
   },
+  attachments: [{
+    type: String, // URLs to files
+    default: []
+  }],
   isRead: {
     type: Boolean,
     default: false
   },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  }
-});
+  readAt: {
+    type: Date
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedFor: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }],
+  reactions: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    emoji: {
+      type: String,
+      required: true
+    }
+  }]
+}, { timestamps: true });
 
-const Message = mongoose.model('Message', messageSchema);
+// Index for faster querying
+messageSchema.index({ senderId: 1, receiverId: 1 });
 
-module.exports = Message;
+module.exports = mongoose.model('Message', messageSchema);

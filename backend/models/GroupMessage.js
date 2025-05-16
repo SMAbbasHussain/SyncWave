@@ -14,14 +14,32 @@ const groupMessageSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    maxlength: 2000
   },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  }
-});
+  attachments: [{
+    type: String, // URLs to files
+    default: []
+  }],
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedFor: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }],
+  reactions: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    emoji: {
+      type: String,
+      required: true
+    }
+  }]
+}, { timestamps: true });
 
-const GroupMessage = mongoose.model('GroupMessage', groupMessageSchema);
-
-module.exports = GroupMessage; 
+module.exports = mongoose.model('GroupMessage', groupMessageSchema);

@@ -4,15 +4,18 @@ const groupSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    maxlength: 50
   },
   description: {
     type: String,
-    trim: true
+    trim: true,
+    maxlength: 200,
+    default: ''
   },
   photo: {
     type: String,
-    default: null
+    default: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
   },
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,20 +25,25 @@ const groupSchema = new mongoose.Schema({
   members: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
     role: {
       type: String,
-      enum: ['member', 'admin'],
+      enum: ['member', 'admin', 'moderator'],
       default: 'member'
     },
     joinedAt: {
       type: Date,
       default: Date.now
+    },
+    muted: {
+      type: Boolean,
+      default: false
     }
   }],
   permissions: {
-    onlyAdminsCanMessage: {
+    onlyAdminsCanPost: {
       type: Boolean,
       default: false
     },
@@ -46,11 +54,54 @@ const groupSchema = new mongoose.Schema({
     allowMemberInvites: {
       type: Boolean,
       default: true
+    },
+    isMuted: {
+      type: Boolean,
+      default: false
     }
   },
+  pinnedMessages: [{
+    messageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'GroupMessage'
+    },
+    pinnedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    pinnedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  joinRequests: [{
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    requestedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, { timestamps: true });
 
+// Add methods to the schema
+groupSchema.methods.isMember = function(userId) {
+  return this.members.some(member => member.userId.toString() === userId.toString());
+};
 
-const Group = mongoose.model('Group', groupSchema);
+groupSchema.methods.isAdmin = function(userId) {
+  return this.members.some(member => 
+    member.userId.toString() === userId.toString() && 
+    ['admin', 'moderator'].includes(member.role)
+  );
+};
 
-module.exports = Group;
+module.exports = mongoose.model('Group', groupSchema);
