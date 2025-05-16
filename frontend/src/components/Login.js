@@ -5,90 +5,132 @@ import ReCAPTCHA from "react-google-recaptcha";
 import "../styles/login.css";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [fieldsFilled, setFieldsFilled] = useState(false);
   const captchaRef = useRef(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setFieldsFilled(email !== "" && password !== "");
-  }, [email, password]);
-
-  const handleCaptchaChange = (value) => {
-    if (value) {
-      setCaptchaVerified(true);
-    }
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     if (!captchaVerified) {
-      alert("Please verify that you are not a robot.");
+      setError("Please verify that you are not a robot.");
+      setLoading(false);
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
 
-      // Store token in localStorage
       localStorage.setItem("token", response.data.token);
-
-      // Redirect to home page
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/home");
-    } catch (error) {
-      alert(error.response?.data?.error || "Login failed. Try again.");
+    } 
+    catch (error) {
+      console.error("Login error:", error);
+
+      if (error.response) {
+        // Backend responded with a status code
+        console.error("Backend error response:", error.response);
+        setError(error.response.data?.error || error.response.data?.message || "Login failed. Please try again.");
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error("No response received:", error.request);
+        setError("No response from server. Please check your network.");
+      } else {
+        // Something happened setting up the request
+        console.error("Axios error setting up the request:", error.message);
+        setError("Unexpected error occurred. Please try again.");
+      }
+
+      // Always reset CAPTCHA on error
+      if (captchaRef.current) {
+        captchaRef.current.reset();
+      }
+      setCaptchaVerified(false);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container login-container">
       <h2 className="login-head-text">Login Account</h2>
+      {error && <div className="error-message">{error}</div>}
+      
       <form onSubmit={handleSubmit}>
         <div className="login-input-container">
           <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             required
             placeholder=" "
           />
-          <label>Username or Email</label>
+          <label>Email</label>
         </div>
+        
         <div className="login-input-container">
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             required
             placeholder=" "
+            minLength="6"
           />
           <label>Password</label>
         </div>
 
-        {fieldsFilled && (
-          <div className="login-captcha-container">
-            <ReCAPTCHA
-              ref={captchaRef}
-              sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-              onChange={handleCaptchaChange}
-            />
-          </div>
-        )}
+        <div className="login-captcha-container">
+          <ReCAPTCHA
+            ref={captchaRef}
+            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
+            onChange={(value) => setCaptchaVerified(!!value)}
+          />
+        </div>
 
-        <button className="login-btn-login" type="submit">
-          Login
+        <button 
+          className="login-btn-login" 
+          type="submit"
+          disabled={loading || !formData.email || !formData.password || !captchaVerified}
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
-      <button className="login-btn-google" onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}>
+
+      <button 
+        className="login-btn-google" 
+        onClick={() => window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`}
+      >
         <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
         Login with Google
       </button>
+      
       <p className="login-else-text">
         Don't have an account? <Link to="/signup">Create New</Link>
       </p>
