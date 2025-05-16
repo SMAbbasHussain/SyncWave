@@ -6,35 +6,26 @@ const User = require('../models/User');
 exports.sendGroupMessage = async (req, res) => {
   try {
     const { groupId, content } = req.body;
-    const senderId = req.user._id;
-
-    // Check if group exists
-    const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ message: 'Group not found' });
-    }
-
-    // Check if user is a member of the group
-    const isMember = group.members.some(member => 
-      member.userId.toString() === senderId.toString()
-    );
-    if (!isMember) {
-      return res.status(403).json({ message: 'You must be a member of the group to send messages' });
-    }
-
-    // Create new group message
     const message = new GroupMessage({
       groupId,
-      senderId,
+      senderId: req.user._id,
       content
     });
 
     await message.save();
-    res.status(201).json(message);
+    
+    const populated = await GroupMessage.populate(message, [
+      { path: 'senderId', select: 'username profilePic' },
+      { path: 'groupId', select: 'name' }
+    ]);
+
+    res.status(201).json(populated);
+    req.io.to(groupId.toString()).emit('newGroupMessage', populated);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
+
 
 // Get all messages for a group
 exports.getGroupMessages = async (req, res) => {
