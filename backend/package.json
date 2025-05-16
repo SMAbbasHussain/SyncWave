@@ -6,7 +6,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "nodemon": "nodemon server.js"
-
   },
   "keywords": [],
   "author": "",
@@ -17,7 +16,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
     "passport": "^0.7.0",

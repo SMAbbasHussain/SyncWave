@@ -1,26 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { 
-  updateProfile,
-  blockUser,
-  unblockUser,
-  getProfile
-} = require("../controllers/userController");
+const userController = require("../controllers/userController");
 const { verifyToken } = require("../utils/jwtUtils");
 
-// Apply verifyToken middleware to all user routes
 router.use(verifyToken);
 
-// Update user profile
-router.put("/profile", updateProfile);
+// User profile
+router.get("/users/:userId", userController.getProfile);
+router.put("/users/profile", userController.updateProfile);
 
-// Block a user
-router.post("/block/:userId", blockUser);
-
-// Unblock a user
-router.post("/unblock/:userId", unblockUser);
-
-// Get user profile
-router.get("/:userId", getProfile);
+// Block management
+router.post("/users/block/:userId", userController.blockUser);
+router.post("/users/unblock/:userId", userController.unblockUser);
 
 module.exports = router;

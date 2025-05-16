@@ -1,38 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const {
-  createGroup,
-  getUserGroups,
-  getGroupDetails,
-  addMember,
-  removeMember,
-  updateMemberRole,
-  updateGroupInfo,
-  handleJoinRequest,
-  toggleGroupMute,
-  pinMessage,
-  unpinMessage
-} = require('../controllers/groupController');
+const groupController = require('../controllers/groupController');
 const { verifyToken } = require('../utils/jwtUtils');
+const { checkGroupMember, checkGroupAdmin } = require('../middleware/chatMiddleware');
 
-// Apply auth middleware to all group routes
+
+// Verify token for all group routes
 router.use(verifyToken);
 
-// Group CRUD operations
-router.post('/', createGroup);
-router.get('/', getUserGroups);
-router.get('/:groupId', getGroupDetails);
-router.put('/:groupId', updateGroupInfo);
+// Group CRUD
+router.post('/', groupController.createGroup);
+router.get('/', groupController.getUserGroups);
+router.get('/:groupId', checkGroupMember, groupController.getGroupDetails);
+router.put('/:groupId', checkGroupAdmin, groupController.updateGroupInfo);
 
 // Member management
-router.post('/:groupId/members', addMember);
-router.delete('/:groupId/members/:userId', removeMember);
-router.put('/:groupId/members/:userId/role', updateMemberRole);
+router.post('/:groupId/members', checkGroupAdmin, groupController.addMember);
+router.delete('/:groupId/members/:userId', checkGroupAdmin, groupController.removeMember);
+router.put('/:groupId/members/:userId/role', checkGroupAdmin, groupController.updateMemberRole);
 
 // Group features
-router.post('/:groupId/join-requests', handleJoinRequest);
-router.put('/:groupId/mute', toggleGroupMute);
-router.post('/:groupId/pin/:messageId', pinMessage);
-router.delete('/:groupId/pin/:messageId', unpinMessage);
+router.post('/:groupId/join-requests', checkGroupAdmin, groupController.handleJoinRequest);
+router.put('/:groupId/mute', checkGroupAdmin, groupController.toggleGroupMute);
+router.post('/:groupId/pins/:messageId', checkGroupAdmin, groupController.pinMessage);
+router.delete('/:groupId/pins/:messageId', checkGroupAdmin, groupController.unpinMessage);
 
 module.exports = router;

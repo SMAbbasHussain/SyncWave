@@ -322,6 +322,5 @@ module.exports = {
   updateGroupInfo,
   pinMessage,
   unpinMessage,
-  toggleGroupMute,
-  checkGroupAdmin
+  toggleGroupMute
 };

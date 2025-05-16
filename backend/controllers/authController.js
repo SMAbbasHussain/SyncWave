@@ -42,56 +42,71 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log("🔐 Login attempt started");
   const { email, password } = req.body;
   const ip = req.ip;
   const userAgent = req.get('User-Agent');
 
   try {
-    // Find user
+    console.log("🔍 Searching user by email:", email);
     const user = await User.findOne({ email }).select('+password');
+    
     if (!user) {
+      console.log("❌ User not found");
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Handle Google-authenticated users
-    if (user.googleId && !user.password) {
-      return res.status(400).json({ 
-        error: 'This account uses Google login. Please sign in with Google.' 
-      });
+    console.log("✅ User found:", user.username);
+
+    // If user has GoogleId but no password (or just no password set)
+    if (!user.password) {
+      console.log("❌ User has no password (Google login user or corrupted data)");
+      return res.status(400).json({ error: 'This account has no password. Please use Google login or reset your password.' });
     }
 
-    // Check login attempts
-    let attempt = await LoginAttempt.findOne({ email }) || 
-                 new LoginAttempt({ email, ipAddress: ip, userAgent });
+    console.log("🔐 Checking login attempts...");
+    let attempt = await LoginAttempt.findOne({ email });
+    if (!attempt) {
+      attempt = new LoginAttempt({
+        email,
+        ipAddress: ip,
+        userAgent,
+        failedAttempts: 0
+      });
+      console.log("📄 Created new LoginAttempt document");
+    }
 
     if (attempt.lockUntil && attempt.lockUntil > Date.now()) {
       const remainingTime = Math.ceil((attempt.lockUntil - Date.now()) / 60000);
-      return res.status(403).json({ 
-        error: `Account locked. Try again in ${remainingTime} minutes.` 
-      });
+      console.log("🔒 Account locked. Time remaining:", remainingTime, "minutes");
+      return res.status(403).json({ error: `Account locked. Try again in ${remainingTime} minutes.` });
     }
 
-    // Verify password
+    console.log("🔑 Verifying password...");
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       attempt.failedAttempts += 1;
-      
+      console.log("❌ Password mismatch. Failed attempts:", attempt.failedAttempts);
+
       if (attempt.failedAttempts >= MAX_LOGIN_ATTEMPTS) {
         attempt.lockUntil = new Date(Date.now() + LOCK_TIME);
+        console.log("🔒 Account locked for", LOCK_TIME / 60000, "minutes");
       }
 
       await attempt.save();
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Reset attempts on success
+    console.log("✅ Password verified. Resetting attempts...");
     attempt.failedAttempts = 0;
     attempt.lockUntil = null;
     await attempt.save();
 
-    // Generate token
     const token = generateToken(user._id);
-    res.json({ 
+    console.log("🎟 Token generated. Sending response...");
+
+    res.json({
       token,
       user: {
         _id: user._id,
@@ -102,9 +117,11 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("🔥 Login backend error:", error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 };
+
 
 const googleAuth = async (req, res) => {
   try {
@@ -127,5 +144,6 @@ const googleAuth = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 module.exports = { signup, login, googleAuth };
