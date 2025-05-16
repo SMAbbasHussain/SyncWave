@@ -1,16 +1,19 @@
+/* Main Profile Section */
 .profile-section {
+    position: relative;
     width: 20%;
     height: 15vh;
     display: flex;
     flex-direction: column;
-    position: relative;
     background: rgba(15, 18, 25, 0.888);
     border-radius: 8px;
     cursor: pointer;
     padding-bottom: 20px;
+    margin-left: 15px;
+    z-index: 100;
 }
 
-.profile-section::after {
+/* .profile-section::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -68,8 +71,9 @@
             #00ffff80 20%,
             #00ffff80 80%,
             transparent);
-}
+} */
 
+/* Profile Content */
 .profile-content {
     display: flex;
     align-items: center;
@@ -78,9 +82,15 @@
     gap: 12px;
     margin-top: 10px;
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.home-profile-pic-container {
+.profile-content:hover {
+    background-color: transparent;
+}
+
+/* Avatar Styles */
+.profile-avatar-container {
     position: relative;
     width: 45px;
     height: 45px;
@@ -89,7 +99,7 @@
     justify-content: center;
 }
 
-.home-profile-pic {
+.profile-avatar {
     width: 100%;
     height: 100%;
     border-radius: 50%;
@@ -100,12 +110,26 @@
     background: rgba(211, 211, 211, 0.1);
 }
 
-.profile-name-container {
+.profile-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(211, 211, 211, 0.1);
+    color: #ccc;
+}
+
+.default-avatar {
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+/* Profile Info */
+.profile-info {
     flex-grow: 1;
     max-width: calc(100% - 90px);
     overflow: hidden;
     display: flex;
-    align-items: center;
+    flex-direction: column;
 }
 
 .profile-name {
@@ -117,19 +141,30 @@
     display: inline-block;
     letter-spacing: 0.5px;
     width: 100%;
+    font-weight: 500;
 }
 
-.profile-name-inner {
-    display: inline-block;
+.profile-status {
+    color: #ccc;
+    font-size: 0.8rem;
+    opacity: 0.7;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.profile-content:hover .profile-name {
+.profile-content:hover .profile-name,
+.profile-content:hover .profile-status {
     color: #00ffff;
 }
 
-.profile-content:hover .home-profile-pic {
+.profile-content:hover .profile-avatar {
     box-shadow: 0 0 0 2px #00ffff;
+}
+
+/* Dropdown Toggle */
+.dropdown-toggle {
+    margin-left: 5px;
 }
 
 .dropdown-icon-container {
@@ -150,6 +185,11 @@
     opacity: 0.8;
 }
 
+.dropdown-icon.active {
+    transform: rotate(180deg);
+    color: #00ffff;
+}
+
 .dropdown-icon-container:hover {
     transform: scale(1.1);
     background-color: rgba(0, 255, 255, 0.1);
@@ -160,6 +200,7 @@
     opacity: 1;
 }
 
+/* Dropdown Menu */
 .profile-dropdown {
     position: absolute;
     top: calc(100% + 5px);
@@ -171,24 +212,45 @@
     z-index: 1000;
     padding: 12px 0;
     border: 1px solid rgba(0, 255, 255, 0.1);
+    animation: fadeIn 0.2s ease-out;
 }
 
-.dropdown-account-info {
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dropdown Header */
+.dropdown-header {
     padding: 15px 20px;
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-.dropdown-profile-pic {
+.dropdown-avatar-container {
     width: 50px;
     height: 50px;
+}
+
+.dropdown-avatar {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(0, 255, 255, 0.3);
+    background: rgba(211, 211, 211, 0.1);
 }
 
-.dropdown-user-details {
+.dropdown-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(211, 211, 211, 0.1);
+    color: #ccc;
+}
+
+.dropdown-user-info {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -206,7 +268,8 @@
     opacity: 0.8;
 }
 
-.dropdown-separator {
+/* Dropdown Divider */
+.dropdown-divider {
     height: 1px;
     width: 90%;
     margin: 12px auto;
@@ -217,7 +280,12 @@
             transparent);
 }
 
-.dropdown-option {
+/* Dropdown Menu Items */
+.dropdown-menu {
+    padding: 8px 0;
+}
+
+.dropdown-item {
     padding: 14px 20px;
     display: flex;
     align-items: center;
@@ -226,28 +294,105 @@
     transition: all 0.3s ease;
 }
 
-.dropdown-option:hover {
+.dropdown-item:hover {
     background: rgba(0, 255, 255, 0.1);
 }
 
-.dropdown-option-icon {
-    color: #ccc;
-    font-size: 1.25rem;
-    opacity: 0.9;
-    transition: all 0.3s ease;
-}
-
-.dropdown-option:hover .dropdown-option-icon {
-    color: #00ffff;
-    opacity: 1;
-}
-
-.dropdown-option-text {
+.dropdown-item span {
     color: #ccc;
     font-size: 1rem;
     transition: all 0.3s ease;
 }
 
-.dropdown-option:hover .dropdown-option-text {
+.dropdown-item:hover span {
     color: #00ffff;
+}
+
+.dropdown-item.logout span {
+    color: #ff6b6b;
+}
+
+.dropdown-item.logout:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.dropdown-item.logout:hover span {
+    color: #ff6b6b;
+}
+
+/* Guest State */
+.dropdown-guest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.guest-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgba(211, 211, 211, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: #ccc;
+    font-size: 1.5rem;
+}
+
+.dropdown-guest p {
+    color: #ccc;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.signin-btn {
+    background-color: rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.signin-btn:hover {
+    background-color: rgba(0, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Loading State */
+.profile-skeleton {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px;
+    height: calc(100% - 20px);
+    margin-top: 10px;
+}
+
+.avatar-skeleton {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: rgba(211, 211, 211, 0.1);
+    animation: pulse 1.5s infinite;
+}
+
+.name-skeleton {
+    width: 100px;
+    height: 16px;
+    border-radius: 4px;
+    background-color: rgba(211, 211, 211, 0.1);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.3; }
 }
