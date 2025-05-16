@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
   res.redirect('http://localhost:3000/home');
