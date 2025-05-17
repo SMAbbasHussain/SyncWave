@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-
+const aiRoutes = require('../backend/routes/aiRoutes');
 
 // Route imports (updated to reflect consolidated routes)
 const authRoutes = require('./routes/authRoutes');
@@ -79,6 +79,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/group-messages', groupMessageRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
