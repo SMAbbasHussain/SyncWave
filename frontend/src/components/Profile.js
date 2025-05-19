@@ -11,71 +11,96 @@ function Profile() {
     const dropdownRef = useRef(null);
     const profileRef = useRef(null);
     const navigate = useNavigate();
+
     useEffect(() => {
-        const loadUserData = async () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
+    const loadUserData = async () => {
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                // Make sure we have all required fields
+                if (parsedUser.username && parsedUser.email) {
+                    setUser(parsedUser);
                     setLoading(false);
                     return;
                 }
+            }
 
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setLoading(false);
-                    return;
-                }
-
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/users`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const userData = {
-                    isLoggedIn: true,
-                    username: response.data.username,
-                    email: response.data.email,
-                    profilePic: response.data.profilePic
-                };
-
-                localStorage.setItem('user', JSON.stringify(userData));
-                setUser(userData);
-            } catch (error) {
-                console.error("Failed to load user data:", error);
-                if (error.response?.status === 401) {
-                    handleLogout();
-                }
-            } finally {
+            // If local storage data is incomplete, fetch from server
+            const token = localStorage.getItem('token');
+            if (!token) {
                 setLoading(false);
+                return;
             }
-        };
 
-        loadUserData();
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/users`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current &&
-                profileRef.current &&
-                !dropdownRef.current.contains(event.target) &&
-                !profileRef.current.contains(event.target)) {
-                setIsDropdownOpen(false);
+            const completeUserData = {
+                isLoggedIn: true,
+                username: response.data.username,
+                email: response.data.email,
+                profilePic: response.data.profilePic,
+                bio: response.data.bio
+            };
+
+            localStorage.setItem('user', JSON.stringify(completeUserData));
+            setUser(completeUserData);
+        } catch (error) {
+            console.error("Failed to load user data:", error);
+            if (error.response?.status === 401) {
+                handleLogout();
             }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    loadUserData();
+
+    const handleUserUpdate = (e) => {
+        setUser(e.detail);
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    
+    return () => {
+        window.removeEventListener('userUpdated', handleUserUpdate);
+    };
+}, []);// Empty dependency array - runs only once on mount
 
     const handleLogout = async () => {
         try {
-            await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/logout`);
+            const response = await axios.get(
+                `${process.env.REACT_APP_API_URL}/api/auth/logout`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            // Clear client-side storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            
+            // Redirect to login
+            navigate('/login', { replace: true });
+            
+            // Optional: Refresh to ensure clean state
+            window.location.reload();
+            
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Fallback cleanup if server request fails
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
             navigate('/login');
-        } catch (error) {
-            console.error("Logout failed:", error);
         }
     };
 
@@ -102,7 +127,7 @@ function Profile() {
         }
     };
 
-     if (loading) {
+    if (loading) {
         return (
             <div className="profile-section">
                 <div className="profile-skeleton">

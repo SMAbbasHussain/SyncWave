@@ -280,7 +280,7 @@ const Background = ({ children }) => {
                 // Wait for 4 seconds then navigate to home
                 await new Promise(resolve => setTimeout(resolve, 4000));
                 setIsTransitioning(false);
-                window.location.href = '/home';
+                //window.location.href = '/home';
             } else {
                 setShowLogo(false);
                 setIsTransitioning(false);

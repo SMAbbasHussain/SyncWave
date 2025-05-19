@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login, getProfile } = require('../controllers/authController');
+const { signup, login, getProfile, logout } = require('../controllers/authController');
 const passport = require('passport');
 const { verifyToken } = require('../utils/jwtUtils');
 const router = express.Router();
@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/signup', signup);
 router.post('/login', login);
 router.get('/profile', verifyToken); // Add this new route
+router.get('/logout', logout); // Use the controller function
 
 // Google OAuth routes
 router.get('/google', passport.authenticate('google', { 
@@ -27,10 +28,12 @@ router.get('/google/callback',
 );
 
 // Logout Route
-router.get('/logout', (req, res) => {
-  req.logout(() => {
-    res.json({ message: 'Logged out successfully' });
-  });
-});
+// router.get('/logout', (req, res) => {
+//   req.logout(() => {
+//     res.json({ message: 'Logged out successfully' });
+//   });
+// });
+
+
 
 module.exports = router;
