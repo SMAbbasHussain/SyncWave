@@ -22,42 +22,54 @@ function ProfileSetup() {
     }
   };
 
-  const handleContinue = async () => {
-    console.log("handleContinue triggered");
+ const handleContinue = async () => {
+  console.log("handleContinue triggered");
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  const storedUser = JSON.parse(localStorage.getItem('user'));
 
-    if (!token) {
-      alert("You must be logged in to complete your profile.");
-      return;
+  if (!token) {
+    alert("You must be logged in to complete your profile.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/users/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ bio, profilePic }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Update local storage with complete user data
+      const updatedUser = {
+        ...storedUser,
+        username: data.username || storedUser.username,
+        profilePic: data.profilePic || profilePic,
+        bio: data.bio || bio
+      };
+      
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Dispatch event to notify other components
+      const event = new CustomEvent('userUpdated', { detail: updatedUser });
+      window.dispatchEvent(event);
+      
+      console.log("Profile updated, navigating to /home");
+      navigate("/home");
+    } else {
+      alert(data.error || "Failed to update profile.");
     }
-
-
-
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ bio, profilePic }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Profile updated, navigating to /home");
-        navigate("/home");
-      } else {
-        alert(data.error || "Failed to update profile.");
-      }
-    } catch (error) {
-      console.error("Profile update error:", error);
-      alert("An error occurred while updating your profile.");
-    }
-  };
+  } catch (error) {
+    console.error("Profile update error:", error);
+    alert("An error occurred while updating your profile.");
+  }
+};
 
   const handleSkip = () => {
     console.log("Skip clicked, navigating to /home");

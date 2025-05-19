@@ -43,10 +43,19 @@ function Signup() {
         const data = await response.json();
   
         if (response.ok) {
-          // ✅ Store the token in localStorage
+          // Store both token and user data in localStorage
           localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify({
+            _id: data.user._id,
+            username: data.user.username,
+            email: data.user.email,
+            phoneNo: data.user.phoneNo,
+            profilePic: data.user.profilePic || "/PFP2.png", // Default profile picture
+            bio: "", // Empty bio by default
+            isLoggedIn: true
+          }));
   
-          // ✅ Navigate to the next page
+          // Navigate to profile setup
           navigate("/profile-setup");
         } else {
           alert(data.error || "Signup failed");

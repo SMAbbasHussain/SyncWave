@@ -26,14 +26,21 @@ const signup = async (req, res) => {
 
     // Generate token
     const token = generateToken(user._id);
+    
+    // Create complete user data for localStorage
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      phoneNo: user.phoneNo,
+      profilePic: user.profilePic || '/PFP2.png', // Default profile picture
+      bio: user.bio || '', // Empty bio by default
+      isLoggedIn: true
+    };
+
     res.status(201).json({ 
       token,
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        profilePic: user.profilePic
-      }
+      user: userData // Send complete user data to frontend
     });
 
   } catch (error) {
@@ -145,5 +152,26 @@ const googleAuth = async (req, res) => {
   }
 };
 
+// Add to authController.js
+const logout = async (req, res) => {
+  try {
+    // For JWT, we typically just need to clear client-side tokens
+    // If you want to implement server-side token invalidation, you would:
+    // 1. Add token to a blacklist
+    // 2. Check blacklist during authentication
+    
+    res.status(200).json({ 
+      success: true,
+      message: 'Logged out successfully' 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false,
+      message: 'Logout failed' 
+    });
+  }
+};
 
-module.exports = { signup, login, googleAuth };
+
+// Update exports
+module.exports = { signup, login, googleAuth, logout };
