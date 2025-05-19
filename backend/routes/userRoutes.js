@@ -6,8 +6,8 @@ const { verifyToken } = require("../utils/jwtUtils");
 router.use(verifyToken);
 
 // User profile
-router.get("/users/:userId", userController.getProfile);
-router.put("/users/profile", userController.updateProfile);
+router.get("/users", userController.getProfile);
+router.put("/users/profile", verifyToken,userController.updateProfile);
 
 // Block management
 router.post("/users/block/:userId", userController.blockUser);

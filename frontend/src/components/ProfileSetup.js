@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ProfileSetup.css";
 
@@ -6,6 +6,10 @@ function ProfileSetup() {
   const [profilePic, setProfilePic] = useState(null);
   const [bio, setBio] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("ProfileSetup rendered");
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -17,14 +21,20 @@ function ProfileSetup() {
       reader.readAsDataURL(file);
     }
   };
+
   const handleContinue = async () => {
+    console.log("handleContinue triggered");
+
     const token = localStorage.getItem("token");
-  
+
     if (!token) {
       alert("You must be logged in to complete your profile.");
       return;
     }
-  
+
+
+
+
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
         method: "PUT",
@@ -34,10 +44,11 @@ function ProfileSetup() {
         },
         body: JSON.stringify({ bio, profilePic }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
+        console.log("Profile updated, navigating to /home");
         navigate("/home");
       } else {
         alert(data.error || "Failed to update profile.");
@@ -47,15 +58,16 @@ function ProfileSetup() {
       alert("An error occurred while updating your profile.");
     }
   };
-  
 
   const handleSkip = () => {
+    console.log("Skip clicked, navigating to /home");
     navigate("/home");
   };
 
   return (
     <div className="container profile-setup-container">
       <h2 className="profile-setup-head-text">Complete Your Profile</h2>
+
       <div className="setup-profile-pic-container">
         <div className="setup-profile-pic-circle">
           <img
@@ -86,13 +98,12 @@ function ProfileSetup() {
       </div>
 
       <div className="profile-setup-actions">
-      <button className="skip-btn" onClick={handleSkip}>
-  Skip
-</button>
-<button className="continue-btn" onClick={handleContinue}>
-  Continue
-</button>
-
+        <button className="skip-btn" onClick={handleSkip}>
+          Skip
+        </button>
+        <button className="continue-btn" onClick={handleContinue}>
+          Continue
+        </button>
       </div>
     </div>
   );
