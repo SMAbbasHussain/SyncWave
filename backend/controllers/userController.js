@@ -1,17 +1,17 @@
 const User = require('../models/User');
 
 // Update user profile
+const cloudinary = require("../utils/cloudinary"); // adjust path as needed
+
 exports.updateProfile = async (req, res) => {
   try {
     const { username, bio, profilePic, phoneNo, status } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.userId;
+    console.log(userId);
 
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Validate username uniqueness
     if (username && username !== user.username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) {
@@ -20,24 +20,32 @@ exports.updateProfile = async (req, res) => {
       user.username = username;
     }
 
-    // Update other fields
     if (bio !== undefined) user.bio = bio;
-    if (profilePic !== undefined) user.profilePic = profilePic;
     if (phoneNo !== undefined) user.phoneNo = phoneNo;
     if (status !== undefined) user.status = status;
 
+    if (profilePic) {
+      // If it's a base64 image string
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic, {
+        folder: "profile_pics", // optional
+        transformation: [{ width: 200, height: 200, crop: "fill" }],
+      });
+      user.profilePic = uploadedResponse.secure_url;
+    }
+
     await user.save();
 
-    // Return updated user (excluding sensitive data)
     const userData = user.toObject();
     delete userData.password;
     delete userData.blockedUsers;
 
     res.json(userData);
   } catch (error) {
+    console.error("Cloudinary upload error:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Block a user
 exports.blockUser = async (req, res) => {
@@ -91,7 +99,9 @@ exports.unblockUser = async (req, res) => {
 // Get user profile
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId)
+        const userId = req.user.userId;
+
+    const user = await User.findById(userId)
       .select('-password -blockedUsers');
 
     if (!user) {
