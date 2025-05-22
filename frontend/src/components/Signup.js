@@ -19,12 +19,12 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-  
+
     if (formData.email && formData.password && formData.username && formData.phoneNo) {
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/signup`, {
@@ -39,9 +39,9 @@ function Signup() {
             phoneNo: formData.phoneNo
           }),
         });
-  
+
         const data = await response.json();
-  
+
         if (response.ok) {
           // Store both token and user data in localStorage
           localStorage.setItem("token", data.token);
@@ -54,7 +54,7 @@ function Signup() {
             bio: "", // Empty bio by default
             isLoggedIn: true
           }));
-  
+
           // Navigate to profile setup
           navigate("/profile-setup");
         } else {
@@ -68,7 +68,7 @@ function Signup() {
       setError("Please fill in all required fields.");
     }
   };
-  
+
   return (
     <div className="container signup-container">
       <h2 className="signup-head-text">Create New Account</h2>

@@ -12,6 +12,9 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [hasShownCaptcha, setHasShownCaptcha] = useState(false);
+  const [focusedField, setFocusedField] = useState(null);
   const captchaRef = useRef(null);
   const navigate = useNavigate();
 
@@ -21,6 +24,31 @@ function Login() {
       [e.target.name]: e.target.value
     });
   };
+
+  const handleFocus = (fieldName) => {
+    setFocusedField(fieldName);
+  };
+
+  const handleBlur = () => {
+    setFocusedField(null);
+    // Check if both fields are filled and neither is focused
+    if (formData.email && formData.password && !focusedField) {
+      setShowCaptcha(true);
+      setHasShownCaptcha(true);
+    }
+  };
+
+  // Effect to handle captcha visibility based on field values and focus
+  useEffect(() => {
+    if (hasShownCaptcha) {
+      setShowCaptcha(true);
+    } else if (formData.email && formData.password && !focusedField) {
+      setShowCaptcha(true);
+      setHasShownCaptcha(true);
+    } else if (!formData.email || !formData.password) {
+      setShowCaptcha(false);
+    }
+  }, [formData.email, formData.password, focusedField, hasShownCaptcha]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,8 +74,14 @@ function Login() {
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate("/home");
-    } 
+
+      // Direct navigation based on profile completion
+      if (!response.data.user.isProfileComplete) {
+        navigate('/profile-setup', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
+    }
     catch (error) {
       console.error("Login error:", error);
 
@@ -77,9 +111,9 @@ function Login() {
 
   return (
     <div className="container login-container">
-      <h2 className="login-head-text">Login Account</h2>
+      <h2 className={`login-head-text ${!showCaptcha ? 'captcha-hidden' : ''}`}>Login Account</h2>
       {error && <div className="error-message">{error}</div>}
-      
+
       <form onSubmit={handleSubmit}>
         <div className="login-input-container">
           <input
@@ -87,18 +121,22 @@ function Login() {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            onFocus={() => handleFocus('email')}
+            onBlur={handleBlur}
             required
             placeholder=" "
           />
           <label>Email</label>
         </div>
-        
+
         <div className="login-input-container">
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
+            onFocus={() => handleFocus('password')}
+            onBlur={handleBlur}
             required
             placeholder=" "
             minLength="6"
@@ -106,16 +144,18 @@ function Login() {
           <label>Password</label>
         </div>
 
-        <div className="login-captcha-container">
+        <div className={`login-captcha-container ${showCaptcha ? 'show' : 'hide'}`}>
           <ReCAPTCHA
             ref={captchaRef}
             sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
             onChange={(value) => setCaptchaVerified(!!value)}
+            theme="dark"
+            size="normal"
           />
         </div>
 
-        <button 
-          className="login-btn-login" 
+        <button
+          className="login-btn-login"
           type="submit"
           disabled={loading || !formData.email || !formData.password || !captchaVerified}
         >
@@ -123,14 +163,14 @@ function Login() {
         </button>
       </form>
 
-      <button 
-        className="login-btn-google" 
+      <button
+        className="login-btn-google"
         onClick={() => window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`}
       >
         <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
         Login with Google
       </button>
-      
+
       <p className="login-else-text">
         Don't have an account? <Link to="/signup">Create New</Link>
       </p>
