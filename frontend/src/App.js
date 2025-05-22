@@ -7,7 +7,6 @@ import ProfileSetup from "./components/ProfileSetup";
 import LandingPage from "./pages/LandingPage";
 import "./styles/App.css";
 import Background from './components/Background';
-import TestProfileSetup from "./components/TestProfileSetup";
 
 function App() {
   return (
@@ -19,8 +18,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/test-setup" element={<TestProfileSetup />} />
-
         </Routes>
       </Background>
     </Router>

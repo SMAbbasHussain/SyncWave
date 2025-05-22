@@ -1,22 +1,30 @@
 .login-container {
   width: 35vw !important;
-  height: 80vh !important;
+  min-height: 60vh !important;
+  height: auto !important;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 22vh;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 5px;
+  transition: all 0.3s ease;
 }
 
 .login-head-text {
   margin-bottom: 1rem;
   color: #ffffff;
+  transition: margin 0.3s ease;
+}
+
+.login-head-text.captcha-hidden {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .login-input-container {
   position: relative;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .login-container form {
@@ -27,7 +35,7 @@
 }
 
 .login-input-container input {
-  width: 25vw;
+  width: 28vw;
   height: 10vh;
   display: flex;
   flex-direction: row;
@@ -73,11 +81,34 @@
 }
 
 .login-captcha-container {
-  margin: 5px 0 18px 0;
   display: flex;
   justify-content: center;
-  width: 25vw;
-  height: 10vh;
+  width: 28vw;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.login-captcha-container.show {
+  height: 78px;
+  opacity: 1;
+}
+
+.login-captcha-container.hide {
+  height: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.login-captcha-container>div {
+  transform: scale(0.85);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.login-captcha-container.show>div {
+  transform: scale(0.85);
 }
 
 .login-btn-login,
@@ -88,7 +119,7 @@
   background-color: #5f8cbcd6;
   transition: transform 0.3s ease;
   height: 10vh;
-  width: 25vw;
+  width: 28vw;
   margin-top: 15px;
   border: none;
   border-radius: 5px;
@@ -132,4 +163,40 @@
   font-size: 0.9rem;
   text-align: center;
   margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .login-container {
+    width: 90vw !important;
+    margin-top: 15vh;
+  }
+
+  .login-input-container input,
+  .login-btn-login,
+  .login-btn-google,
+  .login-captcha-container {
+    width: 80vw;
+  }
+
+  .login-captcha-container.show {
+    height: 78px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-container {
+    margin-top: 10vh;
+  }
+
+  .login-input-container input,
+  .login-btn-login,
+  .login-btn-google,
+  .login-captcha-container {
+    width: 90vw;
+  }
+
+  .login-captcha-container.show {
+    height: 78px;
+  }
 }

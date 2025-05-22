@@ -1,12 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
 import '../styles/Background.css';
 
 const Background = ({ children }) => {
     const canvasRef = useRef(null);
-    const [showLogo, setShowLogo] = useState(false);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    const location = useLocation();
 
     useEffect(() => {
         // Add Orbitron font
@@ -161,7 +157,7 @@ const Background = ({ children }) => {
             }
         }
 
-        // Create particles with new types
+        // Create particles
         const particles = [];
         const types = ['message', 'voice', 'headphone', 'video', 'group', 'notification'];
         for (let i = 0; i < 25; i++) {
@@ -171,53 +167,25 @@ const Background = ({ children }) => {
 
         // Draw the background
         function drawBackground() {
-            // Clear the canvas (transparent background)
+            // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Create a darker gradient background
+            // Create gradient background
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, 'rgba(5, 10, 20, 0.95)'); // Darker blue
-            gradient.addColorStop(0.5, 'rgba(10, 5, 25, 0.9)'); // Darker purple
-            gradient.addColorStop(1, 'rgba(5, 10, 20, 0.95)'); // Darker blue
+            gradient.addColorStop(0, 'rgba(5, 10, 20, 0.95)');
+            gradient.addColorStop(0.5, 'rgba(10, 5, 25, 0.9)');
+            gradient.addColorStop(1, 'rgba(5, 10, 20, 0.95)');
 
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw animated particles (chat and robot icons)
+            // Draw particles
             particles.forEach((particle) => {
                 particle.update();
                 particle.draw();
             });
 
-            // Only draw the logo if showLogo is true
-            if (showLogo) {
-                // Draw the "SyncWave" logo with neon effect
-                ctx.font = "bold 100px 'Orbitron'";
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                // Neon glow effect for the text
-                ctx.shadowColor = 'rgba(0, 255, 255, 0.9)'; // Cyan glow
-                ctx.shadowBlur = 30 + Math.sin(Date.now() * 0.004) * 5; // Pulsing glow
-                ctx.fillStyle = '#00FFFF'; // Cyan text
-                ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)'; // Purple outline
-                ctx.lineWidth = 1;
-
-                // Draw the text with outline and fill
-                ctx.strokeText('SyncWave', canvas.width / 2, canvas.height / 2);
-                ctx.fillText('SyncWave', canvas.width / 2, canvas.height / 2);
-
-                // Draw loading animation if transitioning
-                if (isTransitioning) {
-                    const time = Date.now() * 0.001;
-                    const dots = '.'.repeat(Math.floor((time % 1) * 4));
-                    ctx.font = "30px 'Orbitron'";
-                    ctx.fillStyle = '#00FFFF';
-                    ctx.fillText(`Loading${dots}`, canvas.width / 2, canvas.height / 2 + 80);
-                }
-            }
-
-            // Add subtle background glow effect
+            // Add subtle background glow
             const glowGradient = ctx.createRadialGradient(
                 canvas.width / 1.5,
                 canvas.height / 1.5,
@@ -240,41 +208,17 @@ const Background = ({ children }) => {
         }
         animate();
 
-        // Cleanup function
+        // Cleanup
         return () => {
             window.removeEventListener('resize', resizeCanvas);
             cancelAnimationFrame(animationFrameId);
         };
-    }, [showLogo, isTransitioning]);
-
-    // Handle route changes and transitions
-    useEffect(() => {
-        const handleRouteChange = async () => {
-            // Show logo and transition for specific routes
-            if (location.pathname === '/home') {
-                setShowLogo(true);
-            } else if (location.pathname === '/profile-setup') {
-                // After profile setup, show transition
-                setIsTransitioning(true);
-                setShowLogo(true);
-
-                // Wait for 4 seconds then navigate to home
-                await new Promise(resolve => setTimeout(resolve, 4000));
-                setIsTransitioning(false);
-                //window.location.href = '/home';
-            } else {
-                setShowLogo(false);
-                setIsTransitioning(false);
-            }
-        };
-
-        handleRouteChange();
-    }, [location]);
+    }, []);
 
     return (
-        <div className={`background-container ${isTransitioning ? 'transitioning' : ''}`}>
+        <div className="background-container">
             <canvas ref={canvasRef} className="background-canvas" />
-            <div className={`content ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
+            <div className="content">
                 {children}
             </div>
         </div>
