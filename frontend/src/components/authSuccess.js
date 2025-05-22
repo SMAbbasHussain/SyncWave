@@ -42,6 +42,12 @@ function AuthSuccess() {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(userData));
 
+        // Dispatch custom event to notify other components
+        const userUpdatedEvent = new CustomEvent('userUpdated', {
+          detail: userData
+        });
+        window.dispatchEvent(userUpdatedEvent);
+
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
 
