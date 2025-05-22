@@ -6,15 +6,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Function to generate a unique username
-const generateUsername = (displayName, email) => {
-  // Remove spaces and special characters, add random number
-  const baseUsername = displayName.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  const randomSuffix = Math.floor(Math.random() * 1000);
-  return baseUsername.length > 0 
-    ? `${baseUsername}${randomSuffix}`
-    : `${email.split('@')[0]}${randomSuffix}`;
-};
+
 
 passport.use(
   new GoogleStrategy(
@@ -59,7 +51,7 @@ passport.use(
           // Create new user
           user = new User({
             googleId: profile.id,
-            username: generateUsername(profile.displayName, profile.emails[0].value),
+            username: profile.displayName,
             email: profile.emails[0].value,
             profilePic: profilePicUrl,
             isVerified: true,
