@@ -5,12 +5,13 @@ const { verifyToken } = require("../utils/jwtUtils");
 
 router.use(verifyToken);
 
-// User profile
-router.get("/users", userController.getProfile);
-router.put("/users/profile", verifyToken,userController.updateProfile);
+// User endpoints
+router.get("/me", userController.getCurrentUser); // New endpoint for current user
+router.get("/", userController.getProfile);
+router.put("/profile", userController.updateProfile);
 
 // Block management
-router.post("/users/block/:userId", userController.blockUser);
-router.post("/users/unblock/:userId", userController.unblockUser);
+router.post("/block/:userId", userController.blockUser);
+router.post("/unblock/:userId", userController.unblockUser);
 
 module.exports = router;
