@@ -6,7 +6,9 @@ const formatUserResponse = (user) => {
   const userData = user.toObject();
   delete userData.password;
   delete userData.blockedUsers;
-  delete userData.__v; // Remove version key
+  delete userData.__v;
+  delete userData.isGoogleAuth;
+  
   return {
     ...userData,
     profilePic: userData.profilePic || '/PFP2.png',

@@ -23,9 +23,9 @@ router.get('/google/callback',
     try {
       const token = generateToken(req.user._id);
       
-      // Check if user was just created (within last 5 minutes)
-      const isNewUser = req.user.createdAt > new Date(Date.now() - 5 * 60 * 1000);
-      // In authRoutes.js
+      // Check if user was just created
+      const isNewUser = req.user.isNew;
+      
       res.redirect(`http://localhost:3000/auth-success?token=${token}&isNewUser=${isNewUser}`);
     } catch (error) {
       console.error(error);

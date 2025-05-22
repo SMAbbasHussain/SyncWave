@@ -113,6 +113,28 @@ const googleAuth = async (req, res) => {
       return res.status(401).json({ error: 'Google authentication failed' });
     }
 
+    // If this is a new user and has a Google profile picture, save it
+    if (req.user.isNew && req.user.profilePic) {
+      try {
+        // Upload Google profile picture to Cloudinary
+        const uploadedResponse = await cloudinary.uploader.upload(req.user.profilePic, {
+          folder: "profile_pics",
+          transformation: [{ width: 200, height: 200, crop: "fill" }],
+        });
+        
+        // Update user with the Cloudinary URL
+        await User.findByIdAndUpdate(req.user._id, {
+          profilePic: uploadedResponse.secure_url
+        });
+        
+        // Update the req.user object with the new URL
+        req.user.profilePic = uploadedResponse.secure_url;
+      } catch (uploadError) {
+        console.error("Error uploading Google profile picture:", uploadError);
+        // Fall back to the Google URL if Cloudinary upload fails
+      }
+    }
+
     const token = generateToken(req.user._id);
     res.json({ 
       token,
@@ -120,8 +142,9 @@ const googleAuth = async (req, res) => {
         _id: req.user._id,
         username: req.user.username,
         email: req.user.email,
-        profilePic: req.user.profilePic
-      }
+        profilePic: req.user.profilePic || '/PFP2.png'
+      },
+      isNewUser: req.user.isNew
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
