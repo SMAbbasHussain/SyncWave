@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import "../styles/login.css";
@@ -17,6 +17,15 @@ function Login() {
   const [focusedField, setFocusedField] = useState(null);
   const captchaRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Only handle login errors from redirect
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    if (query.get('error')) {
+      setError(query.get('error'));
+    }
+  }, [location]);
 
   const handleChange = (e) => {
     setFormData({
@@ -31,14 +40,12 @@ function Login() {
 
   const handleBlur = () => {
     setFocusedField(null);
-    // Check if both fields are filled and neither is focused
     if (formData.email && formData.password && !focusedField) {
       setShowCaptcha(true);
       setHasShownCaptcha(true);
     }
   };
 
-  // Effect to handle captcha visibility based on field values and focus
   useEffect(() => {
     if (hasShownCaptcha) {
       setShowCaptcha(true);
@@ -72,34 +79,31 @@ function Login() {
         }
       );
 
+      // Create complete user object with defaults
+      const user = {
+        _id: response.data.user._id,
+        username: response.data.user.username,
+        email: response.data.user.email,
+        profilePic: response.data.user.profilePic || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+        bio: response.data.user.bio || '',
+        phoneNo: response.data.user.phoneNo || '',
+        status: response.data.user.status || 'offline'
+      };
+
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      // Direct navigation based on profile completion
-      if (!response.data.user.isProfileComplete) {
-        navigate('/profile-setup', { replace: true });
-      } else {
-        navigate('/home', { replace: true });
-      }
-    }
-    catch (error) {
+      localStorage.setItem("user", JSON.stringify(user));
+      
+      navigate('/home', { replace: true });
+    } catch (error) {
       console.error("Login error:", error);
-
       if (error.response) {
-        // Backend responded with a status code
-        console.error("Backend error response:", error.response);
         setError(error.response.data?.error || error.response.data?.message || "Login failed. Please try again.");
       } else if (error.request) {
-        // Request was made but no response received
-        console.error("No response received:", error.request);
         setError("No response from server. Please check your network.");
       } else {
-        // Something happened setting up the request
-        console.error("Axios error setting up the request:", error.message);
         setError("Unexpected error occurred. Please try again.");
       }
 
-      // Always reset CAPTCHA on error
       if (captchaRef.current) {
         captchaRef.current.reset();
       }
@@ -108,7 +112,7 @@ function Login() {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="container login-container">
       <h2 className={`login-head-text ${!showCaptcha ? 'captcha-hidden' : ''}`}>Login Account</h2>
@@ -165,7 +169,9 @@ function Login() {
 
       <button
         className="login-btn-google"
-        onClick={() => window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`}
+        onClick={() => {
+          window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
+        }}
       >
         <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
         Login with Google

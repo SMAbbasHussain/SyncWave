@@ -7,7 +7,39 @@ const formatUserResponse = (user) => {
   delete userData.password;
   delete userData.blockedUsers;
   delete userData.__v; // Remove version key
-  return userData;
+  return {
+    ...userData,
+    profilePic: userData.profilePic || '/PFP2.png',
+    bio: userData.bio || '',
+    phoneNo: userData.phoneNo || '',
+    status: userData.status || 'offline',
+    lastSeen: userData.lastSeen || new Date().toISOString()
+  };
+};
+
+// Get current user's complete profile
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'User not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      user: formatUserResponse(user)
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
 };
 
 // Update user profile
@@ -42,7 +74,7 @@ exports.updateProfile = async (req, res) => {
     if (status !== undefined) user.status = status;
 
     // Handle profile picture upload
-    if (profilePic) {
+    if (profilePic && profilePic !== user.profilePic) {
       try {
         const uploadedResponse = await cloudinary.uploader.upload(profilePic, {
           folder: "profile_pics",
@@ -102,12 +134,12 @@ exports.blockUser = async (req, res) => {
       currentUser,
       { $addToSet: { blockedUsers: userId } },
       { new: true }
-    ).select('-password -blockedUsers -__v');
+    );
 
     res.json({ 
       success: true,
       message: 'User blocked successfully',
-      user
+      user: formatUserResponse(user)
     });
 
   } catch (error) {
@@ -128,12 +160,12 @@ exports.unblockUser = async (req, res) => {
       currentUser,
       { $pull: { blockedUsers: userId } },
       { new: true }
-    ).select('-password -blockedUsers -__v');
+    );
 
     res.json({ 
       success: true,
       message: 'User unblocked successfully',
-      user
+      user: formatUserResponse(user)
     });
 
   } catch (error) {
@@ -149,8 +181,7 @@ exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const user = await User.findById(userId)
-      .select('-password -blockedUsers -__v');
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ 
@@ -161,7 +192,7 @@ exports.getProfile = async (req, res) => {
 
     res.json({
       success: true,
-      user
+      user: formatUserResponse(user)
     });
 
   } catch (error) {
