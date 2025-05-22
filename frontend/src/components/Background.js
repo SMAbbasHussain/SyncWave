@@ -31,148 +31,129 @@ const Background = ({ children }) => {
             constructor(type) {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 20 + 10;
-                this.speedX = (Math.random() * 0.5 - 0.25) * 1.9; // Slower speed (halved)
-                this.speedY = (Math.random() * 0.5 - 0.25) * 1.5; // Slower speed (halved)
-                this.opacity = Math.random() * 0.5 + 0.3;
-                this.type = type; // Type determines the icon
+                this.size = Math.random() * 25 + 25; // Increased size range (25-50 pixels)
+                this.speedX = (Math.random() * 1 - 0.25); // Increased speed range
+                this.speedY = (Math.random() * 1 - 0.25); // Increased speed range
+                this.opacity = Math.random() * 0.3 + 0.2;
+                this.type = type;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() * 0.02 - 0.01);
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
 
-                // Bounce off edges
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -2;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -3;
+                // Wrap around edges instead of bouncing
+                if (this.x < -this.size) this.x = canvas.width + this.size;
+                if (this.x > canvas.width + this.size) this.x = -this.size;
+                if (this.y < -this.size) this.y = canvas.height + this.size;
+                if (this.y > canvas.height + this.size) this.y = -this.size;
 
-                // Slight opacity animation
-                this.opacity += Math.sin(Date.now() * 0.002) * 0.01;
-                if (this.opacity < 0.3) this.opacity = 0.3;
-                if (this.opacity > 0.8) this.opacity = 0.8;
+                // Subtle opacity variation
+                this.opacity = 0.2 + Math.sin(Date.now() * 0.001 + this.x) * 0.1;
             }
 
             draw() {
                 ctx.save();
                 ctx.globalAlpha = this.opacity;
                 ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
 
-                if (this.type === 'chatBubble') {
-                    // Chat bubble with robot face
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Robot face inside
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size * 0.5, 0, Math.PI * 2); // Head
-                    ctx.fill();
-
-                    // Eyes
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.15, -this.size * 0.1, this.size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.15, -this.size * 0.1, this.size * 0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (this.type === 'robotHead') {
-                    // Robot head
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
-                    ctx.beginPath();
-                    ctx.rect(-this.size * 0.5, -this.size * 0.5, this.size, this.size);
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Antenna
-                    ctx.beginPath();
-                    ctx.moveTo(0, -this.size * 0.5);
-                    ctx.lineTo(0, -this.size * 0.8);
-                    ctx.stroke();
-
-                    // Eyes
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.15, -this.size * 0.1, this.size * 0.1, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.15, -this.size * 0.1, this.size * 0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (this.type === 'messageSymbol') {
-                    // Message symbol (envelope-like)
+                if (this.type === 'message') {
+                    // Message bubble
                     ctx.beginPath();
                     ctx.moveTo(-this.size * 0.5, -this.size * 0.3);
                     ctx.lineTo(this.size * 0.5, -this.size * 0.3);
-                    ctx.lineTo(0, this.size * 0.5);
+                    ctx.lineTo(this.size * 0.5, this.size * 0.3);
+                    ctx.lineTo(-this.size * 0.5, this.size * 0.3);
+                    ctx.lineTo(-this.size * 0.5, -this.size * 0.3);
                     ctx.closePath();
                     ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
                     ctx.fill();
                     ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                } else if (this.type === 'circuitChat') {
-                    // Circuit-like chat symbol
+                } else if (this.type === 'voice') {
+                    // Voice message icon
                     ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.arc(0, 0, this.size * 0.4, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
                     ctx.fill();
                     ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
                     ctx.lineWidth = 2;
                     ctx.stroke();
 
-                    // Circuit lines
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 0.3, 0);
-                    ctx.lineTo(this.size * 0.3, 0);
-                    ctx.moveTo(0, -this.size * 0.3);
-                    ctx.lineTo(0, this.size * 0.3);
-                    ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                } else if (this.type === 'gearRobot') {
-                    // Gear-shaped robot icon
-                    ctx.beginPath();
-                    for (let i = 0; i < 8; i++) {
-                        const angle = (i * Math.PI) / 4;
-                        const innerRadius = this.size * 0.5;
-                        const outerRadius = this.size * 0.7;
-                        ctx.lineTo(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius);
-                        ctx.lineTo(
-                            Math.cos(angle + Math.PI / 8) * outerRadius,
-                            Math.sin(angle + Math.PI / 8) * outerRadius
-                        );
+                    // Sound waves
+                    for (let i = 1; i <= 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size * (0.4 + i * 0.2), 0, Math.PI * 2);
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${0.3 - i * 0.1})`;
+                        ctx.stroke();
                     }
+                } else if (this.type === 'headphone') {
+                    // Headphone icon
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.3, 0, this.size * 0.2, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.3, 0, this.size * 0.2, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Headband
+                    ctx.beginPath();
+                    ctx.arc(0, -this.size * 0.2, this.size * 0.5, Math.PI, 0);
+                    ctx.stroke();
+                } else if (this.type === 'video') {
+                    // Video call icon
+                    ctx.beginPath();
+                    ctx.rect(-this.size * 0.4, -this.size * 0.3, this.size * 0.8, this.size * 0.6);
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Camera lens
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.3)';
+                    ctx.fill();
+                } else if (this.type === 'group') {
+                    // Group chat icon
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i * Math.PI * 2) / 3;
+                        ctx.beginPath();
+                        ctx.arc(
+                            Math.cos(angle) * this.size * 0.3,
+                            Math.sin(angle) * this.size * 0.3,
+                            this.size * 0.2,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                        ctx.stroke();
+                    }
+                } else if (this.type === 'notification') {
+                    // Notification bell
+                    ctx.beginPath();
+                    ctx.arc(0, -this.size * 0.1, this.size * 0.3, Math.PI * 0.8, Math.PI * 2.2);
+                    ctx.lineTo(0, this.size * 0.2);
                     ctx.closePath();
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
                     ctx.fill();
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)';
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
                     ctx.stroke();
 
-                    // Center circle
+                    // Bell top
                     ctx.beginPath();
-                    ctx.arc(0, 0, this.size * 0.3, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.8)';
+                    ctx.arc(0, -this.size * 0.1, this.size * 0.1, 0, Math.PI * 2);
                     ctx.fill();
-                } else if (this.type === 'holoChat') {
-                    // Holographic chat bubble
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.1)';
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Holographic lines
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 0.5, 0);
-                    ctx.lineTo(this.size * 0.5, 0);
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
-                    ctx.lineWidth = 1;
                     ctx.stroke();
                 }
 
@@ -180,10 +161,10 @@ const Background = ({ children }) => {
             }
         }
 
-        // Create particles
+        // Create particles with new types
         const particles = [];
-        const types = ['chatBubble', 'robotHead', 'messageSymbol', 'circuitChat', 'gearRobot', 'holoChat'];
-        for (let i = 0; i < 30; i++) {
+        const types = ['message', 'voice', 'headphone', 'video', 'group', 'notification'];
+        for (let i = 0; i < 25; i++) {
             const type = types[Math.floor(Math.random() * types.length)];
             particles.push(new Particle(type));
         }

@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import HomePage from "./pages/Homepage";
 import ProfileSetup from "./components/ProfileSetup";
+import LandingPage from "./pages/LandingPage";
 import "./styles/App.css";
 import Background from './components/Background';
 import TestProfileSetup from "./components/TestProfileSetup";
@@ -13,7 +14,7 @@ function App() {
     <Router>
       <Background>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
