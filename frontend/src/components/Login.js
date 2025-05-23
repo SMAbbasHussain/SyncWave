@@ -92,7 +92,7 @@ function Login() {
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(user));
-      
+
       navigate('/home', { replace: true });
     } catch (error) {
       console.error("Login error:", error);
@@ -112,7 +112,7 @@ function Login() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="container login-container">
       <h2 className={`login-head-text ${!showCaptcha ? 'captcha-hidden' : ''}`}>Login Account</h2>

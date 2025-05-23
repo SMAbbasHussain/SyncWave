@@ -3,14 +3,16 @@ import AiChat from "./AiChat";
 import PrivateChats from "./PrivateChats";
 import Profile from "./Profile";
 import AnonymousGroups from "./AnonymousGroups";
+import AiChatBox from "./AiChatBox";
 import "../styles/Dashboard.css";
 
 function Dashboard() {
     const [isAiChatVisible, setIsAiChatVisible] = useState(true);
     const [isAnonGroupsVisible, setIsAnonGroupsVisible] = useState(true);
+    const [isAiChatBoxVisible, setIsAiChatBoxVisible] = useState(false);
 
     const toggleAiChat = () => {
-        setIsAiChatVisible(!isAiChatVisible);
+        setIsAiChatBoxVisible(!isAiChatBoxVisible);
     };
 
     const toggleAnonGroups = () => {
@@ -25,10 +27,14 @@ function Dashboard() {
                     <Profile />
                 </div>
                 <div className="bottom-section">
-                    <AiChat />
+                    <AiChat onClick={toggleAiChat} />
                     <AnonymousGroups />
                 </div>
             </div>
+            <AiChatBox
+                isVisible={isAiChatBoxVisible}
+                onClose={() => setIsAiChatBoxVisible(false)}
+            />
         </div>
     );
 }

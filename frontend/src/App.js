@@ -5,9 +5,10 @@ import Signup from "./components/Signup";
 import HomePage from "./pages/Homepage";
 import ProfileSetup from "./components/ProfileSetup";
 import LandingPage from "./pages/LandingPage";
+import LoadingToHome from "./components/LoadingToHome";
 import "./styles/App.css";
 import Background from './components/Background';
-import AuthSuccess from'./components/authSuccess';
+import AuthSuccess from './components/authSuccess';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/home" element={<LoadingToHome />} />
+          <Route path="/homepage" element={<HomePage />} />
           <Route path="/auth-success" element={<AuthSuccess />} />
         </Routes>
       </Background>

@@ -3,7 +3,7 @@ import { FaRobot } from 'react-icons/fa';
 import { BsStars } from 'react-icons/bs';
 import '../styles/AiChat.css';
 
-const AiChat = () => {
+const AiChat = ({ onClick }) => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const containerRef = useRef(null);
 
@@ -22,6 +22,8 @@ const AiChat = () => {
             className="ai-chat-container"
             ref={containerRef}
             onMouseMove={handleMouseMove}
+            onClick={onClick}
+            style={{ cursor: 'pointer' }}
         >
             <div className="gradient-lines left">
                 <div className="line"></div>
