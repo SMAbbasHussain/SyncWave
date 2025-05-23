@@ -243,7 +243,7 @@ function Profile() {
                         ) : (
                             <div 
                                 className="dropdown-item"
-                                onClick={() => navigate('/register')}
+                                onClick={() => navigate('/signup')}
                             >
                                 <FaPlus className="dropdown-icon" />
                                 <span>Create Account</span>
