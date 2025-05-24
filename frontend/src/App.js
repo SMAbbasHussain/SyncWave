@@ -13,17 +13,15 @@ import AuthSuccess from './components/authSuccess';
 function App() {
   return (
     <Router>
-      <Background>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/home" element={<LoadingToHome />} />
-          <Route path="/homepage" element={<HomePage />} />
-          <Route path="/auth-success" element={<AuthSuccess />} />
-        </Routes>
-      </Background>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/home" element={<LoadingToHome />} />
+        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/auth-success" element={<AuthSuccess />} />
+      </Routes>
     </Router>
   );
 }
