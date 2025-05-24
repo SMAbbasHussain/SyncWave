@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 import "../styles/login.css";
-
+import Background from "./Background";
 function Login() {
   const [formData, setFormData] = useState({
     email: "",
@@ -114,73 +114,76 @@ function Login() {
   };
 
   return (
-    <div className="container login-container">
-      <h2 className={`login-head-text ${!showCaptcha ? 'captcha-hidden' : ''}`}>Login Account</h2>
-      {error && <div className="error-message">{error}</div>}
+    <>
+      <Background />
+      <div className="container login-container">
+        <h2 className={`login-head-text ${!showCaptcha ? 'captcha-hidden' : ''}`}>Login Account</h2>
+        {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <div className="login-input-container">
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            onFocus={() => handleFocus('email')}
-            onBlur={handleBlur}
-            required
-            placeholder=" "
-          />
-          <label>Email</label>
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="login-input-container">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onFocus={() => handleFocus('email')}
+              onBlur={handleBlur}
+              required
+              placeholder=" "
+            />
+            <label>Email</label>
+          </div>
 
-        <div className="login-input-container">
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            onFocus={() => handleFocus('password')}
-            onBlur={handleBlur}
-            required
-            placeholder=" "
-            minLength="6"
-          />
-          <label>Password</label>
-        </div>
+          <div className="login-input-container">
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onFocus={() => handleFocus('password')}
+              onBlur={handleBlur}
+              required
+              placeholder=" "
+              minLength="6"
+            />
+            <label>Password</label>
+          </div>
 
-        <div className={`login-captcha-container ${showCaptcha ? 'show' : 'hide'}`}>
-          <ReCAPTCHA
-            ref={captchaRef}
-            sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
-            onChange={(value) => setCaptchaVerified(!!value)}
-            theme="dark"
-            size="normal"
-          />
-        </div>
+          <div className={`login-captcha-container ${showCaptcha ? 'show' : 'hide'}`}>
+            <ReCAPTCHA
+              ref={captchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_KEY}
+              onChange={(value) => setCaptchaVerified(!!value)}
+              theme="dark"
+              size="normal"
+            />
+          </div>
+
+          <button
+            className="login-btn-login"
+            type="submit"
+            disabled={loading || !formData.email || !formData.password || !captchaVerified}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
 
         <button
-          className="login-btn-login"
-          type="submit"
-          disabled={loading || !formData.email || !formData.password || !captchaVerified}
+          className="login-btn-google"
+          onClick={() => {
+            window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
+          }}
         >
-          {loading ? "Logging in..." : "Login"}
+          <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
+          Login with Google
         </button>
-      </form>
 
-      <button
-        className="login-btn-google"
-        onClick={() => {
-          window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
-        }}
-      >
-        <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png" alt="Google Logo" />
-        Login with Google
-      </button>
-
-      <p className="login-else-text">
-        Don't have an account? <Link to="/signup">Create New</Link>
-      </p>
-    </div>
+        <p className="login-else-text">
+          Don't have an account? <Link to="/signup">Create New</Link>
+        </p>
+      </div>
+    </>
   );
 }
 
