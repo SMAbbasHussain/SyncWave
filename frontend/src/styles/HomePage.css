@@ -1,7 +1,44 @@
 .homepage-layout {
-  width: 100vw;
-  height: 100vh;
   display: flex;
-  gap: 15px;
-  padding: 15px;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 2rem;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.left-sidebar {
+  width: 4vw;
+  height: auto;
+  box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+  background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
+  backdrop-filter: blur(1000px);
+  border-radius: 25px;
+  flex-shrink: 0;
+  transition: height 0.3s ease;
+  animation: fadeInFill 1s ease-out forwards;
+}
+
+@keyframes fadeInFill {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.main-dashboard-area {
+  width: 80%;
+  min-height: 90vh;
+  border-radius: 20px;
+  box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+  background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
+  backdrop-filter: blur(1000px);
+  flex-grow: 1;
+  margin-left: 0;
 }

@@ -2,41 +2,49 @@
 
 .landing-container {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
+    /* Ensure it's at least viewport height */
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    overflow: hidden;
-    /* Prevent overflow from animations/illustrations */
+    padding: 20px;
+    /* Add padding to avoid content touching edges */
+    box-sizing: border-box;
 }
 
 .landing-content {
     display: flex;
+    flex-direction: column;
+    /* Default to column for smaller screens */
     width: 90%;
-    height: 80%;
-    /* Max height for the content area */
+    /* At least 90% width */
+    min-width: 300px;
+    height: auto;
+    max-height: none;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
-    /* Keep outer glow */
-    /* Subtle gradient for blending from left (darker) to right (lighter/more transparent) */
     background: linear-gradient(to right, rgba(1, 6, 19, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
+    position: relative;
 }
 
 .left-column {
     flex: 1;
-    /* Take up half the width */
+    /* Take up half the width in row layout, full width in column */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    /* Align left */
-    padding: 90px;
+    align-items: center;
+    /* Center text by default in column layout */
+    padding: 20px;
+    /* Default padding for smaller screens */
     color: #fff;
     position: relative;
-    z-index: 2;
-    /* Ensure text is above illustrations */
+    z-index: 4;
+    /* Ensure left column content is above right column layers */
+    text-align: center;
+    /* Center text by default */
 }
 
 .new-tag-container {
@@ -66,12 +74,10 @@
 
 .syncwave-logo {
     font-family: 'Orbitron', sans-serif;
-    font-size: 4rem;
-    /* Adjusted for the layout */
+    font-size: 3rem;
+    /* Default font size for smaller screens */
     font-weight: 700;
-    /* Adjusted for Poppins context */
     color: #fff;
-    /* White color */
     text-shadow:
         0 0 20px rgba(0, 255, 255, 0.5),
         0 0 40px rgba(0, 255, 255, 0.3),
@@ -91,7 +97,8 @@
 }
 
 .landing-caption {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    /* Default font size for smaller screens */
     color: rgba(255, 255, 255, 0.7);
     /* Soft white with reduced opacity */
     margin: 0 0 30px 0;
@@ -99,7 +106,9 @@
 
 .button-container {
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    /* Stack buttons by default */
+    gap: 15px;
 }
 
 .auth-button {
@@ -130,13 +139,19 @@
 
 .right-column {
     flex: 1;
-    /* Take up half the width */
+    /* Take up half the width in row layout, full width in column */
     position: relative;
     overflow: hidden;
     /* Crucial for containing pseudo-elements */
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
+    /* Ensure right column is below left column content */
+    height: 400px;
+    /* Default height for smaller screens */
+    margin-top: 30px;
+    /* Add margin when stacked */
 }
 
 .right-column-overlay {
@@ -189,15 +204,15 @@
     z-index: 3;
 }
 
-
 /* Ensure robot image is between stars and waves */
 .robot-image {
-    z-index: 2;
-    width: 100%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
     height: 100%;
-    /* Ensure image takes up available height */
     object-fit: contain;
-    /* Adjust object-fit as needed (e.g., cover) */
+    z-index: 3;
+    opacity: 0.8;
 }
 
 /* Glowing DNA-like lines animation */
@@ -255,75 +270,98 @@
     }
 }
 
+/* Styles for the waves image */
+.waves-img {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
+    opacity: 0.8;
+    filter: blur(2px);
+}
+
 /* Responsive adjustments */
-@media (max-width: 768px) {
+
+/* Tablet and larger screens (1024px and above) */
+@media (min-width: 1024px) {
     .landing-content {
-        flex-direction: column;
-        /* Stack columns on smaller screens */
-        height: auto;
-        max-height: none;
-        width: 95%;
-        padding: 20px;
+        flex-direction: row;
+        /* Display in a row */
+        height: 80vh;
+        /* Aim for 80% of viewport height */
+        max-height: 90vh;
+        /* Prevent taking up too much vertical space */
     }
 
     .left-column {
-        align-items: center;
-        /* Center text on smaller screens */
-        padding: 20px;
-        text-align: center;
+        align-items: flex-start;
+        /* Align text to the left */
+        padding: 40px;
+        /* Padding for larger screens */
+        text-align: left;
+        /* Align text to the left */
     }
 
     .syncwave-logo {
-        font-size: 3rem;
+        font-size: 4rem;
+        /* Adjust font size for larger screens */
     }
 
     .landing-caption {
-        font-size: 1rem;
+        font-size: 1.1rem;
+        /* Adjust font size for larger screens */
     }
 
     .button-container {
-        flex-direction: column;
-        /* Stack buttons */
-        gap: 15px;
+        flex-direction: row;
+        /* Display buttons in a row */
+        gap: 20px;
     }
 
     .right-column {
-        height: 400px;
-        /* Give the illustration some height */
-        margin-top: 30px;
-        /* Ensure waves are still positioned reasonably */
+        height: 100%;
+        /* Take full height in row layout */
+        margin-top: 0;
+        /* Remove margin when in row */
     }
 
-    .ai-model-image {
-        position: relative;
+    .robot-image,
+    .waves-img {
+        position: absolute;
+        /* Absolute positioning in row layout */
         width: 100%;
-        height: auto;
-        right: auto;
-        bottom: auto;
+        /* Ensure full width coverage */
+        height: 100%;
+        /* Ensure full height coverage */
         object-fit: contain;
+        right: 0;
+        bottom: 0;
+    }
+}
+
+/* Larger desktops (1440px and above) - Further refinements */
+@media (min-width: 1440px) {
+    .landing-content {
+        width: 80%;
+        /* Further reduce width usage on very large screens */
+        max-width: 1500px;
+        /* Allow content to be wider */
     }
 
-    .right-column::before,
-    .right-column::after {
-        left: 0;
-        transform: translateX(0%) rotate(0deg);
-        transform-origin: top center;
-        /* Adjust animation or remove if needed for mobile */
+    .left-column {
+        padding: 60px;
+        /* Increase padding on very large screens */
     }
 
-    @keyframes dna-flow {
-        0% {
-            transform: translateX(0%) rotate(0deg) scaleY(0.8);
-            opacity: 0.6;
-        }
+    .syncwave-logo {
+        font-size: 4.5rem;
+        /* Slightly larger logo */
+    }
 
-        50% {
-            opacity: 0.9;
-        }
-
-        100% {
-            transform: translateX(0%) rotate(360deg) scaleY(0.8);
-            opacity: 0.6;
-        }
+    .landing-caption {
+        font-size: 1.2rem;
+        /* Slightly larger caption */
     }
 }
