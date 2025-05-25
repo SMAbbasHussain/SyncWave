@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ProfileSetup.css";
+import Background from "./Background";
 
 function ProfileSetup() {
   const [profilePic, setProfilePic] = useState(null);
@@ -78,7 +79,8 @@ function ProfileSetup() {
 
   return (
     <div className="profile-setup-wrapper">
-      <div className="profile-setup-container">
+      <Background />
+      <div className="profile-setup-container container">
         <h2 className="profile-setup-head-text">Complete Your Profile</h2>
 
         <div className="profile-setup-content">

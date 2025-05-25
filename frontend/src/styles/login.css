@@ -5,10 +5,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 22vh;
   justify-content: flex-start;
   gap: 5px;
   transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
 .login-head-text {
@@ -165,8 +170,48 @@
   margin-bottom: 0;
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
+/* Responsive adjustments for login container (and its children) */
+@media (min-width: 768px) {
+  .login-container {
+    width: 50vw !important;
+  }
+
+  .login-input-container input,
+  .login-btn-login,
+  .login-btn-google,
+  .login-captcha-container {
+    width: 40vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .login-container {
+    width: 35vw !important;
+  }
+
+  .login-input-container input,
+  .login-btn-login,
+  .login-btn-google,
+  .login-captcha-container {
+    width: 27vw;
+  }
+}
+
+@media (min-width: 1440px) {
+  .login-container {
+    width: 35vw !important;
+  }
+
+  .login-input-container input,
+  .login-btn-login,
+  .login-btn-google,
+  .login-captcha-container {
+    width: 30vw;
+  }
+}
+
+/* (Existing media queries for smaller screens remain unchanged.) */
+@media (max-width: 768px) {
   .login-container {
     width: 90vw !important;
     margin-top: 15vh;
@@ -184,7 +229,7 @@
   }
 }
 
-@media screen and (max-width: 480px) {
+@media (max-width: 480px) {
   .login-container {
     margin-top: 10vh;
   }
@@ -192,11 +237,11 @@
   .login-input-container input,
   .login-btn-login,
   .login-btn-google,
-  .login-captcha-container {
+  .login-captcha container {
     width: 90vw;
   }
 
-  .login-captcha-container.show {
+  .login-captcha container.show {
     height: 78px;
   }
 }

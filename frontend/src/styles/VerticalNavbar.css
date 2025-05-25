@@ -1,0 +1,202 @@
+.vertical-navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
+    background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
+    backdrop-filter: blur(1000px);
+    border: 1px solid #074a6ab6;
+    border-radius: 25px;
+    padding: 15px 0;
+    box-sizing: border-box;
+    width: 4vw;
+    position: relative;
+    transition: height 0.3s ease;
+}
+
+.vertical-navbar .icon-container {
+    width: 35px;
+    height: 35px;
+    background-color: transparent;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #b0bec5;
+    cursor: pointer;
+    transition: all 0.3s ease, margin 0.3s ease;
+    margin-bottom: 10px;
+    padding: 5px;
+    position: relative;
+}
+
+.vertical-navbar .icon-container:last-child {
+    margin-bottom: 0;
+}
+
+.vertical-navbar .icon-container:hover .icon-wrapper {
+    background-color: #033c58e5;
+    border-radius: 10px;
+    padding: 5px;
+    color: #ffffff;
+}
+
+.vertical-navbar .icon-container:hover .icon-label {
+    text-shadow: 0 0 8px rgba(0, 119, 255, 0.7);
+}
+
+.vertical-navbar .icon-container .icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    height: 40px;
+    background-color: transparent;
+    border-radius: 50%;
+    transition: background-color 0.3s ease, border-radius 0.3s ease, color 0.3s ease;
+}
+
+.vertical-navbar .icon-container.expanded {
+    border-radius: 25px;
+    padding: 7px;
+    margin-top: 5px;
+    margin-bottom: 25px;
+    width: 4vw;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.vertical-navbar .icon-container.expanded:first-child {
+    margin-top: 0;
+}
+
+
+
+.vertical-navbar .icon-container.expanded .icon-wrapper {
+    background-color: #1439617d;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.vertical-navbar .icon-label {
+    font-size: 0.6rem;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    word-break: break-word;
+    text-shadow: 0 0 5px rgba(0, 119, 255, 0.5);
+    max-width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 0;
+    width: 100%;
+}
+
+.vertical-navbar .icon-container:hover .icon-label,
+.vertical-navbar .icon-container.expanded .icon-label {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Add responsive styles */
+@media (max-width: 1440px) {
+    .homepage-layout {
+        margin: 0 8%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .homepage-layout {
+        margin: 0 5%;
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-sidebar {
+        width: 80%;
+        height: auto;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .main-dashboard-area {
+        width: 80%;
+        height: auto;
+    }
+
+    .vertical-navbar {
+        flex-direction: row;
+        justify-content: space-around;
+        height: auto;
+        padding: 0 10px;
+        width: auto;
+    }
+
+    .vertical-navbar .icon-container {
+        width: 35px;
+        height: 35px;
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    .vertical-navbar .icon-container:last-child {
+        margin-right: 0;
+    }
+
+    .vertical-navbar .icon-container.expanded {
+        flex-direction: column;
+        width: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding: 10px;
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: 0.55rem;
+        max-width: 100%;
+        position: static;
+        transform: none;
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 768px) {
+    .homepage-layout {
+        margin: 0 2%;
+    }
+
+    .left-sidebar,
+    .main-dashboard-area {
+        width: 95%;
+    }
+
+    .vertical-navbar .icon-container {
+        width: 30px;
+        height: 30px;
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: 0.5rem;
+        max-width: 100%;
+        position: static;
+        transform: none;
+        margin-top: 5px;
+    }
+}
+
+/* Define Poppins font family */
+body {
+    font-family: 'Poppins', sans-serif;
+}

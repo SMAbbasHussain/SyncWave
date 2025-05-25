@@ -5,11 +5,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1f2c 0%, #0f1218 100%);
   padding: 2rem;
-  margin-top: 22vh;
-
   gap: 1rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
 .signup-head-text {
@@ -35,7 +38,7 @@
 }
 
 .signup-full-width {
-  width: 30vw !important;
+  width: 30vw;
 }
 
 .signup-input-container {
@@ -144,4 +147,91 @@
 .signup-btn-google img {
   width: 40px;
   height: 40px;
+}
+
+/* Responsive adjustments for signup container (and its children) */
+@media (min-width: 768px) {
+  .signup-container {
+    width: 50vw !important;
+  }
+
+  .signup-row,
+  .signup-full-width,
+  .signup-btn-signup,
+  .signup-btn-google {
+    width: 40vw;
+  }
+
+  .signup-half-width {
+    width: 20vw !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .signup-container {
+    width: 45vw !important;
+  }
+
+  .signup-row,
+  .signup-full-width,
+  .signup-btn-signup,
+  .signup-btn-google {
+    width: 35vw;
+  }
+
+  .signup-half-width {
+    width: 15vw;
+  }
+}
+
+@media (min-width: 1440px) {
+  .signup-container {
+    width: 45vw !important;
+  }
+
+  .signup-row,
+  .signup-full-width,
+  .signup-btn-signup,
+  .signup-btn-google {
+    width: 35vw;
+  }
+
+  .signup-half-width {
+    width: 13vw;
+  }
+}
+
+/* (Existing media queries for smaller screens remain unchanged.) */
+@media (max-width: 768px) {
+  .signup-container {
+    width: 90vw !important;
+  }
+
+  .signup-row,
+  .signup-full-width,
+  .signup-btn-signup,
+  .signup-btn-google {
+    width: 80vw;
+  }
+
+  .signup-half-width {
+    width: 38vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-container {
+    width: 95vw !important;
+  }
+
+  .signup-row,
+  .signup-full-width,
+  .signup-btn-signup,
+  .signup-btn-google {
+    width: 90vw;
+  }
+
+  .signup-half-width {
+    width: 43vw;
+  }
 }
