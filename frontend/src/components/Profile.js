@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaChevronDown, FaCog, FaMoon, FaSignOutAlt, FaUser, FaPlus } from "react-icons/fa";
+import { FaChevronDown, FaCog, FaMoon, FaSignOutAlt, FaUser, FaPlus, FaCircle } from "react-icons/fa";
 import "../styles/Profile.css";
 
 function Profile() {
@@ -13,100 +13,66 @@ function Profile() {
     const navigate = useNavigate();
 
     useEffect(() => {
-    const loadUserData = async () => {
-        try {
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                const parsedUser = JSON.parse(storedUser);
-                // Make sure we have all required fields
-                if (parsedUser.username && parsedUser.email) {
-                    setUser(parsedUser);
+        const loadUserData = async () => {
+            try {
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    if (parsedUser.username && parsedUser.email) {
+                        setUser(parsedUser);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                const token = localStorage.getItem('token');
+                if (!token) {
                     setLoading(false);
                     return;
                 }
-            }
 
-            // If local storage data is incomplete, fetch from server
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setLoading(false);
-                return;
-            }
-
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const completeUserData = {
-                isLoggedIn: true,
-                username: response.data.username,
-                email: response.data.email,
-                profilePic: response.data.profilePic,
-                bio: response.data.bio
-            };
-
-            localStorage.setItem('user', JSON.stringify(completeUserData));
-            setUser(completeUserData);
-        } catch (error) {
-            console.error("Failed to load user data:", error);
-            if (error.response?.status === 401) {
-                handleLogout();
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    loadUserData();
-
-    const handleUserUpdate = (e) => {
-        setUser(e.detail);
-    };
-
-    window.addEventListener('userUpdated', handleUserUpdate);
-    
-    return () => {
-        window.removeEventListener('userUpdated', handleUserUpdate);
-    };
-}, []);// Empty dependency array - runs only once on mount
-
-    const handleLogout = async () => {
-        try {
-            const response = await axios.get(
-                `${process.env.REACT_APP_API_URL}/api/auth/logout`,
-                {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                        Authorization: `Bearer ${token}`
                     }
-                }
-            );
+                });
 
-            // Clear client-side storage
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setUser(null);
-            
-            // Redirect to login
-            navigate('/login', { replace: true });
-            
-            // Optional: Refresh to ensure clean state
-            window.location.reload();
-            
-        } catch (error) {
-            console.error("Logout error:", error);
-            // Fallback cleanup if server request fails
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setUser(null);
-            navigate('/login');
-        }
-    };
+                const completeUserData = {
+                    isLoggedIn: true,
+                    username: response.data.username,
+                    email: response.data.email,
+                    profilePic: response.data.profilePic,
+                    bio: response.data.bio,
+                    status: response.data.status || 'offline'
+                };
 
-    const toggleDropdown = (e) => {
-        e.stopPropagation();
-        setIsDropdownOpen(!isDropdownOpen);
+                localStorage.setItem('user', JSON.stringify(completeUserData));
+                setUser(completeUserData);
+            } catch (error) {
+                console.error("Error loading user data:", error);
+                setLoading(false);
+            }
+        };
+
+        loadUserData();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+                profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
     };
 
     const handleOptionClick = (option) => {
@@ -116,7 +82,6 @@ function Profile() {
                 navigate('/settings');
                 break;
             case 'theme':
-                // Implement theme toggle logic
                 console.log("Theme toggle");
                 break;
             case 'logout':
@@ -124,6 +89,21 @@ function Profile() {
                 break;
             default:
                 break;
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'online':
+                return '#4CAF50';
+            case 'offline':
+                return '#9E9E9E';
+            case 'away':
+                return '#FFC107';
+            case 'busy':
+                return '#F44336';
+            default:
+                return '#9E9E9E';
         }
     };
 
@@ -140,116 +120,65 @@ function Profile() {
 
     return (
         <div className="profile-section" ref={profileRef}>
-            <div className="profile-content" onClick={toggleDropdown}>
-                <div className="profile-avatar-container">
-                    {user?.profilePic ? (
-                        <img
-                            src={user.profilePic}
-                            alt="Profile"
-                            className="profile-avatar"
-                            onError={(e) => {
-                                e.target.src = "https://via.placeholder.com/50";
-                                e.target.className = "profile-avatar placeholder";
-                            }}
-                        />
-                    ) : (
-                        <div className="profile-avatar placeholder">
-                            <FaUser className="default-avatar" />
-                        </div>
-                    )}
-                </div>
+            <div className="profile-content" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+                <FaChevronDown className={`dropdown-icon ${isDropdownOpen ? 'open' : ''}`} />
                 <div className="profile-info">
-                    <span className="profile-name">
-                        {user?.username || "Guest"}
-                    </span>
-                    <span className="profile-status">
-                        {user ? "Online" : "Offline"}
-                    </span>
+                    <div className="profile-name">{user ? user.username : 'Guest'}</div>
+                    <div className="profile-status">
+                        <FaCircle className="status-icon" style={{ color: getStatusColor(user?.status) }} />
+                        <span>{user ? user.status : 'Guest'}</span>
+                    </div>
                 </div>
-                <div className="dropdown-toggle">
-                    <FaChevronDown className={`dropdown-icon ${isDropdownOpen ? "active" : ""}`} />
+                <div className="profile-avatar">
+                    {user?.profilePic ? (
+                        <img src={user.profilePic} alt={user.username} />
+                    ) : (
+                        <FaUser className="default-avatar" />
+                    )}
                 </div>
             </div>
 
             {isDropdownOpen && (
                 <div className="profile-dropdown" ref={dropdownRef}>
-                    {user ? (
-                        <>
-                            <div className="dropdown-header">
-                                <div className="dropdown-avatar-container">
-                                    {user.profilePic ? (
-                                        <img
-                                            src={user.profilePic}
-                                            alt="Profile"
-                                            className="dropdown-avatar"
-                                            onError={(e) => {
-                                                e.target.src = "https://via.placeholder.com/100";
-                                                e.target.className = "dropdown-avatar placeholder";
-                                            }}
-                                        />
-                                    ) : (
-                                        <div className="dropdown-avatar placeholder">
-                                            <FaUser className="default-avatar" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="dropdown-user-info">
-                                    <span className="dropdown-username">{user.username}</span>
-                                    <span className="dropdown-email">{user.email}</span>
-                                </div>
-                            </div>
-                            <div className="dropdown-divider"></div>
-                        </>
-                    ) : (
+                    {!user ? (
                         <div className="dropdown-guest">
                             <div className="guest-avatar">
                                 <FaUser />
                             </div>
                             <p>You're not signed in</p>
-                            <button 
+                            <button
                                 className="signin-btn"
                                 onClick={() => navigate('/login')}
                             >
                                 Sign In
                             </button>
                         </div>
-                    )}
-
-                    <div className="dropdown-menu">
-                        <div 
-                            className="dropdown-item"
-                            onClick={() => handleOptionClick('settings')}
-                        >
-                            <FaCog className="dropdown-icon" />
-                            <span>Profile Settings</span>
-                        </div>
-                        <div 
-                            className="dropdown-item"
-                            onClick={() => handleOptionClick('theme')}
-                        >
-                            <FaMoon className="dropdown-icon" />
-                            <span>Dark Mode</span>
-                        </div>
-                        <div className="dropdown-divider"></div>
-
-                        {user ? (
-                            <div 
+                    ) : (
+                        <div className="dropdown-menu">
+                            <div
+                                className="dropdown-item"
+                                onClick={() => handleOptionClick('settings')}
+                            >
+                                <FaCog className="dropdown-icon" />
+                                <span>Profile Settings</span>
+                            </div>
+                            <div
+                                className="dropdown-item"
+                                onClick={() => handleOptionClick('theme')}
+                            >
+                                <FaMoon className="dropdown-icon" />
+                                <span>Dark Mode</span>
+                            </div>
+                            <div className="dropdown-divider"></div>
+                            <div
                                 className="dropdown-item logout"
                                 onClick={() => handleOptionClick('logout')}
                             >
                                 <FaSignOutAlt className="dropdown-icon" />
                                 <span>Sign Out</span>
                             </div>
-                        ) : (
-                            <div 
-                                className="dropdown-item"
-                                onClick={() => navigate('/signup')}
-                            >
-                                <FaPlus className="dropdown-icon" />
-                                <span>Create Account</span>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
