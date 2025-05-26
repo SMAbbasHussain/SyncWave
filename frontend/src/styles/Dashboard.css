@@ -1,66 +1,180 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
 .dashboard-container {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    position: relative;
+}
+
+.dashboard-top-bar {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(0, 119, 255, 0.2);
+    margin-bottom: 20px;
+}
+
+.dashboard-logo span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-left: 1rem;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .dashboard-content {
     flex: 1;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: 0 20px;
     overflow-y: auto;
-    position: relative;
+    display: flex;
+    gap: 20px;
 }
 
-.dashboard-placeholder {
+/* Home View Styles */
+.home-view {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+}
+
+.home-view .chat-section {
+    width: 35%;
     display: flex;
     flex-direction: column;
+    gap: 15px;
+    max-height: 80vh;
+}
+
+.home-view .private-chats-container {
+    height: calc(80vh - 100px);
+    /* 80% of viewport height minus space for AI chat */
+    min-height: 0;
+    background: rgba(16, 19, 26, 0.95);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.home-view .ai-chat-container {
+    height: 80px;
+    min-height: 80px;
+    background: rgba(16, 19, 26, 0.95);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
+    display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.home-view .ai-chat-container:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.home-view .chat-screen {
+    flex: 1;
+    background: rgba(16, 19, 26, 0.95);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
+}
+
+/* Groups View Styles */
+.groups-view {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     height: 100%;
+}
+
+.groups-view .top-section {
+    flex: 1;
+    min-height: 0;
+}
+
+.groups-view .bottom-section {
+    height: 300px;
+    min-height: 300px;
+}
+
+/* Placeholder styles for upcoming views */
+.dashboard-content h2 {
     color: #fff;
     text-align: center;
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    opacity: 0.7;
 }
 
-.dashboard-placeholder h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
-
-.dashboard-placeholder p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
-}
-
-/* Responsive adjustments */
+/* Responsive styles */
 @media (max-width: 768px) {
-    .dashboard-content {
-        padding: 15px;
+    .dashboard-top-bar {
+        height: 60px;
+        padding: 0 15px;
     }
 
-    .dashboard-placeholder h1 {
+    .dashboard-logo span {
         font-size: 1.5rem;
     }
 
-    .dashboard-placeholder p {
-        font-size: 0.9rem;
+    .dashboard-content {
+        padding: 0 15px;
+    }
+
+    .home-view {
+        flex-direction: column;
+    }
+
+    .home-view .chat-section {
+        width: 100%;
+        max-height: none;
+    }
+
+    .home-view .private-chats-container {
+        height: 60vh;
+    }
+
+    .home-view .ai-chat-container {
+        height: 70px;
+        min-height: 70px;
     }
 }
 
 @media (max-width: 480px) {
-    .dashboard-content {
-        padding: 10px;
+    .dashboard-top-bar {
+        height: 50px;
+        padding: 0 10px;
     }
 
-    .dashboard-placeholder h1 {
+    .dashboard-logo span {
         font-size: 1.2rem;
     }
 
-    .dashboard-placeholder p {
-        font-size: 0.8rem;
+    .dashboard-content {
+        padding: 0 10px;
+    }
+
+    .home-view .private-chats-container {
+        height: 50vh;
+    }
+
+    .home-view .ai-chat-container {
+        height: 60px;
+        min-height: 60px;
     }
 }
