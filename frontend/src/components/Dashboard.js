@@ -1,34 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import AiChat from "./AiChat";
-// import PrivateChats from "./PrivateChats";
-// import Profile from "./Profile";
-// import AnonymousGroups from "./AnonymousGroups";
+import PrivateChats from "./PrivateChats";
+import AiChat from "./AiChat";
+import Groups from "./Groups";
+import AnonymousGroups from "./AnonymousGroups";
 // import AiChatBox from "./AiChatBox";
-import TopBar from "./TopBar";
+import Profile from "./Profile";
 import "../styles/Dashboard.css";
 
-function Dashboard() {
-    // const [isAiChatVisible, setIsAiChatVisible] = useState(true);
-    // const [isAnonGroupsVisible, setIsAnonGroupsVisible] = useState(true);
-    // const [isAiChatBoxVisible, setIsAiChatBoxVisible] = useState(false);
+function Dashboard({ activeNavItem = 'home' }) {
+    const [isAiChatVisible, setIsAiChatVisible] = useState(true);
+    const [isAnonGroupsVisible, setIsAnonGroupsVisible] = useState(true);
 
-    // const toggleAiChat = () => {
-    //     setIsAiChatBoxVisible(!isAiChatBoxVisible);
-    // };
+    const toggleAiChat = () => {
+        setIsAiChatVisible(!isAiChatVisible);
+    };
 
-    // const toggleAnonGroups = () => {
-    //     setIsAnonGroupsVisible(!isAnonGroupsVisible);
-    // };
+    const toggleAnonGroups = () => {
+        setIsAnonGroupsVisible(!isAnonGroupsVisible);
+    };
+
+    // Home View Component
+    const HomeView = () => (
+        <div className="dashboard-content">
+            <div className="home-view">
+                <div className="chat-section">
+                    <div className="private-chats-container">
+                        <PrivateChats />
+                    </div>
+                    <div className="ai-chat-container">
+                        <AiChat onClick={toggleAiChat} />
+                    </div>
+                </div>
+                <div className="chat-screen">
+                    {/* Chat screen will be implemented later */}
+                </div>
+            </div>
+        </div>
+    );
+
+    // Groups View Component
+    const GroupsView = () => (
+        <div className="dashboard-content">
+            <div className="groups-view">
+                <div className="top-section">
+                    <Groups />
+                </div>
+                <div className="bottom-section">
+                    <AnonymousGroups />
+                </div>
+            </div>
+        </div>
+    );
+
+    // Render the appropriate view based on activeNavItem
+    const renderContent = () => {
+        switch (activeNavItem) {
+            case 'home':
+                return <HomeView />;
+            case 'groups':
+                return <GroupsView />;
+            case 'friends':
+                return <div className="dashboard-content"><h2>Friends View Coming Soon</h2></div>;
+            case 'theme':
+                return <div className="dashboard-content"><h2>Theme Settings Coming Soon</h2></div>;
+            case 'settings':
+                return <div className="dashboard-content"><h2>Settings Coming Soon</h2></div>;
+            default:
+                return <HomeView />;
+        }
+    };
 
     return (
         <div className="dashboard-container">
-            <TopBar />
-            <div className="dashboard-content">
-                <div className="dashboard-placeholder">
-                    <h1>Dashboard</h1>
-                    <p>Components temporarily removed for redesign</p>
+            <div className="dashboard-top-bar">
+                <div className="dashboard-logo">
+                    <span >SYNCWAVE</span>
                 </div>
+                <Profile />
             </div>
+            {renderContent()}
         </div>
     );
 }

@@ -1,122 +1,77 @@
-import React, { useState, useRef, useEffect } from "react";
-import "../styles/PrivateChats.css";
-import { FaSearch } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from 'react';
+import { FaSearch, FaPlus } from 'react-icons/fa';
+import '../styles/PrivateChats.css';
 
 function PrivateChats() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const chatContainerRef = useRef(null);
-  const searchContainerRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeChat, setActiveChat] = useState(null);
+  const [chats, setChats] = useState([
+    { id: 1, name: 'John Doe', status: 'online', lastMessage: 'Hey, how are you?' },
+    { id: 2, name: 'Alice Smith', status: 'offline', lastMessage: 'See you tomorrow!' },
+    { id: 3, name: 'Robert Johnson', status: 'online', lastMessage: 'Thanks for the help!' },
+    { id: 4, name: 'Emily Brown', status: 'offline', lastMessage: 'Did you see the meeting notes?' },
+    { id: 5, name: 'Michael Wilson', status: 'online', lastMessage: 'The project is ready' },
+    { id: 6, name: 'Sarah Davis', status: 'offline', lastMessage: "Let me know when you're free" },
+    { id: 7, name: 'David Anderson', status: 'online', lastMessage: 'Great work!' },
+    { id: 8, name: 'Jessica Taylor', status: 'offline', lastMessage: "Can we discuss this later?" },
+    { id: 9, name: 'Christopher Martinez', status: 'online', lastMessage: "I'll send the files" },
+    { id: 10, name: 'Amanda Thompson', status: 'offline', lastMessage: 'Have a good day!' }
+  ]);
 
-  const privateChats = [
-    { id: 1, name: "aleena", image: "https://via.placeholder.com/40" },
-    { id: 2, name: "salman", image: "https://via.placeholder.com/40" },
-    { id: 3, name: "Abbas hussain", image: "https://via.placeholder.com/40" },
-    { id: 4, name: "zayn abbas", image: "https://via.placeholder.com/40" },
-    { id: 5, name: "Johnson", image: "https://via.placeholder.com/40" },
-    { id: 6, name: "Jane Smith", image: "https://via.placeholder.com/40" },
-    { id: 7, name: "mynamezain", image: "https://via.placeholder.com/40" },
-    { id: 8, name: "Namesare", image: "https://via.placeholder.com/40" },
-    { id: 9, name: "Name", image: "https://via.placeholder.com/40" },
-    { id: 10, name: "Nail", image: "https://via.placeholder.com/40" },
-    { id: 11, name: "Jane Smith", image: "https://via.placeholder.com/40" },
-    { id: 12, name: "mynamezain", image: "https://via.placeholder.com/40" },
-    { id: 13, name: "Namesare", image: "https://via.placeholder.com/40" },
-    { id: 14, name: "Name", image: "https://via.placeholder.com/40" }
-  ];
-
-  const filteredChats = privateChats.filter((chat) =>
+  const filteredChats = chats.filter(chat =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const shouldTextScroll = (text) => {
-    const tempSpan = document.createElement('span');
-    tempSpan.style.visibility = 'hidden';
-    tempSpan.style.fontSize = '0.8rem';
-    tempSpan.style.whiteSpace = 'nowrap';
-    tempSpan.innerText = text;
-    document.body.appendChild(tempSpan);
-    const width = tempSpan.offsetWidth;
-    document.body.removeChild(tempSpan);
-    return width > 45;
+  const handleChatClick = (chatId) => {
+    setActiveChat(chatId);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(e.target) &&
-        !e.target.classList.contains("search-toggle-icon") &&
-        !e.target.classList.contains("search-toggle") &&
-        !e.target.classList.contains("search-toggle-span")
-      ) {
-        setIsSearchVisible(false);
-        setSearchQuery("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  };
 
-  const toggleSearch = () => {
-    setIsSearchVisible(!isSearchVisible);
+  const shouldScrollName = (name) => {
+    return name.length > 12;
   };
 
   return (
     <div className="private-chats-container">
-      <div className="content-wrapper">
-        <div className={`chats-section ${isSearchVisible ? "reduced-width" : ""}`}>
-          <div className="chats-wrapper">
-            <div className="chat-container" ref={chatContainerRef}>
-              {isSearchVisible && searchQuery.trim() === ""
-                ? privateChats.map((chat) => (
-                  <div key={chat.id} className="chat-item">
-                    <img src={chat.image} alt={chat.name} className="chat-pic" />
-                    <div className="chat-name" data-should-scroll={shouldTextScroll(chat.name)}>
-                      <span className="chat-name-inner">{chat.name}</span>
-                    </div>
-                  </div>
-                ))
-                : filteredChats.length > 0
-                  ? filteredChats.map((chat) => (
-                    <div key={chat.id} className="chat-item">
-                      <img src={chat.image} alt={chat.name} className="chat-pic" />
-                      <div className="chat-name" data-should-scroll={shouldTextScroll(chat.name)}>
-                        <span className="chat-name-inner">{chat.name}</span>
-                      </div>
-                    </div>
-                  ))
-                  : (
-                    <div className="no-results">
-                      No chats found matching "{searchQuery}"
-                    </div>
-                  )}
-            </div>
+      <div className="private-chats-header">
+        <h2>Private Chats</h2>
+        <div className="private-chats-actions">
+          <div className="search-bar">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-        <div className="separator"></div>
-        <div className={`search-section ${isSearchVisible ? "expanded" : ""}`} ref={searchContainerRef}>
-          {!isSearchVisible && (
-            <div className="search-toggle" onClick={toggleSearch}>
-              <FaSearch className="search-toggle-icon" />
-              <span className="search-toggle-span">Search</span>
+      </div>
+      <div className="chat-list">
+        {filteredChats.map(chat => (
+          <div
+            key={chat.id}
+            className={`chat-item ${activeChat === chat.id ? 'active' : ''}`}
+            onClick={() => handleChatClick(chat.id)}
+          >
+            <div className="avatar">
+              {getInitials(chat.name)}
+              <div className={`status-indicator ${chat.status}`} />
             </div>
-          )}
-          {isSearchVisible && (
-            <div className="search-container">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search private chats..."
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="chat-info">
+              <h3 className={`chat-name ${shouldScrollName(chat.name) ? 'scroll' : ''}`}>
+                {chat.name}
+              </h3>
             </div>
-          )}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
