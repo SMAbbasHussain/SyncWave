@@ -4,6 +4,7 @@ import React, { useState } from "react";
 // import Profile from "./Profile";
 // import AnonymousGroups from "./AnonymousGroups";
 // import AiChatBox from "./AiChatBox";
+import TopBar from "./TopBar";
 import "../styles/Dashboard.css";
 
 function Dashboard() {
@@ -21,25 +22,12 @@ function Dashboard() {
 
     return (
         <div className="dashboard-container">
-            {/* Temporarily removed for redesign
+            <TopBar />
             <div className="dashboard-content">
-                <div className="top-section">
-                    <PrivateChats />
-                    <Profile />
+                <div className="dashboard-placeholder">
+                    <h1>Dashboard</h1>
+                    <p>Components temporarily removed for redesign</p>
                 </div>
-                <div className="bottom-section">
-                    <AiChat onClick={toggleAiChat} />
-                    <AnonymousGroups />
-                </div>
-            </div>
-            <AiChatBox
-                isVisible={isAiChatBoxVisible}
-                onClose={() => setIsAiChatBoxVisible(false)}
-            />
-            */}
-            <div className="dashboard-placeholder">
-                <h1>Dashboard</h1>
-                <p>Components temporarily removed for redesign</p>
             </div>
         </div>
     );
