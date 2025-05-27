@@ -1,16 +1,18 @@
 .ai-chat-container {
-    width: calc(65% - 260px) !important;
-    height: 60px;
-    background: linear-gradient(135deg,
-            rgba(13, 17, 23, 0.95) 0%,
-            rgba(16, 20, 28, 0.95) 100%);
+    width: 22vw;
+    /* Match private chat container width */
+    /* height: 52px; Keep user's last height adjustment */
+    background-color: rgba(2, 10, 33, 0.345);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    position: fixed;
-    bottom: 20px;
-    z-index: 1;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    /* Keep existing margin to space it from the list */
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .ai-chat-container::before {
