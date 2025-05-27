@@ -32,9 +32,7 @@ function Dashboard({ activeNavItem = 'home' }) {
                         <AiChat onClick={toggleAiChat} />
                     </div>
                 </div>
-                <div className="chat-screen">
-                    {/* Chat screen will be implemented later */}
-                </div>
+
             </div>
         </div>
     );
