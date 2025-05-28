@@ -16,6 +16,74 @@
     padding: 0 20px;
     border-bottom: 1px solid rgba(0, 119, 255, 0.2);
     margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.wave-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.3;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    animation: waveMovement 15s linear infinite;
+    border-radius: 0 0 15px 15px;
+}
+
+@keyframes waveMovement {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.wave-line {
+    position: absolute;
+    top: -10%;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(90deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 179, 255, 0.294) 50%, rgba(0, 162, 255, 0.254) 100%);
+    mask-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjcwIiB2aWV3Qm94PSIwIDAgNjAwIDcwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAzNUMxNTAgMzUgMjUwIDAgNDAwIDM1QzU1MCA3MCA2MDAgMzUgNjAwIDM1VjBIMFYzNVoiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+');
+    mask-size: 540px 70px;
+    mask-repeat: repeat-x;
+    animation: lineWaveAnimation 15s linear infinite;
+}
+
+.wave-line-1 {
+    mask-position: 0% 0%;
+    animation-delay: 0s;
+    opacity: 0.8;
+}
+
+.wave-line-2 {
+    mask-position: 50% 0%;
+    animation-delay: 2s;
+    opacity: 0.5;
+}
+
+.wave-line-3 {
+    mask-position: 100% 0%;
+    animation-delay: 4s;
+    opacity: 0.3;
+}
+
+@keyframes lineWaveAnimation {
+    0% {
+        mask-position: 0% 0%;
+    }
+
+    100% {
+        mask-position: 100% 0%;
+    }
 }
 
 .dashboard-logo span {
@@ -28,6 +96,13 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-top-bar>.Profile {
+    position: relative;
+    z-index: 1;
 }
 
 .dashboard-content {
@@ -38,55 +113,37 @@
     gap: 20px;
 }
 
-/* Home View Styles */
-.home-view {
+.left-sidebar-content {
+    width: 30%;
     display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 80vh;
+}
+
+.home-view {
     gap: 0;
     height: 100%;
     width: 100%;
 }
 
 .home-view .chat-section {
-    width: 35%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    max-height: 80vh;
+    gap: 12px;
+    max-height: none;
 }
 
-
-
-.home-view .ai-chat-container {
-    height: 80px;
-    min-height: 80px;
-    background: rgba(16, 19, 26, 0.95);
-    border-radius: 15px;
-    border: 1px solid rgba(0, 119, 255, 0.2);
-    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.home-view .private-chats-container {
+    max-height: none;
 }
 
-.home-view .ai-chat-container:hover {
-    background: rgba(0, 255, 255, 0.1);
-    border-color: rgba(0, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-
-.home-view .chat-screen {
+.chat-screen-container {
     flex: 1;
-    background: rgba(16, 19, 26, 0.95);
-    border-radius: 15px;
-    border: 1px solid rgba(0, 119, 255, 0.2);
-    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
 }
 
-/* Groups View Styles */
 .groups-view {
-    display: flex;
     flex-direction: column;
     gap: 20px;
     height: 100%;
@@ -109,7 +166,6 @@
     opacity: 0.7;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
     .dashboard-top-bar {
         height: 60px;
@@ -122,10 +178,12 @@
 
     .dashboard-content {
         padding: 0 15px;
+        flex-direction: column;
     }
 
-    .home-view {
-        flex-direction: column;
+    .left-sidebar-content {
+        width: 100%;
+        max-height: none;
     }
 
     .home-view .chat-section {
@@ -137,32 +195,8 @@
         height: 60vh;
     }
 
-    .home-view .ai-chat-container {
-        height: 70px;
-        min-height: 70px;
-    }
-}
-
-@media (max-width: 480px) {
-    .dashboard-top-bar {
-        height: 50px;
-        padding: 0 10px;
-    }
-
-    .dashboard-logo span {
-        font-size: 1.2rem;
-    }
-
-    .dashboard-content {
-        padding: 0 10px;
-    }
-
-    .home-view .private-chats-container {
-        height: 50vh;
-    }
-
-    .home-view .ai-chat-container {
-        height: 60px;
-        min-height: 60px;
+    .chat-screen-container {
+        width: 100%;
+        height: 60vh;
     }
 }

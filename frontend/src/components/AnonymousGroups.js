@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FiPlus, FiRefreshCw, FiFilter, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FaTimes } from 'react-icons/fa';
 import '../styles/AnonymousGroups.css';
 
-const AnonymousGroups = () => {
-    const [isHidden, setIsHidden] = useState(false);
+const AnonymousGroups = ({ onChatSelect }) => {
+    const [isContainerVisible, setIsContainerVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
 
-    // Close category dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest('.anon-category-container')) {
@@ -19,7 +20,6 @@ const AnonymousGroups = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Placeholder data for anonymous groups
     const [groups, setGroups] = useState([
         { id: 1, name: "Whisper Circle #1", members: 15, category: "Gaming" },
         { id: 2, name: "Tech Hub Connect", members: 8, category: "Technology & Programming" },
@@ -56,8 +56,8 @@ const AnonymousGroups = () => {
         setGroups(shuffled);
     };
 
-    const toggleVisibility = () => {
-        setIsHidden(!isHidden);
+    const toggleContainer = () => {
+        setIsContainerVisible(!isContainerVisible);
     };
 
     const handleCategorySelect = (category) => {
@@ -65,14 +65,28 @@ const AnonymousGroups = () => {
         setShowCategoryDropdown(false);
     };
 
+    const handleAnonymousGroupClick = (groupId) => {
+        setSelectedGroupId(groupId);
+        if (onChatSelect) {
+            onChatSelect('anonymousGroup', groupId);
+        }
+    };
+
     const filteredGroups = selectedCategory
         ? groups.filter(group => group.category === selectedCategory)
         : groups;
 
     return (
-        <div className={`anon-groups-container ${isHidden ? 'hidden' : ''}`}>
-            {!isHidden ? (
-                <>
+        <div className="anon-groups-wrapper">
+            <div className="anon-groups-toggle-button" onClick={toggleContainer}>
+                <div className="anon-groups-button-content">
+                    <span className="anon-groups-text">Anonymous Groups</span>
+                    {isContainerVisible ? <FiEyeOff className="anon-groups-icon" /> : <FiEye className="anon-groups-icon" />}
+                </div>
+            </div>
+
+            {isContainerVisible && (
+                <div className="anon-groups-container visible">
                     <div className="anon-groups-header">
                         <h2>Anonymous Groups</h2>
                         <div className="anon-groups-actions">
@@ -114,18 +128,19 @@ const AnonymousGroups = () => {
                                     </div>
                                 )}
                             </div>
-                            <button
-                                className="anon-action-btn visibility-btn"
-                                onClick={toggleVisibility}
-                                title="Hide Groups"
-                            >
-                                <FiEye className="action-icon" />
+                            <button className="anon-action-btn close-container-btn" onClick={toggleContainer} title="Hide Groups">
+                                <FaTimes className="action-icon" />
                             </button>
                         </div>
                     </div>
+
                     <div className="anon-groups-list">
                         {filteredGroups.map(group => (
-                            <div key={group.id} className="anon-group-item">
+                            <div
+                                key={group.id}
+                                className={`anon-group-item ${selectedGroupId === group.id ? 'active' : ''}`}
+                                onClick={() => handleAnonymousGroupClick(group.id)}
+                            >
                                 <div className="anon-group-info">
                                     <span className="anon-group-name">{group.name}</span>
                                     <span className="anon-group-members">{group.members} members</span>
@@ -133,25 +148,6 @@ const AnonymousGroups = () => {
                             </div>
                         ))}
                     </div>
-                </>
-            ) : (
-                <div className="anon-groups-collapsed">
-                    <div className="collapsed-content">
-                        <h2>Anonymous Groups</h2>
-                        <div className="collapsed-actions">
-                            <button className="anon-action-btn create-btn" title="Create New Group">
-                                <FiPlus className="action-icon" />
-                            </button>
-                            <button
-                                className="anon-action-btn visibility-btn"
-                                onClick={toggleVisibility}
-                                title="Show Groups"
-                            >
-                                <FiEyeOff className="action-icon" />
-                            </button>
-                        </div>
-                    </div>
-
                 </div>
             )}
         </div>

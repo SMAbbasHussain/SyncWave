@@ -7,19 +7,17 @@
   height: calc(80vh - 120px);
   display: flex;
   flex-direction: column;
-  background: rgba(2, 10, 33, 0.345);
   border-radius: 8px;
-  padding: 8px;
+  padding: 5px 10px;
   position: relative;
-  border: 1px solid rgba(0, 119, 255, 0.15);
-  box-shadow: 0 0 20px rgba(0, 119, 255, 0.1);
+  background: rgba(0, 119, 255, 0.055);
+  border-top: 1px solid rgba(0, 119, 255, 0.15);
 }
 
 .private-chats {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(16, 19, 26, 0.95);
   border-radius: 15px;
   overflow: hidden;
 }
@@ -49,6 +47,19 @@
   font-size: 0.9rem;
   font-weight: 500;
   position: relative;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-icon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .private-chats-header {
@@ -59,6 +70,8 @@
   min-height: 2.8rem;
   display: flex;
   align-items: center;
+  border-bottom: 1px solid rgba(0, 119, 255, 0.15);
+
 }
 
 .header-content {
@@ -113,12 +126,11 @@
 
 .search-toggle .search-icon {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   transition: all 0.2s ease;
   position: absolute;
-  top: 38%;
-  transform: translateX(180px);
-
+  top: 40%;
+  transform: translateX(calc(22vw - 90px));
 }
 
 .search-label {
@@ -144,6 +156,8 @@
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
+  left: 0.5rem;
+  right: 0.5rem;
 }
 
 .search-bar {
@@ -172,20 +186,11 @@
   background: rgba(211, 211, 211, 0.2);
 }
 
-.search-icon-left {
-  position: absolute;
-  left: 0.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
-}
 
 .search-close-button {
   position: absolute;
   top: 50%;
-  transform: translateX(190px);
+  transform: translateX(calc(22vw - 85px));
   background: none;
   border: none;
   cursor: pointer;
@@ -264,7 +269,7 @@
 /* Responsive styles */
 @media (min-width: 1024px) {
   .private-chats-container {
-    width: 20vw;
+    width: 22vw;
   }
 
   .private-chats-header {

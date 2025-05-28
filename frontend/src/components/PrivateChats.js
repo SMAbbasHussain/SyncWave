@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaUserCircle } from 'react-icons/fa';
 import '../styles/PrivateChats.css';
 
-function PrivateChats() {
+function PrivateChats({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeChat, setActiveChat] = useState(null);
+  const [selectedChatId, setSelectedChatId] = useState(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef(null);
   const [chats, setChats] = useState([
-    { id: 1, name: 'John Doe', status: 'online' },
-    { id: 2, name: 'Alice Smith', status: 'offline' },
-    { id: 3, name: 'Robert Johnson', status: 'online' },
-    { id: 4, name: 'Emily Brown', status: 'offline' },
-    { id: 5, name: 'Michael Wilson', status: 'online' },
+    { id: 1, name: 'John Doe', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
+    { id: 2, name: 'Alice Smith', status: 'offline', profilePicUrl: '' },
+    { id: 3, name: 'Robert Johnson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
+    { id: 4, name: 'Emily Brown', status: 'offline', profilePicUrl: null },
+    { id: 5, name: 'Michael Wilson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
     { id: 6, name: 'Sarah Davis', status: 'offline' },
-    { id: 7, name: 'David Anderson', status: 'online' },
-    { id: 8, name: 'Jessica Taylor', status: 'offline' },
-    { id: 9, name: 'Christopher Martinez', status: 'online' },
+    { id: 7, name: 'David Anderson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+    { id: 8, name: 'Jessica Taylor', status: 'offline', profilePicUrl: '' },
+    { id: 9, name: 'Christopher Martinez', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/5.jpg' },
     { id: 10, name: 'Amanda Thompson', status: 'offline' }
   ]);
 
@@ -25,15 +25,10 @@ function PrivateChats() {
   );
 
   const handleChatClick = (chatId) => {
-    setActiveChat(chatId);
-  };
-
-  const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase();
+    setSelectedChatId(chatId);
+    if (onChatSelect) {
+      onChatSelect('private', chatId);
+    }
   };
 
   const toggleSearch = () => {
@@ -92,11 +87,15 @@ function PrivateChats() {
           chats.map(chat => (
             <div
               key={chat.id}
-              className={`chat-item ${activeChat === chat.id ? 'active' : ''}`}
+              className={`chat-item ${selectedChatId === chat.id ? 'active' : ''}`}
               onClick={() => handleChatClick(chat.id)}
             >
               <div className="avatar">
-                {getInitials(chat.name)}
+                {chat.profilePicUrl ? (
+                  <img src={chat.profilePicUrl} alt={`${chat.name}'s avatar`} className="avatar-img" />
+                ) : (
+                  <FaUserCircle className="avatar-icon" />
+                )}
                 <div className={`status-indicator ${chat.status}`} />
               </div>
               <div className="chat-info">
@@ -110,11 +109,15 @@ function PrivateChats() {
           filteredChats.map(chat => (
             <div
               key={chat.id}
-              className={`chat-item ${activeChat === chat.id ? 'active' : ''}`}
+              className={`chat-item ${selectedChatId === chat.id ? 'active' : ''}`}
               onClick={() => handleChatClick(chat.id)}
             >
               <div className="avatar">
-                {getInitials(chat.name)}
+                {chat.profilePicUrl ? (
+                  <img src={chat.profilePicUrl} alt={`${chat.name}'s avatar`} className="avatar-img" />
+                ) : (
+                  <FaUserCircle className="avatar-icon" />
+                )}
                 <div className={`status-indicator ${chat.status}`} />
               </div>
               <div className="chat-info">
