@@ -8,29 +8,21 @@
 
 .anon-groups-toggle-button {
     width: 22vw;
-    /* Match AiChat button width */
     height: 10vh;
-    /* Match AiChat button height */
     background: rgba(0, 6, 22, 0.902);
-    /* Matte black base */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
-    /* Match AiChat button border-radius */
     padding: 0.8rem;
-    /* Match AiChat button padding */
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0, 119, 255, 0.1);
-    background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 5px 5px;
-    background-blend-mode: screen;
 }
 
 .anon-groups-toggle-button:hover {
-    background: rgba(11, 46, 84, 0.058);
-    border-color: rgba(0, 255, 255, 0.3);
+    background: rgba(8, 33, 100, 0.1);
+    border-color: rgba(0, 119, 255, 0.18);
     transform: translateY(-2px);
 }
 
@@ -53,7 +45,7 @@
 .anon-groups-icon {
     color: #00ffff;
     font-size: 1.2rem;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.335));
 }
 
 .anon-groups-text {
@@ -64,19 +56,16 @@
 
 .anon-groups-container {
     position: fixed;
-    bottom: 20px;
-    left: calc(20px + 22vw + 10px);
+    bottom: calc(10vh + 30px);
+    left: 20px;
     z-index: 998;
-    width: 300px;
-    height: 400px;
-    background: linear-gradient(135deg,
-            rgba(13, 17, 23, 0.95) 0%,
-            rgba(16, 20, 28, 0.95) 100%);
+    width: 22vw;
+    height: calc(80vh - 120px);
+    background: rgba(0, 119, 255, 0.055);
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    padding: 5px 10px;
     overflow: hidden;
-    border: 1px solid rgba(0, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 119, 255, 0.15);
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
@@ -92,56 +81,77 @@
 }
 
 .anon-groups-header {
+    padding: 0.6rem 0.8rem;
+    position: relative;
+    transition: all 0.3s ease;
+    min-height: 2.8rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
-    background: rgba(13, 17, 23, 0.95);
-    z-index: 2;
+    border-radius: 8px;
+    justify-content: space-between;
+    background: rgba(0, 6, 22, 0.902);
+    border-bottom: 1px solid rgba(0, 119, 255, 0.18);
 }
 
 .anon-groups-header h2 {
     color: #fff;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 500;
     margin: 0;
 }
 
 .anon-groups-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 }
 
 .anon-action-btn {
-    background: transparent;
+    background: none;
     border: none;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
-.anon-action-btn:hover {
+.anon-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
     background: rgba(0, 255, 255, 0.1);
-    color: #00ffff;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.3s ease;
+    filter: blur(8px);
+}
+
+.anon-action-btn:hover::before {
+    opacity: 1;
+    width: 120%;
+    height: 120%;
 }
 
 .action-icon {
-    color: #ccc;
-    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
 .anon-action-btn:hover .action-icon {
     color: #00ffff;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5));
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.335));
 }
 
 /* Category Dropdown Styles */
@@ -151,39 +161,42 @@
 
 .anon-category-dropdown {
     position: absolute;
-    top: calc(100% + 5px);
+    top: calc(100% + 25px);
     right: 0;
-    width: 180px;
-    background: rgba(16, 19, 26, 0.95);
+    width: 230px;
+    background: rgb(0, 6, 22);
     border-radius: 8px;
-    border: 1px solid rgba(0, 255, 255, 0.1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     max-height: 200px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 255, 255, 0.3) transparent;
+    scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
 }
 
 .anon-category-dropdown::-webkit-scrollbar {
-    width: 5px;
+    width: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .anon-category-dropdown::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 20px;
 }
 
 .anon-category-dropdown::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 255, 255, 0.3);
+    background-color: rgba(0, 255, 255, 0.4);
     border-radius: 20px;
 }
 
 .category-option {
-    padding: 10px 15px;
-    color: #ccc;
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(104, 138, 201, 0.155);
+    font-size: 0.75rem;
 }
 
 .category-option:last-child {
@@ -203,19 +216,31 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background: rgba(13, 17, 23, 0.5);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
+    transition: filter 0.3s ease;
+}
+
+/* Add blur effect when dropdown is visible */
+.anon-groups-list.dropdown-visible {
+    filter: blur(1px);
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .anon-groups-list::-webkit-scrollbar {
-    width: 5px;
+    width: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .anon-groups-list::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 20px;
 }
 
 .anon-groups-list::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 255, 255, 0.3);
+    background-color: rgba(0, 255, 255, 0.4);
     border-radius: 20px;
 }
 
@@ -223,36 +248,35 @@
 .anon-group-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     padding: 8px 10px;
-    margin-bottom: 5px;
-    background: rgba(211, 211, 211, 0.05);
-    border-radius: 8px;
+    border-bottom: 1px solid rgba(104, 138, 201, 0.1);
     cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
+    transition: background 0.2s ease;
 }
 
 .anon-group-item:hover {
-    background: rgba(0, 255, 255, 0.1);
-    border: 1px solid rgba(0, 255, 255, 0.2);
+    background: rgba(211, 211, 211, 0.08);
 }
 
 .anon-group-info {
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .anon-group-name {
     color: #fff;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .anon-group-members {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.75rem;
-    opacity: 0.8;
 }
 
 /* Responsive Styles */

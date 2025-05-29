@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiPlus, FiRefreshCw, FiFilter, FiEye, FiEyeOff } from 'react-icons/fi';
-import { FaTimes } from 'react-icons/fa';
+import { FiPlus, FiEye, FiEyeOff } from 'react-icons/fi';
+import { IoFilterOutline } from 'react-icons/io5';
 import '../styles/AnonymousGroups.css';
 
-const AnonymousGroups = ({ onChatSelect }) => {
-    const [isContainerVisible, setIsContainerVisible] = useState(false);
+const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
@@ -57,7 +56,9 @@ const AnonymousGroups = ({ onChatSelect }) => {
     };
 
     const toggleContainer = () => {
-        setIsContainerVisible(!isContainerVisible);
+        if (onToggle) {
+            onToggle(!isVisible);
+        }
     };
 
     const handleCategorySelect = (category) => {
@@ -81,32 +82,22 @@ const AnonymousGroups = ({ onChatSelect }) => {
             <div className="anon-groups-toggle-button" onClick={toggleContainer}>
                 <div className="anon-groups-button-content">
                     <span className="anon-groups-text">Anonymous Groups</span>
-                    {isContainerVisible ? <FiEyeOff className="anon-groups-icon" /> : <FiEye className="anon-groups-icon" />}
+                    {isVisible ? <FiEyeOff className="anon-groups-icon" /> : <FiEye className="anon-groups-icon" />}
                 </div>
             </div>
 
-            {isContainerVisible && (
+            {isVisible && (
                 <div className="anon-groups-container visible">
                     <div className="anon-groups-header">
                         <h2>Anonymous Groups</h2>
                         <div className="anon-groups-actions">
-                            <button className="anon-action-btn create-btn" title="Create New Group">
-                                <FiPlus className="action-icon" />
-                            </button>
-                            <button
-                                className="anon-action-btn refresh-btn"
-                                onClick={handleRefresh}
-                                title="Refresh Groups"
-                            >
-                                <FiRefreshCw className="action-icon" />
-                            </button>
                             <div className="anon-category-container">
                                 <button
                                     className="anon-action-btn category-btn"
                                     onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                                     title="Filter by Category"
                                 >
-                                    <FiFilter className="action-icon" />
+                                    <IoFilterOutline className="action-icon" />
                                 </button>
                                 {showCategoryDropdown && (
                                     <div className="anon-category-dropdown">
@@ -128,13 +119,13 @@ const AnonymousGroups = ({ onChatSelect }) => {
                                     </div>
                                 )}
                             </div>
-                            <button className="anon-action-btn close-container-btn" onClick={toggleContainer} title="Hide Groups">
-                                <FaTimes className="action-icon" />
+                            <button className="anon-action-btn create-btn" title="Create New Group">
+                                <FiPlus className="action-icon" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="anon-groups-list">
+                    <div className={`anon-groups-list ${showCategoryDropdown ? 'dropdown-visible' : ''}`}>
                         {filteredGroups.map(group => (
                             <div
                                 key={group.id}

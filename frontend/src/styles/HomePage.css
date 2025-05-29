@@ -42,4 +42,6 @@
   backdrop-filter: blur(1000px);
   flex-grow: 1;
   margin-left: 0;
+  position: relative;
+  z-index: 1;
 }

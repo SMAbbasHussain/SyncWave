@@ -190,18 +190,17 @@
     opacity: 1;
 }
 
-/* Dropdown Menu */
 .profile-dropdown {
     position: absolute;
-    top: calc(100% + 5px);
+    top: calc(100% + 20px);
     right: 0;
     width: 300px;
-    background: rgba(15, 18, 25, 0.97);
+    background-color: #010811;
+    border-top: 1px solid rgba(0, 119, 255, 0.15);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+    z-index: 1;
     padding: 12px 0;
-    border: 1px solid rgba(0, 255, 255, 0.1);
     animation: fadeIn 0.2s ease-out;
 }
 
