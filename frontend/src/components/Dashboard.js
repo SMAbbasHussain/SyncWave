@@ -10,11 +10,13 @@ import "../styles/Dashboard.css";
 function Dashboard({ activeNavItem = 'home' }) {
     // State to manage the currently active chat
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
+    const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
 
     // Reset active chat when switching views
     useEffect(() => {
         if (activeNavItem === 'home' && ['group', 'anonymousGroup'].includes(activeChat.type)) {
             setActiveChat({ type: 'none' });
+            setShowAnonymousGroups(false); // Reset anonymous groups visibility when switching views
         } else if (activeNavItem === 'groups' && ['private', 'ai'].includes(activeChat.type)) {
             setActiveChat({ type: 'none' });
         }
@@ -23,6 +25,15 @@ function Dashboard({ activeNavItem = 'home' }) {
     // Function to handle chat selection
     const handleChatSelect = (chatType, chatId) => {
         setActiveChat({ type: chatType, chatId: chatId });
+    };
+
+    // Function to handle anonymous groups toggle
+    const handleAnonymousGroupsToggle = (isVisible) => {
+        setShowAnonymousGroups(isVisible);
+        // Reset active chat when toggling to prevent background issues
+        if (isVisible) {
+            setActiveChat({ type: 'none' });
+        }
     };
 
     // Home View Component
@@ -49,9 +60,17 @@ function Dashboard({ activeNavItem = 'home' }) {
             <div className="left-sidebar-content">
                 <div className="groups-view">
                     <div className="top-section">
-                        <Groups onChatSelect={(groupId) => handleChatSelect('group', groupId)} />
+                        {!showAnonymousGroups ? (
+                            <Groups onChatSelect={(groupId) => handleChatSelect('group', groupId)} />
+                        ) : (
+                            <div className="groups-container-placeholder" style={{ height: 'calc(80vh - 120px)' }}></div>
+                        )}
                     </div>
-                    <AnonymousGroups onChatSelect={(groupId) => handleChatSelect('anonymousGroup', groupId)} />
+                    <AnonymousGroups
+                        onChatSelect={(groupId) => handleChatSelect('anonymousGroup', groupId)}
+                        onToggle={handleAnonymousGroupsToggle}
+                        isVisible={showAnonymousGroups}
+                    />
                 </div>
             </div>
             {/* Render ChatScreen in the remaining space */}
@@ -80,19 +99,21 @@ function Dashboard({ activeNavItem = 'home' }) {
     return (
         <div className="dashboard-container">
             <div className="dashboard-top-bar">
-                {/* Animated Wave Background Layer */}
-                <div className="wave-bg">
-                    <div className="wave-line wave-line-1"></div>
-                    <div className="wave-line wave-line-2"></div>
-                    <div className="wave-line wave-line-3"></div>
+                <div className="wave-container">
+                    <div className="wave-bg">
+                        <div className="wave-line wave-line-1"></div>
+                        <div className="wave-line wave-line-2"></div>
+                        <div className="wave-line wave-line-3"></div>
+                    </div>
                 </div>
-                <div className="dashboard-logo">
-                    <span>SYNCWAVE</span>
+                <div className="dashboard-top-bar-content">
+                    <div className="dashboard-logo">
+                        <span>SYNCWAVE</span>
+                    </div>
+                    <Profile />
                 </div>
-                <Profile />
             </div>
             {renderContent()}
-
         </div>
     );
 }

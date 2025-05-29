@@ -9,15 +9,44 @@ import AnonymousGroupChatTopBar from './AnonymousGroupChatTopBar';
 function ChatScreen({ activeChat }) {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
+    const [isScrolling, setIsScrolling] = useState(false);
     const messagesEndRef = useRef(null);
     const chatContainerRef = useRef(null);
     const aiGlowDotRef = useRef(null);
+    const scrollTimeoutRef = useRef(null);
 
     // Reset chat when switching views
     useEffect(() => {
         setMessages([]);
         setMessage('');
     }, [activeChat.type]);
+
+    // Handle scroll events
+    const handleScroll = (e) => {
+        const messagesContainer = e.target;
+
+        // Clear any existing timeout
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // Set scrolling state to true
+        setIsScrolling(true);
+
+        // Set a timeout to hide the scrollbar after 2 seconds of no scrolling
+        scrollTimeoutRef.current = setTimeout(() => {
+            setIsScrolling(false);
+        }, 2000);
+    };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Scroll to bottom when new messages arrive
     useEffect(() => {
@@ -92,7 +121,11 @@ function ChatScreen({ activeChat }) {
     };
 
     if (activeChat.type === 'none') {
-        return <div className="chat-screen-placeholder">Select a chat to start messaging</div>;
+        return (
+            <div className="chat-screen-placeholder">
+                <img src="/Network.png" alt="Network" />
+            </div>
+        );
     }
 
     // Add a class based on the active chat type
@@ -100,13 +133,25 @@ function ChatScreen({ activeChat }) {
 
     return (
         <div className={chatContainerClass} ref={chatContainerRef} onMouseMove={handleMouseMove}>
-            {activeChat.type === 'ai' && <div className="ai-chat-glow-container"><div className="ai-chat-glow-dot" ref={aiGlowDotRef}></div></div>}
+            {activeChat.type === 'ai' && (
+                <>
+                    <div className="ai-chat-glow-container">
+                        <div className="ai-chat-glow-dot" ref={aiGlowDotRef}></div>
+                    </div>
+                    <div className="ai-chat-robot-bg">
+                        <img src="/robo.png" alt="AI Robot" />
+                    </div>
+                </>
+            )}
             <div className="chat-screen-top-bar">
                 {renderTopBar()}
             </div>
-            <div className="chat-screen-messages">
+            <div
+                className={`chat-screen-messages ${isScrolling ? 'scrolling' : ''}`}
+                onScroll={handleScroll}
+            >
                 <div className="messages-wrapper">
-                    {messages.length === 0 ? (
+                    {messages.length === 0 && activeChat.type !== 'ai' ? (
                         <div className="welcome-message">
                             <p>Start of chat history...</p>
                         </div>
