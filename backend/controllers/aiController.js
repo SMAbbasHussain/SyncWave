@@ -131,112 +131,137 @@ chatCompletion: async (req, res) => {
     }
   },
 
-  // Streaming chat completion with automatic saving
-  streamCompletion: async (req, res) => {
+// Streaming chat completion with automatic saving
+streamCompletion: async (req, res) => {
     try {
-      const { messages } = req.body;
-      const userId = req.userId;
-      let fullResponse = '';
+        const { messages } = req.body;
+        const userId = req.userId;
+        let fullResponse = '';
+        let buffer = '';
 
-      // Save user's last message first
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.role === 'user') {
-        await AiConversation.findOneAndUpdate(
-          { userId },
-          {
-            $push: {
-              messages: {
-                role: lastMessage.role,
-                content: lastMessage.content,
-                timestamp: new Date()
-              }
-            },
-            $set: { lastUpdated: new Date() }
-          },
-          { upsert: true }
-        );
-      }
-
-      // Set SSE headers
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      res.flushHeaders();
-
-      const response = await axios.post(
-        process.env.GROK_API,
-        {
-          model: 'llama3-70b-8192',
-          messages,
-          temperature: 0.7,
-          max_tokens: 1024,
-          stream: true
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          responseType: 'stream'
+        // Save user's last message first
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.role === 'user') {
+            await AiConversation.findOneAndUpdate(
+                { userId },
+                {
+                    $push: {
+                        messages: {
+                            role: lastMessage.role,
+                            content: lastMessage.content,
+                            timestamp: new Date()
+                        }
+                    },
+                    $set: { lastUpdated: new Date() }
+                },
+                { upsert: true }
+            );
         }
-      );
 
-      // Process streaming response
-      response.data.on('data', chunk => {
-        const chunkStr = chunk.toString();
-        res.write(`data: ${chunkStr}\n\n`);
-        
-        // Accumulate response chunks
-        try {
-          const lines = chunkStr.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('data:') && !line.includes('[DONE]')) {
-              const data = JSON.parse(line.substring(5));
-              if (data.choices[0].delta.content) {
-                fullResponse += data.choices[0].delta.content;
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error processing stream chunk:', e);
-        }
-      });
+        // Set SSE headers
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
 
-      response.data.on('end', async () => {
-        // Save the complete AI response
-        if (fullResponse) {
-          await AiConversation.findOneAndUpdate(
-            { userId },
+        const response = await axios.post(
+            process.env.GROK_API,
             {
-              $push: {
-                messages: {
-                  role: 'assistant',
-                  content: fullResponse,
-                  timestamp: new Date()
-                }
-              },
-              $set: { lastUpdated: new Date() }
+                model: 'llama3-70b-8192',
+                messages,
+                temperature: 0.7,
+                max_tokens: 1024,
+                stream: true
             },
-            { upsert: true }
-          );
-        }
-        res.end();
-      });
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'stream'
+            }
+        );
 
-      req.on('close', () => {
-        response.data.destroy();
-      });
+        // Process streaming response
+        response.data.on('data', chunk => {
+            try {
+                buffer += chunk.toString();
+                
+                // Process complete lines only
+                let boundary;
+                while ((boundary = buffer.indexOf('\n')) !== -1) {
+                    const line = buffer.substring(0, boundary).trim();
+                    buffer = buffer.substring(boundary + 1);
+                    
+                    if (!line.startsWith('data:')) continue;
+                    if (line.includes('[DONE]')) continue;
+                    
+                    try {
+                        const jsonStr = line.substring(5).trim();
+                        if (jsonStr) {
+                            const data = JSON.parse(jsonStr);
+                            if (data.choices?.[0]?.delta?.content) {
+                                const content = data.choices[0].delta.content;
+                                fullResponse += content;
+                                res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON line:', e);
+                    }
+                }
+            } catch (e) {
+                console.error('Error processing stream chunk:', e);
+            }
+        });
+
+        response.data.on('end', async () => {
+            // Save the complete AI response
+            if (fullResponse) {
+                await AiConversation.findOneAndUpdate(
+                    { userId },
+                    {
+                        $push: {
+                            messages: {
+                                role: 'assistant',
+                                content: fullResponse,
+                                timestamp: new Date()
+                            }
+                        },
+                        $set: { lastUpdated: new Date() }
+                    },
+                    { upsert: true }
+                );
+            }
+            res.write('data: [DONE]\n\n');
+            res.end();
+        });
+
+        response.data.on('error', err => {
+            console.error('Stream error:', err);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    error: 'Stream error',
+                    details: err.message
+                });
+            }
+        });
+
+        req.on('close', () => {
+            response.data.destroy();
+        });
 
     } catch (error) {
-      console.error('Streaming error:', error);
-      if (!res.headersSent) {
-        res.status(500).json({
-          error: 'Stream initialization failed',
-          details: error.message
-        });
-      }
+        console.error('Streaming error:', error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                error: 'Stream initialization failed',
+                details: error.message
+            });
+        }
     }
-  }
+}
+
 };
 
 module.exports = aiController;
