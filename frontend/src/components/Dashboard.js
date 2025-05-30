@@ -5,6 +5,8 @@ import Groups from "./Groups";
 import AnonymousGroups from "./AnonymousGroups";
 import Profile from "./Profile";
 import ChatScreen from "./ChatScreen";
+import Friends from "./Friends";
+import FriendsActions from "./FriendsActions";
 import "../styles/Dashboard.css";
 
 function Dashboard({ activeNavItem = 'home' }) {
@@ -86,7 +88,16 @@ function Dashboard({ activeNavItem = 'home' }) {
             case 'groups':
                 return <GroupsView />;
             case 'friends':
-                return <div className="dashboard-content"><h2>Friends View Coming Soon</h2></div>;
+                return (
+                    <div className="friends-dashboard-layout">
+                        <div className="friends-left-section">
+                            <Friends />
+                        </div>
+                        <div className="friends-right-section">
+                            <FriendsActions />
+                        </div>
+                    </div>
+                );
             case 'theme':
                 return <div className="dashboard-content"><h2>Theme Settings Coming Soon</h2></div>;
             case 'settings':

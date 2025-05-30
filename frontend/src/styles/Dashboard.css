@@ -221,3 +221,48 @@
         height: 60vh;
     }
 }
+
+/* Styles for the Friends section layout */
+.friends-dashboard-layout {
+    display: flex;
+    height: 100%;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.friends-left-section {
+    flex: 0 0 60%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0;
+}
+
+.friends-right-section {
+    flex: 0 0 40%;
+    /* 40% width, no shrinking or growing */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Prevent content overflow */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .friends-dashboard-layout {
+        flex-direction: column;
+        /* Stack columns on smaller screens */
+        padding: 10px;
+        /* Reduce padding */
+        gap: 10px;
+        /* Reduce gap */
+    }
+
+    .friends-left-section,
+    .friends-right-section {
+        flex: 0 0 auto;
+        /* Allow sections to take auto height */
+        width: 100%;
+        /* Full width */
+    }
+}
