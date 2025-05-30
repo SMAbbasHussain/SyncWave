@@ -55,11 +55,13 @@ function PrivateChats({ onChatSelect }) {
       <div className="private-chats-header">
         <div className={`header-content ${isSearchActive ? 'search-active' : ''}`}>
           <h2 className="header-title">Private Chats</h2>
-          <button className="search-toggle" onClick={toggleSearch} aria-label="Toggle search">
-            <div className="search-toggle-content">
-              <FaSearch className="search-icon" />
-              <span className="search-label">Search</span>
-            </div>
+          <button
+            className={`search-toggle ${isSearchActive ? 'active' : ''}`}
+            onClick={toggleSearch}
+            aria-label="Toggle search"
+          >
+            <FaSearch />
+            <span className="search-label">Search</span>
           </button>
         </div>
         <div className={`search-container ${isSearchActive ? 'active' : ''}`}>
