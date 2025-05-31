@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaTimes, FaUserPlus, FaUserFriends } from 'react-icons/fa';
-import FriendsActions from './FriendsActions';
+import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus } from 'react-icons/fa';
 import '../styles/Friends.css';
 
 function Friends() {
@@ -9,7 +8,6 @@ function Friends() {
     const [allFriends, setAllFriends] = useState([]); // Store all friends
     const [displayedFriends, setDisplayedFriends] = useState([]); // Friends currently displayed
     const [visibleFriendsCount, setVisibleFriendsCount] = useState(10); // Number of friends to show at once (5x2 grid)
-    const [activePanel, setActivePanel] = useState(null); // 'add-friend' or 'requests' or null
     const searchInputRef = useRef(null);
     const rotationIntervalRef = useRef(null);
 
@@ -133,15 +131,6 @@ function Friends() {
         }
     };
 
-    const togglePanel = (panel) => {
-        setActivePanel(activePanel === panel ? null : panel);
-        // Reset search when closing panels
-        if (activePanel === panel) {
-            setIsSearchActive(false);
-            setSearchQuery('');
-        }
-    };
-
     // Render friend item
     const renderFriendItem = (friend, isSearchResult = false) => (
         <div key={friend.id} className={`friend-item ${isSearchResult ? 'search-result' : ''}`}>
@@ -157,9 +146,9 @@ function Friends() {
 
     return (
         <div className="friends-container">
-            {/* Top Bar with Search */}
             <div className="friends-top-bar">
                 <div className="friends-header">
+                    {/* Heading and Search Toggle on the left/right */}
                     <div className={`header-content ${isSearchActive ? 'search-active' : ''}`}>
                         <h2>Friends List</h2>
                     </div>
@@ -172,6 +161,7 @@ function Friends() {
                         <span className="search-label">Search</span>
                     </button>
 
+                    {/* Search Bar - appears over the right side when active */}
                     <div className={`search-container ${isSearchActive ? 'active' : ''}`}>
                         <div className="search-bar">
                             <FaSearch className="search-icon search-icon-left" />
@@ -194,10 +184,10 @@ function Friends() {
                 </div>
             </div>
 
-            {/* Main Content Area */}
+            {/* Main Content - Friends List Grid or Message */}
             <div className="friends-content">
-                {/* Left Section - Friends List */}
                 <div className="friends-list-section">
+                    {/* Conditionally render the grid or the message */}
                     {displayedFriends.length > 0 ? (
                         <div className="friends-list">
                             {displayedFriends.map(friend => renderFriendItem(friend))}
@@ -206,38 +196,6 @@ function Friends() {
                         <div className="no-results">User not found in Friends List</div>
                     ) : (
                         <div className="placeholder-text">No friends yet.</div>
-                    )}
-                </div>
-
-                {/* Right Section - Action Buttons and Panels */}
-                <div className="friends-actions-section">
-                    {/* Action Buttons Row */}
-                    <div className="friends-action-buttons">
-                        <button
-                            className={`action-button add-friend ${activePanel === 'add-friend' ? 'active' : ''}`}
-                            onClick={() => togglePanel('add-friend')}
-                        >
-                            <FaUserPlus />
-                            <span>Add Friend +</span>
-                        </button>
-                        <button
-                            className={`action-button friend-requests ${activePanel === 'requests' ? 'active' : ''}`}
-                            onClick={() => togglePanel('requests')}
-                        >
-                            <FaUserFriends />
-                            <span>Friend Requests</span>
-                        </button>
-                    </div>
-
-                    {/* Action Panels */}
-                    {activePanel && (
-                        <div className="friends-action-panel">
-                            <FriendsActions
-                                panelType={activePanel}
-                                onClose={() => setActivePanel(null)}
-                                friendsList={allFriends}
-                            />
-                        </div>
                     )}
                 </div>
             </div>

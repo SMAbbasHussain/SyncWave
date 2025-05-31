@@ -13,12 +13,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.9rem;
-    background: rgba(0, 119, 255, 0.055);
+    background: rgba(0, 119, 255, 0.131);
     border: 1px solid rgba(0, 119, 255, 0.15);
     border-bottom: none !important;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-
+    border-radius: 50px;
     position: relative;
     min-height: 3.6rem;
 }
@@ -84,6 +82,7 @@
     top: 50%;
     left: 40%;
     transform: translateY(-50%);
+
     width: calc(100% - 20vw);
     padding: 0;
     opacity: 0;
@@ -95,6 +94,7 @@
 .friends-header .search-container.active {
     opacity: 1;
     transform: translateY(-50%);
+
     pointer-events: all;
     z-index: 1;
 }
@@ -117,7 +117,7 @@
     height: 2rem;
     padding: 0 2.5rem 0 2.2rem;
     font-size: 0.85rem;
-    border-radius: 4px;
+    border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(211, 211, 211, 0.135);
     color: #ffffff;
@@ -183,22 +183,21 @@
 /* Main Content Styles */
 .friends-content {
     display: flex;
+    flex: 1;
     gap: 20px;
-    padding: 20px;
-    height: calc(100% - 60px);
-    /* Adjust based on top bar height */
+    overflow: hidden;
 }
 
 /* Left Section - Friends List */
 .friends-list-section {
     flex: 1;
     min-width: 0;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 15px;
+    padding: 10px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+
 }
 
 .friends-list {
@@ -216,8 +215,13 @@
     justify-content: flex-start;
     gap: 12px;
     padding: 8px 14px;
-    border-radius: 8px;
-    background: rgba(0, 119, 255, 0.055);
+    border-radius: 20px;
+    background: rgba(74, 124, 182, 0.055);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* White outline */
+    backdrop-filter: blur(5px);
+    /* Apply blur */
     transition: all 0.3s ease;
     animation: fadeIn 0.3s ease;
     text-align: left;
@@ -227,8 +231,10 @@
 }
 
 .friend-item:hover {
-    background: #0088ff24;
-    border-color: #1389ff90;
+    background: rgba(255, 255, 255, 0.044);
+    /* More transparent on hover */
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.177);
 }
 
 .friend-item.search-result {
@@ -348,75 +354,4 @@
     text-align: center;
     width: 100%;
     box-sizing: border-box;
-}
-
-/* Right Section - Action Buttons and Panels */
-.friends-actions-section {
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.friends-action-buttons {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.action-button {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(0, 119, 255, 0.2);
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    height: 38px;
-}
-
-.action-button:hover {
-    background: rgba(0, 119, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-.action-button.active {
-    background: rgba(0, 119, 255, 0.4);
-    box-shadow: 0 0 10px rgba(0, 119, 255, 0.2);
-}
-
-.action-button svg {
-    width: 14px;
-    height: 14px;
-}
-
-.friends-action-panel {
-    flex: 1;
-    min-height: 0;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    overflow: hidden;
-    animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
