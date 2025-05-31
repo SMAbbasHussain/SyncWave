@@ -39,6 +39,7 @@ function FriendsAction() {
         e.stopPropagation();
         setIsSearchActive(!isSearchActive);
         if (!isSearchActive) {
+            // Focus the input after a short delay to ensure the search container is rendered
             setTimeout(() => {
                 if (searchInputRef.current) {
                     searchInputRef.current.focus();
@@ -190,41 +191,38 @@ function FriendsAction() {
             {activeBox === 'addFriend' && (
                 <div className="action-box">
                     <div className="action-box-header">
-                        {!isSearchActive ? (
-                            <>
-                                <h3>Add Friend</h3>
+                        <div className={`header-content ${isSearchActive ? 'search-active' : ''}`}>
+                            <h3>Add Friend</h3>
+                            <button
+                                type="button"
+                                className={`search-toggle ${isSearchActive ? 'active' : ''}`}
+                                onClick={toggleSearch}
+                                aria-label={isSearchActive ? 'Close search' : 'Open search'}
+                            >
+                                <FaSearch />
+                                <span>Search</span>
+                            </button>
+                        </div>
+                        <div className={`search-container ${isSearchActive ? 'active' : ''}`}>
+                            <div className="search-bar">
+                                <FaSearch className="search-icon" />
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    placeholder="Search by username..."
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    autoFocus
+                                />
                                 <button
-                                    type="button"
-                                    className="search-toggle"
-                                    onClick={toggleSearch}
-                                    aria-label="Open search"
+                                    className="search-close-button"
+                                    onClick={handleCloseSearch}
+                                    aria-label="Close search"
                                 >
-                                    <FaSearch />
-                                    <span>Search</span>
+                                    <FaTimes />
                                 </button>
-                            </>
-                        ) : (
-                            <div className="search-bar-container">
-                                <div className="search-bar">
-                                    <FaSearch className="search-icon" />
-                                    <input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        placeholder="Search by username..."
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                        autoFocus
-                                    />
-                                    <button
-                                        className="search-close-button"
-                                        onClick={handleCloseSearch}
-                                        aria-label="Close search"
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                </div>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     {isSearchActive && searchQuery && (

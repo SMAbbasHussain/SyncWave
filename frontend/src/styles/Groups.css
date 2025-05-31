@@ -270,7 +270,7 @@
 .groups-header .search-close-button {
   position: absolute;
   top: 50%;
-  right: 95%;
+  left: 85%;
   transform: translateY(-50%);
   background: none;
   border: none;
