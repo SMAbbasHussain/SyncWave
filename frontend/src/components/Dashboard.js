@@ -6,7 +6,7 @@ import AnonymousGroups from "./AnonymousGroups";
 import Profile from "./Profile";
 import ChatScreen from "./ChatScreen";
 import Friends from "./Friends";
-import FriendsActions from "./FriendsActions";
+import FriendsAction from "./FriendsAction";
 import "../styles/Dashboard.css";
 
 function Dashboard({ activeNavItem = 'home' }) {
@@ -94,7 +94,7 @@ function Dashboard({ activeNavItem = 'home' }) {
                             <Friends />
                         </div>
                         <div className="friends-right-section">
-                            <FriendsActions />
+                            <FriendsAction />
                         </div>
                     </div>
                 );

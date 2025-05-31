@@ -1,0 +1,448 @@
+.friends-action-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    height: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+
+}
+
+.action-button {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* White outline */
+    backdrop-filter: blur(5px);
+    /* Apply blur */
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    /* More transparent on hover */
+    box-shadow: 0 0 14px rgba(0, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.action-button.active {
+    background: rgba(0, 119, 255, 0.163);
+    border: 1px solid rgba(0, 119, 255, 0.4);
+}
+
+.action-button svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.9;
+}
+
+/* Action Box */
+.action-box {
+    background: rgb(0, 2, 24);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 40px);
+    /* Account for action buttons + gap */
+}
+
+/* Action Box Header */
+.action-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin: 10px;
+    border-radius: 50px;
+    background: rgba(0, 119, 255, 0.131);
+    border-bottom: 1px solid rgba(0, 119, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.action-box-header h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Search Bar Container */
+.search-bar-container {
+    width: 100%;
+    padding: 0 5px;
+}
+
+.search-bar {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 36px;
+    padding: 0 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+    border-color: rgba(0, 119, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    outline: none;
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.search-close-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.search-close-button:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.search-close-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Search Results Container */
+.search-results-container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+}
+
+/* Search Toggle Button */
+.search-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.search-toggle svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.9;
+}
+
+/* Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Search Results */
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(0, 119, 255, 0.05);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: rgba(0, 119, 255, 0.1);
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.friend-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.friend-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.friend-username {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Add Friend Icon */
+.add-friend-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(0, 119, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-friend-icon:hover {
+    background: rgba(0, 119, 255, 0.2);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.add-friend-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.request-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(0, 119, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-button.active {
+    color: #fff;
+    font-weight: 500;
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 119, 255, 0.5);
+}
+
+/* Requests List */
+.requests-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 20px !important;
+
+    padding: 10px;
+    background: rgba(0, 119, 255, 0.05);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.request-item:hover {
+    background: rgba(0, 119, 255, 0.1);
+}
+
+.request-status {
+    margin-left: 10px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.request-status.pending {
+    color: #f4db51;
+}
+
+.request-status.rejected {
+    color: #ff4f4f;
+}
+
+.request-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.accept-request,
+.reject-request {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(0, 119, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.accept-request:hover {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    transform: scale(1.05);
+}
+
+.reject-request:hover {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    transform: scale(1.05);
+}
+
+.accept-request svg,
+.reject-request svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Scrollbar Styles */
+.requests-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.requests-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.requests-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 119, 255, 0.2);
+    border-radius: 3px;
+}
+
+.requests-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 119, 255, 0.3);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .friends-action-container {
+        padding: 10px;
+    }
+
+    .action-button span {
+        display: none;
+    }
+
+    .action-button {
+        padding: 10px;
+    }
+
+    .action-button svg {
+        margin: 0;
+    }
+
+    .search-toggle span {
+        display: none;
+    }
+}

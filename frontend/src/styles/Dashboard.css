@@ -231,20 +231,19 @@
 }
 
 .friends-left-section {
-    flex: 0 0 60%;
+    flex: 0 0 59%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
     margin: 0;
 }
 
 .friends-right-section {
-    flex: 0 0 40%;
-    /* 40% width, no shrinking or growing */
+    flex: 0 0 39%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Prevent content overflow */
 }
 
 /* Responsive adjustments for smaller screens */
