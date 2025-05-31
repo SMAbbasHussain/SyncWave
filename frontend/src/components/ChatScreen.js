@@ -163,6 +163,7 @@ function ChatScreen({ activeChat }) {
                             </div>
                         ))
                     )}
+                    <div className="message-spacer"></div>
                     <div ref={messagesEndRef} />
                 </div>
             </div>

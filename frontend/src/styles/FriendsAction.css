@@ -3,9 +3,10 @@
     flex-direction: column;
     gap: 15px;
     width: 100%;
-    height: 100%;
+    height: calc(80vh - 50px);
     padding: 0 15px;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* Action Buttons */
@@ -61,11 +62,16 @@
 .action-box {
     background: rgb(0, 2, 24);
     border-radius: 20px;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: calc(100% - 40px);
+    height: calc(100% - 20px);
     /* Account for action buttons + gap */
+    min-height: 370px;
+    /* Minimum height */
+    max-height: calc(80vh - 150px);
+    /* Maximum height relative to container */
+    overflow: hidden;
+    /* Add this back to contain scrolling content */
 }
 
 /* Action Box Header */
@@ -79,6 +85,9 @@
     background: rgba(0, 119, 255, 0.131);
     border-bottom: 1px solid rgba(0, 119, 255, 0.1);
     transition: all 0.3s ease;
+    position: relative;
+    min-height: 60px;
+    flex-shrink: 0;
 }
 
 .action-box-header h3 {
@@ -91,7 +100,7 @@
 /* Search Bar Container */
 .search-bar-container {
     width: 100%;
-    padding: 0 5px;
+    position: relative;
 }
 
 .search-bar {
@@ -104,7 +113,7 @@
 .search-bar input {
     width: 100%;
     height: 36px;
-    padding: 0 40px;
+    padding: 0 35px 0 40px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50px;
     background: rgba(0, 0, 0, 0.2);
@@ -131,8 +140,8 @@
 
 .search-close-button {
     position: absolute;
-    right: 10px;
     top: 50%;
+    left: 90%;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -143,24 +152,17 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
 }
 
-.search-close-button:hover {
-    color: rgba(255, 255, 255, 0.8);
-}
+
 
 .search-close-button svg {
     width: 14px;
     height: 14px;
-}
-
-/* Search Results Container */
-.search-results-container {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    animation: slideDown 0.3s ease;
 }
 
 /* Search Toggle Button */
@@ -177,6 +179,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1;
 }
 
 .search-toggle:hover {
@@ -186,23 +189,69 @@
     transform: translateY(-1px);
 }
 
+.search-toggle.active {
+    background: rgba(0, 119, 255, 0.15);
+    color: #fff;
+    border-color: rgba(0, 119, 255, 0.3);
+}
+
 .search-toggle svg {
     width: 16px;
     height: 16px;
     opacity: 0.9;
 }
 
-/* Animation */
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+/* Search Container Animation */
+.search-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 15px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.search-container.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Header Content */
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.header-content.search-active {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Search Results Container */
+.search-results-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
 /* Search Results */
@@ -322,6 +371,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-height: 200px;
 }
 
 .request-item {
@@ -403,23 +453,29 @@
     border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
+    margin: auto;
+    /* Center vertically when no results */
 }
 
 /* Scrollbar Styles */
+.search-results-container::-webkit-scrollbar,
 .requests-list::-webkit-scrollbar {
     width: 6px;
 }
 
+.search-results-container::-webkit-scrollbar-track,
 .requests-list::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 3px;
 }
 
+.search-results-container::-webkit-scrollbar-thumb,
 .requests-list::-webkit-scrollbar-thumb {
     background: rgba(0, 119, 255, 0.2);
     border-radius: 3px;
 }
 
+.search-results-container::-webkit-scrollbar-thumb:hover,
 .requests-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 119, 255, 0.3);
 }

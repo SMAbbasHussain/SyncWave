@@ -231,7 +231,7 @@
 }
 
 .friends-left-section {
-    flex: 0 0 59%;
+    flex: 0 0 54%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -240,7 +240,7 @@
 }
 
 .friends-right-section {
-    flex: 0 0 39%;
+    flex: 0 0 44%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
