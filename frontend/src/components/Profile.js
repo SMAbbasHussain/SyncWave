@@ -159,7 +159,7 @@ function Profile() {
                             alt="Profile"
                             className="profile-avatar"
                             onError={(e) => {
-                                e.target.src = "https://via.placeholder.com/50";
+                                e.target.src = "/PFP2.png";
                                 e.target.className = "profile-avatar placeholder";
                             }}
                         />

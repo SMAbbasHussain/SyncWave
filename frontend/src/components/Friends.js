@@ -1,17 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus, FaUserMinus } from 'react-icons/fa';
 import '../styles/Friends.css';
+import * as friendService from '../services/friendService';
 
 function Friends() {
     const [isSearchActive, setIsSearchActive] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [friends] = useState([
-        { id: 1, username: 'John Doe', status: 'online', avatar: '/avatars/default.png' },
-        { id: 2, username: 'Alice Smith', status: 'offline', avatar: '/avatars/default.png' },
-        { id: 3, username: 'Robert Johnson', status: 'online', avatar: '/avatars/default.png' },
-        // ... other friends
-    ]);
+    const [friends, setFriends] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const searchInputRef = useRef(null);
+
+    // Fetch friends list when component mounts
+    useEffect(() => {
+        loadFriends();
+    }, []);
+
+    const loadFriends = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const friendsList = await friendService.getFriends();
+            setFriends(friendsList);
+        } catch (error) {
+            console.error('Failed to load friends:', error);
+            setError('Failed to load friends list');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRemoveFriend = async (friendId) => {
+        try {
+            await friendService.removeFriend(friendId);
+            setFriends(prevFriends => prevFriends.filter(friend => friend._id !== friendId));
+        } catch (error) {
+            console.error('Failed to remove friend:', error);
+            setError('Failed to remove friend');
+        }
+    };
 
     const filteredFriends = friends.filter(friend =>
         friend.username.toLowerCase().includes(searchQuery.toLowerCase())
@@ -37,6 +64,19 @@ function Friends() {
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
+
+    if (error) {
+        return (
+            <div className="friends-container">
+                <div className="error-message">
+                    {error}
+                    <button onClick={loadFriends} className="retry-button">
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="friends-container">
@@ -77,17 +117,35 @@ function Friends() {
             </div>
 
             <div className="friends-list">
-                {friends.map(friend => (
-                    <div key={friend.id} className="friend-item">
-                        <div className="friend-avatar">
-                            <img src={friend.avatar} alt={friend.username} />
-                            <div className={`status-indicator ${friend.status}`} />
-                        </div>
-                        <div className="friend-info">
-                            <span className="friend-username">{friend.username}</span>
-                        </div>
+                {isLoading ? (
+                    <div className="loading-message">Loading friends...</div>
+                ) : friends.length === 0 ? (
+                    <div className="no-friends-message">
+                        No friends yet. Add some friends to start chatting!
                     </div>
-                ))}
+                ) : (
+                    friends.map(friend => (
+                        <div key={friend._id} className="friend-item">
+                            <div className="friend-avatar">
+                                <img 
+                                    src={friend.profilePic || '/PFP2.png'} 
+                                    alt={friend.username} 
+                                />
+                                <div className={`status-indicator ${friend.status || 'offline'}`} />
+                            </div>
+                            <div className="friend-info">
+                                <span className="friend-username">{friend.username}</span>
+                            </div>
+                            <button
+                                className="remove-friend-button"
+                                onClick={() => handleRemoveFriend(friend._id)}
+                                title="Remove friend"
+                            >
+                                <FaUserMinus />
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Search Results - Only show when searching */}
@@ -95,14 +153,24 @@ function Friends() {
                 <div className="search-results">
                     {filteredFriends.length > 0 ? (
                         filteredFriends.map(friend => (
-                            <div key={friend.id} className="friend-item search-result">
+                            <div key={friend._id} className="friend-item search-result">
                                 <div className="friend-avatar">
-                                    <img src={friend.avatar} alt={friend.username} />
-                                    <div className={`status-indicator ${friend.status}`} />
+                                    <img 
+                                        src={friend.profilePic || '/PFP2.png'} 
+                                        alt={friend.username} 
+                                    />
+                                    <div className={`status-indicator ${friend.status || 'offline'}`} />
                                 </div>
                                 <div className="friend-info">
                                     <span className="friend-username">{friend.username}</span>
                                 </div>
+                                <button
+                                    className="remove-friend-button"
+                                    onClick={() => handleRemoveFriend(friend._id)}
+                                    title="Remove friend"
+                                >
+                                    <FaUserMinus />
+                                </button>
                             </div>
                         ))
                     ) : (
