@@ -16,6 +16,8 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const friendRoutes = require('./routes/friendRoutes');
+
 const groupMessageRoutes = require('./routes/groupMessageRoutes');
 require('./services/passport');
 
@@ -80,6 +82,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/group-messages', groupMessageRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

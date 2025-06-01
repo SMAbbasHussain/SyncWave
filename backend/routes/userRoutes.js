@@ -14,4 +14,7 @@ router.put("/profile", userController.updateProfile);
 router.post("/block/:userId", userController.blockUser);
 router.post("/unblock/:userId", userController.unblockUser);
 
+// Search users
+router.get('/search', userController.searchUsers);
+
 module.exports = router;

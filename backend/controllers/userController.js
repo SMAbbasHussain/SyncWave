@@ -204,3 +204,27 @@ exports.getProfile = async (req, res) => {
     });
   }
 };
+
+// Search users by username
+exports.searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    // Search for users whose email contains the query string
+    // Exclude the current user from results
+    const users = await User.find({
+      email: { $regex: q, $options: 'i' },
+      _id: { $ne: req.user.userId } // Exclude current user
+    })
+    .select('username email profilePic') // Only return necessary fields
+    .limit(10); // Limit results to prevent overwhelming response
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

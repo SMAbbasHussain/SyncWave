@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus, FaCheck, FaTimes as FaReject } from 'react-icons/fa';
 import { FiUserPlus, FiUserCheck, FiUserX } from 'react-icons/fi';
 import '../styles/FriendsAction.css';
+import * as friendService from '../services/friendService';
 
 function FriendsAction() {
     // State for active box and tabs
@@ -12,18 +13,36 @@ function FriendsAction() {
     const searchInputRef = useRef(null);
 
     // State for friend requests
-    const [receivedRequests, setReceivedRequests] = useState([
-        { id: 1, username: 'john_doe', avatar: '/avatars/default.png', status: 'pending' },
-        { id: 2, username: 'jane_smith', avatar: '/avatars/default.png', status: 'pending' },
-    ]);
-    const [sentRequests, setSentRequests] = useState([
-        { id: 3, username: 'alex_wilson', avatar: '/avatars/default.png', status: 'pending' },
-        { id: 4, username: 'sarah_brown', avatar: '/avatars/default.png', status: 'rejected' },
-    ]);
-
-    // State for search results
+    const [receivedRequests, setReceivedRequests] = useState([]);
+    const [sentRequests, setSentRequests] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [searchStatus, setSearchStatus] = useState(''); // 'notFound' or ''
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Load friend requests when component mounts or tab changes
+    useEffect(() => {
+        if (activeBox === 'requests') {
+            loadFriendRequests();
+        }
+    }, [activeBox, activeTab]);
+
+    // Load friend requests
+    const loadFriendRequests = async () => {
+        try {
+            setIsLoading(true);
+            if (activeTab === 'received') {
+                const requests = await friendService.getIncomingRequests();
+                setReceivedRequests(requests);
+            } else {
+                const requests = await friendService.getOutgoingRequests();
+                setSentRequests(requests);
+            }
+        } catch (error) {
+            console.error('Failed to load friend requests:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Toggle between Add Friend and Requests boxes
     const toggleBox = (box) => {
@@ -62,26 +81,24 @@ function FriendsAction() {
     };
 
     // Handle search input change
-    const handleSearchChange = (e) => {
+    const handleSearchChange = async (e) => {
         const query = e.target.value;
         setSearchQuery(query);
 
         if (query.trim()) {
-            // Simulate API call to search users
-            // In real app, this would be an API call
-            const mockResults = [
-                { id: 1, username: 'john_doe', avatar: '/avatars/default.png' },
-                { id: 2, username: 'jane_smith', avatar: '/avatars/default.png' },
-            ].filter(user =>
-                user.username.toLowerCase().includes(query.toLowerCase())
-            );
-
-            if (mockResults.length === 0) {
-                setSearchStatus('notFound');
+            try {
+                const results = await friendService.searchUsers(query);
+                if (results.length === 0) {
+                    setSearchStatus('notFound');
+                    setSearchResults([]);
+                } else {
+                    setSearchStatus('');
+                    setSearchResults(results);
+                }
+            } catch (error) {
+                console.error('Failed to search users:', error);
+                setSearchStatus('error');
                 setSearchResults([]);
-            } else {
-                setSearchStatus('');
-                setSearchResults(mockResults);
             }
         } else {
             setSearchResults([]);
@@ -90,41 +107,52 @@ function FriendsAction() {
     };
 
     // Handle friend request actions
-    const handleRequestAction = (requestId, action) => {
-        if (action === 'accept') {
-            // In real app, this would be an API call
-            setReceivedRequests(prev => prev.filter(req => req.id !== requestId));
-        } else if (action === 'reject') {
-            // In real app, this would be an API call
-            setReceivedRequests(prev => prev.filter(req => req.id !== requestId));
+    const handleRequestAction = async (requestId, action) => {
+        try {
+            if (action === 'accept') {
+                await friendService.acceptFriendRequest(requestId);
+                setReceivedRequests(prev => prev.filter(req => req._id !== requestId));
+            } else if (action === 'reject') {
+                await friendService.declineFriendRequest(requestId);
+                setReceivedRequests(prev => prev.filter(req => req._id !== requestId));
+            } else if (action === 'cancel') {
+                await friendService.cancelFriendRequest(requestId);
+                setSentRequests(prev => prev.filter(req => req._id !== requestId));
+            }
+        } catch (error) {
+            console.error('Failed to process friend request:', error);
         }
     };
 
     // Handle sending friend request
-    const handleSendRequest = (userId) => {
-        // In real app, this would be an API call
-        const newRequest = {
-            id: Date.now(),
-            username: searchResults.find(user => user.id === userId).username,
-            avatar: '/avatars/default.png',
-            status: 'pending'
-        };
-        setSentRequests(prev => [...prev, newRequest]);
-        setSearchResults(prev => prev.filter(user => user.id !== userId));
+    const handleSendRequest = async (userId) => {
+        try {
+            await friendService.sendFriendRequest(userId);
+            const user = searchResults.find(user => user._id === userId);
+            const newRequest = {
+                _id: Date.now().toString(), // Temporary ID
+                receiver: user,
+                status: 'pending'
+            };
+            setSentRequests(prev => [...prev, newRequest]);
+            setSearchResults(prev => prev.filter(user => user._id !== userId));
+        } catch (error) {
+            console.error('Failed to send friend request:', error);
+        }
     };
 
     // Render search results
     const renderSearchResult = (user) => (
-        <div key={user.id} className="search-result-item">
+        <div key={user._id} className="search-result-item">
             <div className="friend-avatar">
-                <img src={user.avatar} alt={user.username} />
+                <img src={user.profilePic || '/PFP.png'} alt={user.username} />
             </div>
             <div className="friend-info">
                 <span className="friend-username">{user.username}</span>
             </div>
             <button
                 className="add-friend-icon"
-                onClick={() => handleSendRequest(user.id)}
+                onClick={() => handleSendRequest(user._id)}
                 title="Send friend request"
             >
                 <FiUserPlus />
@@ -134,35 +162,50 @@ function FriendsAction() {
 
     // Render friend request item
     const renderRequestItem = (request, type) => (
-        <div key={request.id} className="request-item">
+        <div key={request._id} className="request-item">
             <div className="friend-avatar">
-                <img src={request.avatar} alt={request.username} />
+                <img 
+                    src={type === 'received' ? request.sender.profilePic : request.receiver.profilePic || '/PFP.png'} 
+                    alt={type === 'received' ? request.sender.username : request.receiver.username} 
+                />
             </div>
             <div className="friend-info">
-                <span className="friend-username">{request.username}</span>
+                <span className="friend-username">
+                    {type === 'received' ? request.sender.username : request.receiver.username}
+                </span>
                 {type === 'sent' && (
                     <span className={`request-status ${request.status}`}>
                         {request.status === 'pending' ? 'Pending' : 'Rejected'}
                     </span>
                 )}
             </div>
-            {type === 'received' && (
+            {type === 'received' ? (
                 <div className="request-actions">
                     <button
                         className="accept-request"
-                        onClick={() => handleRequestAction(request.id, 'accept')}
+                        onClick={() => handleRequestAction(request._id, 'accept')}
                         title="Accept request"
                     >
                         <FiUserCheck />
                     </button>
                     <button
                         className="reject-request"
-                        onClick={() => handleRequestAction(request.id, 'reject')}
+                        onClick={() => handleRequestAction(request._id, 'reject')}
                         title="Reject request"
                     >
                         <FiUserX />
                     </button>
                 </div>
+            ) : (
+                request.status === 'pending' && (
+                    <button
+                        className="reject-request"
+                        onClick={() => handleRequestAction(request._id, 'cancel')}
+                        title="Cancel request"
+                    >
+                        <FiUserX />
+                    </button>
+                )
             )}
         </div>
     );
@@ -260,7 +303,9 @@ function FriendsAction() {
                     </div>
 
                     <div className="requests-list">
-                        {activeTab === 'received' ? (
+                        {isLoading ? (
+                            <div className="no-results">Loading...</div>
+                        ) : activeTab === 'received' ? (
                             receivedRequests.length > 0 ? (
                                 receivedRequests.map(request => renderRequestItem(request, 'received'))
                             ) : (
