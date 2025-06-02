@@ -319,10 +319,14 @@ function ChatScreen({ activeChat }) {
         }
     }, [activeChat.type, activeChat.chatId, conversationMode, toggleConversationMode]);
 
-    if (activeChat.type === 'none') {
+     if (activeChat.type === 'none') {
         return (
-            <div className="chat-screen-container no-chat-selected">
-                <p>Select a chat to start messaging</p>
+            <div className="no-chat-selected-container">
+                <img 
+                    src="/network.png" 
+                    alt="No chat selected" 
+                    className="network-illustration"
+                />
             </div>
         );
     }
