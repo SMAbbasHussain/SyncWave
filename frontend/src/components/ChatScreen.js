@@ -50,7 +50,7 @@ function ChatScreen({ activeChat }) {
         setMessages(prev => prev.map(msg => {
             if (msg.id === id) {
                 const updatedMsg = { ...msg };
-                
+
                 // Handle each update property individually
                 Object.keys(updates).forEach(key => {
                     if (key === 'content' && typeof updates[key] === 'function') {
@@ -61,7 +61,7 @@ function ChatScreen({ activeChat }) {
                         updatedMsg[key] = updates[key];
                     }
                 });
-                
+
                 return updatedMsg;
             }
             return msg;
@@ -205,7 +205,7 @@ function ChatScreen({ activeChat }) {
                     timestamp: new Date().toISOString()
                 };
                 addMessage(aiResponse);
-                
+
             } else {
                 // STREAMING MODE - Fixed implementation
                 const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete/stream`, {
@@ -255,7 +255,7 @@ function ChatScreen({ activeChat }) {
                                 if (data.content) {
                                     fullResponse += data.content;
                                     // Update the message content by appending new content
-                                    updateMessage(aiResponse.id, { 
+                                    updateMessage(aiResponse.id, {
                                         content: (prevContent) => prevContent + data.content
                                     });
                                 }
@@ -319,12 +319,12 @@ function ChatScreen({ activeChat }) {
         }
     }, [activeChat.type, activeChat.chatId, conversationMode, toggleConversationMode]);
 
-     if (activeChat.type === 'none') {
+    if (activeChat.type === 'none') {
         return (
-            <div className="no-chat-selected-container">
-                <img 
-                    src="/network.png" 
-                    alt="No chat selected" 
+            <div className="chat-screen-placeholder">
+                <img
+                    src="/network.png"
+                    alt="No chat selected"
                     className="network-illustration"
                 />
             </div>
@@ -339,8 +339,8 @@ function ChatScreen({ activeChat }) {
                 <div className="chat-screen-top-bar">
                     {renderTopBar()}
                 </div>
-                
-                <div 
+
+                <div
                     className={`chat-screen-messages ${isScrolling ? 'scrolling' : ''}`}
                     ref={chatContainerRef}
                     onScroll={handleScroll}
@@ -381,7 +381,7 @@ function ChatScreen({ activeChat }) {
                             className="message-input-field"
                             disabled={isLoading}
                         />
-                        
+
                         <button
                             type="submit"
                             className="send-message-button"
@@ -390,7 +390,7 @@ function ChatScreen({ activeChat }) {
                             <FaPaperPlane className="send-icon" />
                         </button>
                     </form>
-                    
+
                     {error && (
                         <div className="ai-chat-error">
                             {error}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/Groups.css";
 import { FaSearch, FaTimes, FaUsers } from "react-icons/fa";
+import { FiPlus } from "react-icons/fi";
 
 function Groups({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,14 +54,22 @@ function Groups({ onChatSelect }) {
       <div className="groups-header">
         <div className={`header-content ${isSearchActive ? 'search-active' : ''}`}>
           <h2 className="header-title">Groups</h2>
-          <button
-            className={`search-toggle ${isSearchActive ? 'active' : ''}`}
-            onClick={toggleSearch}
-            aria-label="Toggle search"
-          >
-            <FaSearch />
-            <span className="search-label">Search</span>
-          </button>
+          <div className="header-actions">
+            <button
+              className="action-btn create-btn"
+              title="Create New Group"
+            >
+              <FiPlus className="action-icon" />
+            </button>
+            <button
+              className={`search-toggle ${isSearchActive ? 'active' : ''}`}
+              onClick={toggleSearch}
+              aria-label="Toggle search"
+            >
+              <FaSearch />
+              <span className="search-label">Search</span>
+            </button>
+          </div>
         </div>
         <div className={`search-container ${isSearchActive ? 'active' : ''}`}>
           <div className="search-bar">
