@@ -1,10 +1,10 @@
 .friends-action-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
     height: calc(80vh - 50px);
-    padding: 0 15px;
+    padding: 10px 15px 0px;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -87,14 +87,19 @@
     transition: all 0.3s ease;
     position: relative;
     min-height: 60px;
+    /* Ensure consistent height */
     flex-shrink: 0;
+    overflow: hidden;
+    /* Hide overflowing search bar */
 }
 
 .action-box-header h3 {
     color: #fff;
     font-size: 1.1rem;
     font-weight: 500;
-    margin: 0;
+    margin-left: 20px;
+    transition: opacity 0.3s ease;
+    /* Add transition for consistency */
 }
 
 /* Search Bar Container */
@@ -108,61 +113,91 @@
     width: 100%;
     display: flex;
     align-items: center;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.3);
+    /* Darker background */
+    border-radius: 50px;
+    /* Rounded borders */
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .search-bar input {
     width: 100%;
-    height: 36px;
-    padding: 0 35px 0 40px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50px;
-    background: rgba(0, 0, 0, 0.2);
+    height: 2rem;
+    /* Consistent height */
+    padding: 0 2.5rem 0 2.2rem;
+    /* Padding for icons */
+    border: none;
+    background: none;
     color: #fff;
     font-size: 0.95rem;
+    /* Keep original font size for FriendsAction input */
     transition: all 0.3s ease;
+    outline: none;
 }
 
 .search-bar input:focus {
     border-color: rgba(0, 119, 255, 0.3);
     background: rgba(0, 0, 0, 0.3);
+    /* Consistent focus background */
     outline: none;
+}
+
+.search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    /* Consistent placeholder color */
 }
 
 .search-bar .search-icon {
     position: absolute;
-    left: 15px;
+    left: 0.9rem;
+    /* Align to the left */
     top: 50%;
     transform: translateY(-50%);
     color: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
+    /* Consistent icon color */
+    font-size: 0.85rem;
+    /* Consistent icon size */
     pointer-events: none;
+    z-index: 1;
+    /* Ensure icon is above input */
 }
 
 .search-close-button {
     position: absolute;
+    right: 0.9rem;
+    /* Align to the right */
     top: 50%;
-    left: 90%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.6);
+    /* Consistent color */
     cursor: pointer;
-    padding: 5px;
+    padding: 0;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     z-index: 2;
+    /* Ensure button is above input and search icon */
+    opacity: 0.4;
+    /* Consistent opacity */
     width: 24px;
     height: 24px;
     border-radius: 50%;
 }
 
-
+.search-close-button:hover {
+    opacity: 0.7;
+}
 
 .search-close-button svg {
-    width: 14px;
-    height: 14px;
+    width: 0.65rem;
+    /* Consistent icon size */
+    height: 0.65rem;
+    /* Consistent icon size */
 }
 
 /* Search Toggle Button */
@@ -190,38 +225,49 @@
 }
 
 .search-toggle.active {
-    background: rgba(0, 119, 255, 0.15);
-    color: #fff;
-    border-color: rgba(0, 119, 255, 0.3);
+    opacity: 0;
+    /* Hide when active */
+    pointer-events: none;
 }
 
 .search-toggle svg {
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    /* Consistent icon size */
+    height: 1rem;
+    /* Consistent icon size */
     opacity: 0.9;
 }
 
 /* Search Container Animation */
 .search-container {
     position: absolute;
-    top: 0;
+    top: 50%;
+    /* Center vertically */
     left: 0;
     right: 0;
-    bottom: 0;
-    padding: 10px 15px;
+    bottom: auto;
+    /* Remove bottom constraint */
+    padding: 0 15px;
+    /* Add padding for alignment */
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(-50%) translateX(100%);
+    /* Center and start off-screen */
     transition: all 0.3s ease;
     z-index: 2;
+    /* Ensure it's above header content */
     display: flex;
     align-items: center;
+    height: 100%;
+    /* Match header height */
 }
 
 .search-container.active {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(-50%) translateX(0);
+    /* Slide into view */
+    pointer-events: all;
 }
 
 /* Header Content */
@@ -233,6 +279,7 @@
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
+    /* Ensure it's below search container when active */
 }
 
 .header-content.search-active {
