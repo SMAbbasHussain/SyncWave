@@ -399,3 +399,17 @@
         opacity: 0.3;
     }
 }
+
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.profile-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.8em;
+}

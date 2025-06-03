@@ -19,7 +19,14 @@ const signup = async (req, res) => {
       });
     }
 
-    const user = new User({ username, email, password, phoneNo });
+    const user = new User({ 
+      username, 
+      email, 
+      password, 
+      phoneNo,
+      status: 'online', // Set status to online on signup
+      lastSeen: new Date()
+    });
     await user.save();
 
     const token = generateToken(user._id);
@@ -31,6 +38,7 @@ const signup = async (req, res) => {
       phoneNo: user.phoneNo,
       profilePic: user.profilePic || '/PFP2.png',
       bio: user.bio || '',
+      status: user.status,
       isLoggedIn: true
     };
 
@@ -86,9 +94,16 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Reset login attempts and update user status to online
     attempt.failedAttempts = 0;
     attempt.lockUntil = null;
     await attempt.save();
+
+    // Update user status to online and lastSeen
+    await User.findByIdAndUpdate(user._id, {
+      status: 'online',
+      lastSeen: new Date()
+    });
 
     const token = generateToken(user._id);
 
@@ -98,7 +113,8 @@ const login = async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
-        profilePic: user.profilePic
+        profilePic: user.profilePic,
+        status: 'online'
       }
     });
 
@@ -122,9 +138,11 @@ const googleAuth = async (req, res) => {
           transformation: [{ width: 200, height: 200, crop: "fill" }],
         });
         
-        // Update user with the Cloudinary URL
+        // Update user with the Cloudinary URL and status
         await User.findByIdAndUpdate(req.user._id, {
-          profilePic: uploadedResponse.secure_url
+          profilePic: uploadedResponse.secure_url,
+          status: 'online',
+          lastSeen: new Date()
         });
         
         // Update the req.user object with the new URL
@@ -132,27 +150,45 @@ const googleAuth = async (req, res) => {
       } catch (uploadError) {
         console.error("Error uploading Google profile picture:", uploadError);
         // Fall back to the Google URL if Cloudinary upload fails
+        await User.findByIdAndUpdate(req.user._id, {
+          status: 'online',
+          lastSeen: new Date()
+        });
       }
+    } else {
+      // Update user status to online and lastSeen for Google auth
+      await User.findByIdAndUpdate(req.user._id, {
+        status: 'online',
+        lastSeen: new Date()
+      });
     }
 
     const token = generateToken(req.user._id);
-    res.json({ 
-      token,
-      user: {
-        _id: req.user._id,
-        username: req.user.username,
-        email: req.user.email,
-        profilePic: req.user.profilePic || '/PFP2.png'
-      },
-      isNewUser: req.user.isNew
-    });
+    
+    // Check if user was just created
+    const isNewUser = req.user.isNew;
+    
+    // Redirect to frontend with token instead of sending JSON
+    res.redirect(`http://localhost:3000/auth-success?token=${token}&isNewUser=${isNewUser}`);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Google auth error:', error);
+    res.redirect('/login?error=google_auth_failed');
   }
 };
 
 const logout = async (req, res) => {
   try {
+    // Extract user ID from the JWT token or request
+    const userId = req.user?._id || req.userId; // Assuming you have middleware that sets this
+    
+    if (userId) {
+      // Update user status to offline and lastSeen
+      await User.findByIdAndUpdate(userId, {
+        status: 'offline',
+        lastSeen: new Date()
+      });
+    }
+
     res.status(200).json({ 
       success: true,
       message: 'Logged out successfully' 
