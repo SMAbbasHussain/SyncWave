@@ -8,9 +8,34 @@ function Profile() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [userStatus, setUserStatus] = useState('offline');
     const dropdownRef = useRef(null);
     const profileRef = useRef(null);
+    const heartbeatInterval = useRef(null);
     const navigate = useNavigate();
+
+    // Heartbeat function to keep user online
+    const sendHeartbeat = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token && user) {
+                await axios.patch(
+                    `${process.env.REACT_APP_API_URL}/api/users/heartbeat`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+            }
+        } catch (error) {
+            console.error("Heartbeat failed:", error);
+            if (error.response?.status === 401) {
+                handleLogout();
+            }
+        }
+    };
 
     useEffect(() => {
         const loadUserData = async () => {
@@ -21,7 +46,13 @@ function Profile() {
                     // Make sure we have all required fields
                     if (parsedUser.username && parsedUser.email) {
                         setUser(parsedUser);
+                        setUserStatus(parsedUser.status || 'online');
                         setLoading(false);
+
+                        // Start heartbeat for logged-in users
+                        if (parsedUser.isLoggedIn) {
+                            startHeartbeat();
+                        }
                         return;
                     }
                 }
@@ -44,11 +75,14 @@ function Profile() {
                     username: response.data.username,
                     email: response.data.email,
                     profilePic: response.data.profilePic,
-                    bio: response.data.bio
+                    bio: response.data.bio,
+                    status: response.data.status || 'online'
                 };
 
                 localStorage.setItem('user', JSON.stringify(completeUserData));
                 setUser(completeUserData);
+                setUserStatus(completeUserData.status);
+                startHeartbeat();
             } catch (error) {
                 console.error("Failed to load user data:", error);
                 if (error.response?.status === 401) {
@@ -59,21 +93,36 @@ function Profile() {
             }
         };
 
+        const startHeartbeat = () => {
+            // Send heartbeat every 5 minutes to keep user online
+            heartbeatInterval.current = setInterval(sendHeartbeat, 5 * 60 * 1000);
+        };
+
         loadUserData();
 
         const handleUserUpdate = (e) => {
             setUser(e.detail);
+            setUserStatus(e.detail.status || 'online');
         };
 
         window.addEventListener('userUpdated', handleUserUpdate);
 
+        // Cleanup heartbeat on unmount
         return () => {
             window.removeEventListener('userUpdated', handleUserUpdate);
+            if (heartbeatInterval.current) {
+                clearInterval(heartbeatInterval.current);
+            }
         };
-    }, []);// Empty dependency array - runs only once on mount
+    }, []);
 
     const handleLogout = async () => {
         try {
+            // Clear heartbeat first
+            if (heartbeatInterval.current) {
+                clearInterval(heartbeatInterval.current);
+            }
+
             const response = await axios.get(
                 `${process.env.REACT_APP_API_URL}/api/auth/logout`,
                 {
@@ -87,6 +136,7 @@ function Profile() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
+            setUserStatus('offline');
 
             // Redirect to login
             navigate('/login', { replace: true });
@@ -98,8 +148,14 @@ function Profile() {
             console.error("Logout error:", error);
             // Fallback cleanup if server request fails
             localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            localStorage.removeUser('user');
             setUser(null);
+            setUserStatus('offline');
+            
+            if (heartbeatInterval.current) {
+                clearInterval(heartbeatInterval.current);
+            }
+            
             navigate('/login');
         }
     };
@@ -138,6 +194,20 @@ function Profile() {
         );
     }
 
+    const getStatusDisplay = () => {
+        if (!user) return "Offline";
+        return userStatus.charAt(0).toUpperCase() + userStatus.slice(1);
+    };
+
+    const getStatusColor = () => {
+        switch (userStatus) {
+            case 'online': return '#4ade80';
+            case 'away': return '#facc15';
+            case 'offline': return '#94a3b8';
+            default: return '#94a3b8';
+        }
+    };
+
     return (
         <div className="profile-section" ref={profileRef}>
             <div className="profile-content" onClick={toggleDropdown}>
@@ -148,8 +218,12 @@ function Profile() {
                     <span className="profile-name">
                         {user?.username || "Guest"}
                     </span>
-                    <span className="profile-status">
-                        {user ? "Online" : "Offline"}
+                    <span className="profile-status" style={{ color: getStatusColor() }}>
+                        <span 
+                            className="status-indicator" 
+                            style={{ backgroundColor: getStatusColor() }}
+                        ></span>
+                        {getStatusDisplay()}
                     </span>
                 </div>
                 <div className="profile-avatar-container">
@@ -196,6 +270,9 @@ function Profile() {
                                 <div className="dropdown-user-info">
                                     <span className="dropdown-username">{user.username}</span>
                                     <span className="dropdown-email">{user.email}</span>
+                                    <span className="dropdown-status" style={{ color: getStatusColor() }}>
+                                        {getStatusDisplay()}
+                                    </span>
                                 </div>
                             </div>
                             <div className="dropdown-divider"></div>

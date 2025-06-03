@@ -1,12 +1,15 @@
 const express = require('express');
-const { signup, login, logout } = require('../controllers/authController');
+const { signup, login, logout, googleAuth } = require('../controllers/authController');
 const passport = require('passport');
 const { generateToken } = require('../utils/jwtUtils');
+const authenticateToken = require('../middleware/authMiddleware'); // Updated middleware
 const router = express.Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.get('/logout', logout);
+
+// Protected logout route - requires authentication to identify user
+router.get('/logout', authenticateToken, logout);
 
 // Google OAuth routes
 router.get('/google', passport.authenticate('google', { 
@@ -19,19 +22,7 @@ router.get('/google/callback',
     failureRedirect: '/login',
     session: false 
   }),
-  async (req, res) => {
-    try {
-      const token = generateToken(req.user._id);
-      
-      // Check if user was just created
-      const isNewUser = req.user.isNew;
-      
-      res.redirect(`http://localhost:3000/auth-success?token=${token}&isNewUser=${isNewUser}`);
-    } catch (error) {
-      console.error(error);
-      res.redirect('/login?error=google_auth_failed');
-    }
-  }
+  googleAuth // Use the updated googleAuth controller
 );
 
 module.exports = router;
