@@ -140,8 +140,8 @@ const CreateGroupModal = ({ isOpen, onClose, friends, onCreateGroup }) => {
                                 >
                                     <div className="create-group-friend-info">
                                         <div className="create-group-friend-avatar">
-                                            {friend.avatar ? (
-                                                <img src={friend.avatar} alt={friend.username} />
+                                            {friend.profilePic ? (
+                                                <img src={friend.profilePic} alt={friend.username} />
                                             ) : (
                                                 <FaUser />
                                             )}

@@ -3,6 +3,7 @@ import { FaSearch, FaTimes, FaUserCircle } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';
 import NewChatModal from './NewChatModal';
 import '../styles/PrivateChats.css';
+import { getFriends } from '../services/friendService';
 
 function PrivateChats({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,19 +24,19 @@ function PrivateChats({ onChatSelect }) {
     { id: 10, name: 'Amanda Thompson', status: 'offline' }
   ]);
 
-  // Mock friends list - in a real app, this would come from an API
-  const [friends] = useState([
-    { id: 101, username: 'John Doe', profilePicUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { id: 102, username: 'Alice Smith', profilePicUrl: '' },
-    { id: 103, username: 'Robert Johnson', profilePicUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { id: 104, username: 'Emily Brown', profilePicUrl: null },
-    { id: 105, username: 'Michael Wilson', profilePicUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
-    { id: 106, username: 'Sarah Davis', profilePicUrl: '' },
-    { id: 107, username: 'David Anderson', profilePicUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
-    { id: 108, username: 'Jessica Taylor', profilePicUrl: '' },
-    { id: 109, username: 'Christopher Martinez', profilePicUrl: 'https://randomuser.me/api/portraits/men/5.jpg' },
-    { id: 110, username: 'Amanda Thompson', profilePicUrl: '' }
-  ]);
+  const [friends, setFriends] = useState([]);
+
+  useEffect(() => {
+    async function fetchFriends() {
+      try {
+        const data = await getFriends();
+        setFriends(data);
+      } catch (error) {
+        // Optionally handle error
+      }
+    }
+    fetchFriends();
+  }, []);
 
   const filteredChats = chats.filter(chat =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())

@@ -116,8 +116,8 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
                                 <div key={friend.id} className="friend-item">
                                     <div className="friend-info">
                                         <div className="friend-avatar">
-                                            {friend.profilePicUrl ? (
-                                                <img src={friend.profilePicUrl} alt={`${friend.username}'s avatar`} />
+                                            {friend.profilePic ? (
+                                                <img src={friend.profilePic} alt={`${friend.username}'s avatar`} />
                                             ) : (
                                                 <FaUserCircle className="avatar-icon" />
                                             )}
