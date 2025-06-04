@@ -243,7 +243,6 @@
 
 .search-bar input:focus {
   border-color: rgba(0, 255, 255, 0.3);
-  background: rgba(211, 211, 211, 0.2);
 }
 
 .search-icon-left {
@@ -257,32 +256,6 @@
   z-index: 1;
 }
 
-.search-close-button {
-  position: absolute;
-  right: 0.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  opacity: 0.4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease;
-  padding: 0;
-  margin: 0;
-  z-index: 2;
-}
-
-.search-close-button:hover {
-  opacity: 0.7;
-}
-
-.search-close-button .search-icon {
-  font-size: 0.6rem;
-}
 
 /* Chat List Section */
 .chat-list {
@@ -617,7 +590,7 @@
 
 .private-chats-header .search-close-button {
   position: absolute;
-  right: 0.8rem;
+  left: 85% !important;
   top: 50%;
   transform: translateY(-50%);
   background: none;
