@@ -4,6 +4,8 @@ import { FaSearch, FaTimes, FaUsers } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import CreateGroupModal from "./CreateGroupModal";
 import { getFriends } from '../services/friendService';
+import axios from 'axios';
+
 
 function Groups({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -11,30 +13,43 @@ function Groups({ onChatSelect }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const searchInputRef = useRef(null);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
-  const [groups, setGroups] = useState([
-    { id: 1, name: "Group Name ni mila?", groupPicUrl: "https://via.placeholder.com/40/abcdef", image: "https://via.placeholder.com/35" },
-    { id: 2, name: "itna dehan kabhi..", groupPicUrl: '', image: "https://via.placeholder.com/35" },
-    { id: 3, name: "PARHAI Pr dete na", groupPicUrl: "https://via.placeholder.com/40/123456", image: "https://via.placeholder.com/35" },
-    { id: 4, name: "To ajj kamyaab hote", groupPicUrl: null, image: "https://via.placeholder.com/35" },
-    { id: 5, name: "Hadeed bhai..", groupPicUrl: "https://via.placeholder.com/40/789012", image: "https://via.placeholder.com/35" },
-    { id: 6, name: "React seekh lo", image: "https://via.placeholder.com/35" },
-    { id: 7, name: "Abbas kerey na nikal", groupPicUrl: "https://via.placeholder.com/40/345678", image: "https://via.placeholder.com/35" },
-    { id: 8, name: "Sakooon kr thore din", groupPicUrl: '', image: "https://via.placeholder.com/35" },
-    { id: 9, name: "kia dhoond rhy?", groupPicUrl: "https://via.placeholder.com/40/901234", image: "https://via.placeholder.com/35" },
-    { id: 10, name: "bsss kro. bye", image: "https://via.placeholder.com/35" },
-  ]);
-
+  const [groups, setGroups] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch user's groups from backend
   useEffect(() => {
-    async function fetchFriends() {
+    const fetchGroups = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/groups`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setGroups(response.data);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to fetch groups');
+        console.error('Error fetching groups:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  // Fetch friends list
+  useEffect(() => {
+    const fetchFriends = async () => {
       try {
         const data = await getFriends();
         setFriends(data);
       } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
+        setError('Failed to fetch friends');
       }
-    }
+    };
     fetchFriends();
   }, []);
 
@@ -62,21 +77,56 @@ function Groups({ onChatSelect }) {
   const handleGroupClick = (groupId) => {
     setSelectedGroupId(groupId);
     if (onChatSelect) {
-      onChatSelect('group', groupId);
+      onChatSelect({
+        type: 'group',
+        chatId: groupId
+      });
     }
   };
 
-  const handleCreateGroup = (groupData) => {
-    // TODO: Replace with actual API call to create group
-    const newGroup = {
-      id: groups.length + 1,
-      name: groupData.title,
-      groupPicUrl: null, // Will be updated when group image upload is implemented
-      description: groupData.description,
-      members: groupData.members
-    };
-    setGroups(prevGroups => [...prevGroups, newGroup]);
+  const handleCreateGroup = async (groupData) => {
+    try {
+      console.log('Creating group with data:', {
+        title: groupData.title,
+        description: groupData.description,
+        members: groupData.members
+      });
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/groups`,
+        {
+          name: groupData.title,
+          description: groupData.description,
+          members: groupData.members.filter(id => id) // Filter out any null/undefined
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      const newGroup = response.data;
+      setGroups(prevGroups => [...prevGroups, newGroup]);
+      setIsCreateModalOpen(false);
+
+    } catch (err) {
+      console.error('Error creating group:', {
+        error: err,
+        requestData: err.config?.data,
+        response: err.response?.data
+      });
+      setError(err.response?.data?.error || 'Failed to create group');
+    }
   };
+
+  if (isLoading) {
+    return <div className="groups-container loading">Loading groups...</div>;
+  }
+
+  if (error) {
+    return <div className="groups-container error">Error: {error}</div>;
+  }
 
   return (
     <div className="groups-container">
@@ -123,32 +173,38 @@ function Groups({ onChatSelect }) {
       </div>
       <div className="groups-list">
         {searchQuery.trim() === "" ? (
-          groups.map((group) => (
-            <div
-              key={group.id}
-              className={`group-item ${selectedGroupId === group.id ? 'active' : ''}`}
-              onClick={() => handleGroupClick(group.id)}
-            >
-              <div className="group-pic">
-                {group.groupPicUrl ? (
-                  <img src={group.groupPicUrl} alt={`${group.name}'s picture`} className="group-pic-img" />
-                ) : (
-                  <FaUsers className="group-pic-icon" />
-                )}
+          groups.length > 0 ? (
+            groups.map((group) => (
+              <div
+                key={group._id}
+                className={`group-item ${selectedGroupId === group._id ? 'active' : ''}`}
+                onClick={() => handleGroupClick(group._id)}
+              >
+                <div className="group-pic">
+                  {group.photo ? (
+                    <img src={group.photo} alt={`${group.name}'s picture`} className="group-pic-img" />
+                  ) : (
+                    <FaUsers className="group-pic-icon" />
+                  )}
+                </div>
+                <div className="group-name">{group.name}</div>
               </div>
-              <div className="group-name">{group.name}</div>
+            ))
+          ) : (
+            <div className="no-groups-message">
+              You don't have any groups yet. Create one to get started!
             </div>
-          ))
+          )
         ) : filteredGroups.length > 0 ? (
           filteredGroups.map((group) => (
             <div
-              key={group.id}
-              className={`group-item ${selectedGroupId === group.id ? 'active' : ''}`}
-              onClick={() => handleGroupClick(group.id)}
+              key={group._id}
+              className={`group-item ${selectedGroupId === group._id ? 'active' : ''}`}
+              onClick={() => handleGroupClick(group._id)}
             >
               <div className="group-pic">
-                {group.groupPicUrl ? (
-                  <img src={group.groupPicUrl} alt={`${group.name}'s picture`} className="group-pic-img" />
+                {group.photo ? (
+                  <img src={group.photo} alt={`${group.name}'s picture`} className="group-pic-img" />
                 ) : (
                   <FaUsers className="group-pic-icon" />
                 )}

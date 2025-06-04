@@ -27,18 +27,23 @@ const CreateGroupModal = ({ isOpen, onClose, friends, onCreateGroup }) => {
         }
     }, [isOpen]);
 
+
     const handleFriendToggle = (friendId, e) => {
         e.stopPropagation();
         setSelectedFriends(prev => {
             const newSelected = new Set(prev);
-            if (newSelected.has(friendId)) {
-                newSelected.delete(friendId);
+            // Use friend._id instead of friend.id if that's what your backend expects
+            const idToUse = friends.find(f => f.id === friendId)?._id || friendId;
+
+            if (newSelected.has(idToUse)) {
+                newSelected.delete(idToUse);
             } else {
-                newSelected.add(friendId);
+                newSelected.add(idToUse);
             }
             return newSelected;
         });
     };
+
 
     const handleCreateGroup = (e) => {
         e.preventDefault();
@@ -132,7 +137,7 @@ const CreateGroupModal = ({ isOpen, onClose, friends, onCreateGroup }) => {
                             />
                         </div>
                         <div className="create-group-friends-list">
-                            {filteredFriends.map(friend => (
+                            {/* {filteredFriends.map(friend => (
                                 <div
                                     key={friend.id}
                                     className="create-group-friend-item"
@@ -151,6 +156,33 @@ const CreateGroupModal = ({ isOpen, onClose, friends, onCreateGroup }) => {
                                     <button
                                         type="button"
                                         className={`create-group-add-friend-button ${selectedFriends.has(friend.id) ? 'selected' : ''}`}
+                                        onClick={(e) => handleFriendToggle(friend.id, e)}
+                                        aria-label={selectedFriends.has(friend.id) ? 'Remove from group' : 'Add to group'}
+                                    >
+                                        {selectedFriends.has(friend.id) ? <FaCheck /> : <FaPlus />}
+                                    </button>
+                                </div>
+                            ))} */}
+                            {filteredFriends.map(friend => (
+                                <div
+                                    key={friend.id}
+                                    className="create-group-friend-item"
+                                    onClick={(e) => handleFriendToggle(friend.id, e)}
+                                >
+                                    <div className="create-group-friend-info">
+                                        <div className="create-group-friend-avatar">
+                                            {friend.profilePic ? (
+                                                <img src={friend.profilePic} alt={friend.username} />
+                                            ) : (
+                                                <FaUser />
+                                            )}
+                                        </div>
+                                        <span className="create-group-friend-username">{friend.username}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className={`create-group-add-friend-button ${selectedFriends.has(friend.id) ? 'selected' : ''
+                                            }`}
                                         onClick={(e) => handleFriendToggle(friend.id, e)}
                                         aria-label={selectedFriends.has(friend.id) ? 'Remove from group' : 'Add to group'}
                                     >

@@ -1,5 +1,6 @@
 const Message = require('../models/Message');
 const User = require('../models/User');
+const Chat = require('../models/Chat');
 
 // Send a private message
 const sendMessage = async (req, res) => {
@@ -184,10 +185,148 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+// Initialize chat between two users
+const initializeChat = async (req, res) => {
+  try {
+    const { participantId } = req.body;
+    const currentUserId = req.user._id;
+
+    // Prevent self-chat
+    if (currentUserId.toString() === participantId.toString()) {
+      return res.status(400).json({ error: 'Cannot create chat with yourself' });
+    }
+
+    // Check if chat already exists between these users
+    const existingChat = await Chat.findOne({
+      participants: { 
+        $all: [currentUserId, participantId],
+        $size: 2 
+      }
+    }).populate('participants', 'username profilePic');
+
+    if (existingChat) {
+      return res.status(200).json({
+        message: 'Chat already exists',
+        chat: existingChat
+      });
+    }
+
+    // Verify the other user exists
+    const participant = await User.findById(participantId).select('username profilePic');
+    if (!participant) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Create new chat
+    const newChat = new Chat({
+      participants: [currentUserId, participantId],
+      chatType: 'private',
+      createdBy: currentUserId,
+      lastActivity: new Date()
+    });
+
+    await newChat.save();
+
+    // Populate the chat with participant details
+    const populatedChat = await Chat.populate(newChat, {
+      path: 'participants',
+      select: 'username profilePic'
+    });
+
+    // Emit socket event to both users
+    req.io.to(currentUserId.toString()).emit('chatInitialized', populatedChat);
+    req.io.to(participantId.toString()).emit('chatInitialized', populatedChat);
+
+    res.status(201).json({
+      message: 'Chat initialized successfully',
+      chat: populatedChat
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get chat by ID
+const getChatById = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const userId = req.user._id;
+
+    const chat = await Chat.findOne({
+      _id: chatId,
+      participants: userId
+    }).populate('participants', 'username profilePic');
+
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found or access denied' });
+    }
+
+    res.json(chat);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update the sendMessage function to work with chat initialization
+const sendMessageWithChat = async (req, res) => {
+  try {
+    const { receiverId, content, attachments = [] } = req.body;
+    const senderId = req.user._id;
+
+    // Find or create chat
+    let chat = await Chat.findOne({
+      participants: { 
+        $all: [senderId, receiverId],
+        $size: 2 
+      }
+    });
+
+    if (!chat) {
+      chat = new Chat({
+        participants: [senderId, receiverId],
+        chatType: 'private',
+        createdBy: senderId,
+        lastActivity: new Date()
+      });
+      await chat.save();
+    }
+
+    // Create message with chat reference
+    const message = new Message({
+      chatId: chat._id,
+      senderId,
+      receiverId,
+      content,
+      attachments
+    });
+
+    await message.save();
+
+    // Update chat's last activity
+    chat.lastActivity = new Date();
+    await chat.save();
+    
+    const populatedMessage = await Message.populate(message, {
+      path: 'senderId',
+      select: 'username profilePic'
+    });
+
+    res.status(201).json(populatedMessage);
+    req.io.to(receiverId.toString()).emit('newMessage', populatedMessage);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Export the new methods
 module.exports = {
   sendMessage,
+  sendMessageWithChat,
   getConversation,
   getAllConversations,
   markAsRead,
-  deleteMessage
+  deleteMessage,
+  initializeChat,
+  getChatById
 };

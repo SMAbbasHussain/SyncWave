@@ -1,110 +1,188 @@
-const GroupMessage = require('../models/GroupMessage');
 const Group = require('../models/Group');
+const GroupMessage = require('../models/GroupMessage');
 const User = require('../models/User');
 
-// Send a new group message
-exports.sendGroupMessage = async (req, res) => {
+// Send group message
+const sendGroupMessage = async (req, res) => {
   try {
-    const { groupId, content } = req.body;
+    const { groupId, content, attachments = [], mentions = [] } = req.body;
+    const senderId = req.user._id;
+
+    // Check if user is member
+    const group = await Group.findById(groupId);
+    if (!group || !group.isMember(senderId)) {
+      return res.status(403).json({ error: 'Not a member of this group' });
+    }
+
+    // Check permissions
+    if (group.permissions.onlyAdminsCanPost && !group.isAdmin(senderId)) {
+      return res.status(403).json({ error: 'Only admins can post in this group' });
+    }
+
+    // Check if group is muted
+    if (group.permissions.isMuted && !group.isAdmin(senderId)) {
+      return res.status(403).json({ error: 'Group is currently muted' });
+    }
+
     const message = new GroupMessage({
       groupId,
-      senderId: req.user._id,
-      content
+      senderId,
+      content,
+      attachments,
+      mentions
     });
 
     await message.save();
-    
-    const populated = await GroupMessage.populate(message, [
-      { path: 'senderId', select: 'username profilePic' },
-      { path: 'groupId', select: 'name' }
+
+    // Update group's last activity
+    group.lastActivity = new Date();
+    await group.save();
+
+    const populatedMessage = await GroupMessage.populate(message, [
+      {
+        path: 'senderId',
+        select: 'username profilePic'
+      },
+      {
+        path: 'mentions',
+        select: 'username profilePic'
+      }
     ]);
 
-    res.status(201).json(populated);
-    req.io.to(groupId.toString()).emit('newGroupMessage', populated);
+    // Emit to all group members
+    if (req.io) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('newGroupMessage', populatedMessage);
+      });
+
+      // Send special notification to mentioned users
+      mentions.forEach(mentionedUserId => {
+        req.io.to(mentionedUserId.toString()).emit('mentioned', {
+          type: 'group',
+          groupId,
+          messageId: message._id,
+          sender: req.user
+        });
+      });
+    }
+
+    res.status(201).json(populatedMessage);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
-// Get all messages for a group
-exports.getGroupMessages = async (req, res) => {
+// Get group messages
+const getGroupMessages = async (req, res) => {
   try {
     const { groupId } = req.params;
-    const userId = req.user._id;
+    const { page = 1, limit = 50 } = req.query;
+    const skip = (page - 1) * limit;
 
-    // Check if group exists
+    // Check if user is member
     const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ message: 'Group not found' });
+    if (!group || !group.isMember(req.user._id)) {
+      return res.status(403).json({ error: 'Not a member of this group' });
     }
 
-    // Check if user is a member of the group
-    const isMember = group.members.some(member => 
-      member.userId.toString() === userId.toString()
-    );
-    if (!isMember) {
-      return res.status(403).json({ message: 'You must be a member of the group to view messages' });
-    }
-
-    const messages = await GroupMessage.find({ groupId })
-      .sort({ timestamp: 1 })
-      .populate('senderId', 'username profilePicture')
-      .populate('groupId', 'name');
+    const messages = await GroupMessage.find({
+      groupId,
+      isDeleted: false,
+      deletedFor: { $ne: req.user._id }
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('senderId', 'username profilePic')
+      .populate('mentions', 'username profilePic')
+      .populate('reactions.userId', 'username profilePic');
 
     res.json(messages);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Delete a group message
-exports.deleteGroupMessage = async (req, res) => {
+// Mark messages as read
+const markMessagesAsRead = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { messageIds } = req.body;
+
+    // Check if user is member
+    const group = await Group.findById(groupId);
+    if (!group || !group.isMember(req.user._id)) {
+      return res.status(403).json({ error: 'Not a member of this group' });
+    }
+
+    await GroupMessage.updateMany(
+      {
+        _id: { $in: messageIds },
+        groupId,
+        'readBy.userId': { $ne: req.user._id }
+      },
+      {
+        $push: { readBy: { userId: req.user._id } }
+      }
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete group message
+const deleteGroupMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user._id;
+    const { deleteForEveryone = false } = req.body;
 
     const message = await GroupMessage.findById(messageId);
     if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+      return res.status(404).json({ error: 'Message not found' });
     }
 
-    // Check if user is the sender or an admin of the group
+    // Check if user is sender or admin
     const group = await Group.findById(message.groupId);
-    const isAdmin = group.members.some(member => 
-      member.userId.toString() === userId.toString() && 
-      member.role === 'admin'
-    );
+    const isOwner = message.senderId.toString() === req.user._id.toString();
+    const isAdmin = group && group.isAdmin(req.user._id);
 
-    if (message.senderId.toString() !== userId.toString() && !isAdmin) {
-      return res.status(403).json({ message: 'Not authorized to delete this message' });
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ error: 'Not authorized to delete this message' });
     }
 
-    await message.remove();
-    res.json({ message: 'Message deleted successfully' });
+    if (deleteForEveryone && isAdmin) {
+      // Hard delete for everyone
+      message.isDeleted = true;
+    } else {
+      // Soft delete for user
+      if (!message.deletedFor.includes(req.user._id)) {
+        message.deletedFor.push(req.user._id);
+      }
+    }
+
+    await message.save();
+
+    // Emit socket event
+    if (req.io && deleteForEveryone) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('messageDeleted', {
+          messageId,
+          groupId: message.groupId
+        });
+      });
+    }
+
+    res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Get recent messages from all groups user is part of
-exports.getRecentGroupMessages = async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    // Get all groups user is part of
-    const userGroups = await Group.find({ 'members.userId': userId });
-    const groupIds = userGroups.map(group => group._id);
-
-    // Get recent messages from these groups
-    const recentMessages = await GroupMessage.find({ groupId: { $in: groupIds } })
-      .sort({ timestamp: -1 })
-      .limit(50)
-      .populate('senderId', 'username profilePicture')
-      .populate('groupId', 'name');
-
-    res.json(recentMessages);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}; 
+module.exports = {
+  sendGroupMessage,
+  getGroupMessages,
+  markMessagesAsRead,
+  deleteGroupMessage
+};

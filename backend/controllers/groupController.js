@@ -1,30 +1,52 @@
 const Group = require('../models/Group');
-const User = require('../models/User');
 const GroupMessage = require('../models/GroupMessage');
-
-// Helper function to check group permissions
-const checkGroupAdmin = (group, userId) => {
-  return group.members.some(m => 
-    m.userId.equals(userId) && ['admin', 'moderator'].includes(m.role)
-  );
-};
+const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // Create a new group
 const createGroup = async (req, res) => {
   try {
-    const { name, description, photo } = req.body;
+    const { name, description, members = [] } = req.body;
+    const createdBy = req.user._id;
+    
+    // Convert string IDs to ObjectId
+    const validMembers = members.map(memberId => ({
+      userId: new mongoose.Types.ObjectId(memberId), // Convert to ObjectId
+      role: 'member'
+    }));
+
     const group = new Group({
       name,
       description,
-      photo,
-      creatorId: req.user._id,
-      members: [{
-        userId: req.user._id,
-        role: 'admin'
-      }]
+      createdBy,
+      members: [
+        { userId: createdBy, role: 'admin' },
+        ...validMembers
+      ]
     });
+
     await group.save();
-    res.status(201).json(group);
+    
+
+    const populatedGroup = await Group.populate(group, [
+      {
+        path: 'members.userId',
+        select: 'username profilePic'
+      },
+      {
+        path: 'createdBy',
+        select: 'username profilePic'
+      }
+    ]);
+
+    // Emit socket event to all members
+    if (req.io) {
+      populatedGroup.members.forEach(member => {
+        req.io.to(member.userId._id.toString()).emit('groupCreated', populatedGroup);
+      });
+    }
+
+    res.status(201).json(populatedGroup);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -33,22 +55,56 @@ const createGroup = async (req, res) => {
 // Get all groups for a user
 const getUserGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ 'members.userId': req.user._id })
-      .populate('creatorId', 'username profilePic')
+    const userId = req.user._id;
+
+    const groups = await Group.find({
+      'members.userId': userId,
+      isActive: true
+    })
+      .populate('createdBy', 'username profilePic')
       .populate('members.userId', 'username profilePic')
       .populate('pinnedMessages.messageId')
-      .populate('pinnedMessages.pinnedBy', 'username profilePic');
-    res.json(groups);
+      .populate('pinnedMessages.pinnedBy', 'username profilePic')
+      .sort({ lastActivity: -1 });
+
+    const groupsWithDetails = await Promise.all(
+      groups.map(async (group) => {
+        const lastMessage = await GroupMessage.findOne({
+          groupId: group._id,
+          isDeleted: false,
+          deletedFor: { $ne: userId }
+        })
+          .sort({ createdAt: -1 })
+          .populate('senderId', 'username profilePic');
+
+        const unreadCount = await GroupMessage.countDocuments({
+          groupId: group._id,
+          isDeleted: false,
+          deletedFor: { $ne: userId },
+          'readBy.userId': { $ne: userId }
+        });
+
+        return {
+          ...group.toObject(),
+          lastMessage,
+          unreadCount
+        };
+      })
+    );
+
+    res.json(groupsWithDetails);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Get group details
 const getGroupDetails = async (req, res) => {
   try {
     const group = await Group.findById(req.params.groupId)
-      .populate('creatorId', 'username profilePic')
+      .populate('createdBy', 'username profilePic')
       .populate('members.userId', 'username profilePic')
       .populate('pinnedMessages.messageId')
       .populate('pinnedMessages.pinnedBy', 'username profilePic');
@@ -73,16 +129,16 @@ const handleJoinRequest = async (req, res) => {
   try {
     const { userId, status } = req.body;
     const group = await Group.findById(req.params.groupId);
-    
+
     if (!group) {
       return res.status(404).json({ error: 'Group not found' });
     }
 
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can handle join requests' });
     }
 
-    const request = group.joinRequests.find(req => 
+    const request = group.joinRequests.find(req =>
       req.userId.toString() === userId && req.status === 'pending'
     );
 
@@ -100,6 +156,12 @@ const handleJoinRequest = async (req, res) => {
     }
 
     await group.save();
+
+    // Emit socket event if approved
+    if (req.io && status === 'approved') {
+      req.io.to(userId.toString()).emit('joinRequestApproved', group);
+    }
+
     res.json(group);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -117,7 +179,7 @@ const addMember = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can add members' });
     }
 
@@ -133,7 +195,18 @@ const addMember = async (req, res) => {
     });
 
     await group.save();
-    res.json(group);
+
+    const populatedGroup = await Group.populate(group, {
+      path: 'members.userId',
+      select: 'username profilePic'
+    });
+
+    // Emit socket event
+    if (req.io) {
+      req.io.to(userId.toString()).emit('addedToGroup', populatedGroup);
+    }
+
+    res.json(populatedGroup);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -150,7 +223,7 @@ const removeMember = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can remove members' });
     }
 
@@ -163,6 +236,11 @@ const removeMember = async (req, res) => {
     // Remove member
     group.members = group.members.filter(m => !m.userId.equals(userId));
     await group.save();
+
+    // Emit socket event
+    if (req.io) {
+      req.io.to(userId.toString()).emit('removedFromGroup', { groupId: group._id });
+    }
 
     res.json(group);
   } catch (error) {
@@ -181,7 +259,7 @@ const updateMemberRole = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can update roles' });
     }
 
@@ -193,6 +271,11 @@ const updateMemberRole = async (req, res) => {
 
     member.role = role;
     await group.save();
+
+    // Emit socket event
+    if (req.io) {
+      req.io.to(userId.toString()).emit('roleUpdated', { groupId: group._id, newRole: role });
+    }
 
     res.json(group);
   } catch (error) {
@@ -211,7 +294,7 @@ const updateGroupInfo = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can update group info' });
     }
 
@@ -221,6 +304,14 @@ const updateGroupInfo = async (req, res) => {
     if (photo) group.photo = photo;
 
     await group.save();
+
+    // Emit socket event to all members
+    if (req.io) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('groupInfoUpdated', group);
+      });
+    }
+
     res.json(group);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -238,14 +329,22 @@ const pinMessage = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can pin messages' });
     }
 
-    // Check if message exists
-    const message = await GroupMessage.findById(messageId);
+    // Check if message exists and belongs to this group
+    const message = await GroupMessage.findOne({
+      _id: messageId,
+      groupId: req.params.groupId
+    });
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
+    }
+
+    // Check if already pinned
+    if (group.pinnedMessages.some(pm => pm.messageId.equals(messageId))) {
+      return res.status(400).json({ error: 'Message is already pinned' });
     }
 
     // Add to pinned messages
@@ -255,6 +354,18 @@ const pinMessage = async (req, res) => {
     });
 
     await group.save();
+
+    // Emit socket event to all members
+    if (req.io) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('messagePinned', {
+          groupId: group._id,
+          messageId,
+          pinnedBy: req.user._id
+        });
+      });
+    }
+
     res.json(group);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -272,7 +383,7 @@ const unpinMessage = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can unpin messages' });
     }
 
@@ -282,6 +393,17 @@ const unpinMessage = async (req, res) => {
     );
 
     await group.save();
+
+    // Emit socket event to all members
+    if (req.io) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('messageUnpinned', {
+          groupId: group._id,
+          messageId
+        });
+      });
+    }
+
     res.json(group);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -298,12 +420,22 @@ const toggleGroupMute = async (req, res) => {
     }
 
     // Check permissions
-    if (!checkGroupAdmin(group, req.user._id)) {
+    if (!group.isAdmin(req.user._id)) {
       return res.status(403).json({ error: 'Only admins can mute the group' });
     }
 
     group.permissions.isMuted = !group.permissions.isMuted;
     await group.save();
+
+    // Emit socket event to all members
+    if (req.io) {
+      group.members.forEach(member => {
+        req.io.to(member.userId.toString()).emit('groupMuteToggled', {
+          groupId: group._id,
+          isMuted: group.permissions.isMuted
+        });
+      });
+    }
 
     res.json(group);
   } catch (error) {
