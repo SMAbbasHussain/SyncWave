@@ -138,9 +138,6 @@
 
 .search-bar input:focus {
     border-color: rgba(0, 119, 255, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    /* Consistent focus background */
-    outline: none;
 }
 
 .search-bar input::placeholder {
@@ -165,8 +162,6 @@
 
 .search-close-button {
     position: absolute;
-    right: 0.9rem;
-    /* Align to the right */
     top: 50%;
     transform: translateY(-50%);
     background: none;

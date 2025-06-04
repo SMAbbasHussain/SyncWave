@@ -127,9 +127,9 @@ function Friends() {
                     friends.map(friend => (
                         <div key={friend._id} className="friend-item">
                             <div className="friend-avatar">
-                                <img 
-                                    src={friend.profilePic || '/PFP2.png'} 
-                                    alt={friend.username} 
+                                <img
+                                    src={friend.profilePic || '/PFP2.png'}
+                                    alt={friend.username}
                                 />
                                 <div className={`status-indicator ${friend.status || 'offline'}`} />
                             </div>
@@ -155,9 +155,9 @@ function Friends() {
                         filteredFriends.map(friend => (
                             <div key={friend._id} className="friend-item search-result">
                                 <div className="friend-avatar">
-                                    <img 
-                                        src={friend.profilePic || '/PFP2.png'} 
-                                        alt={friend.username} 
+                                    <img
+                                        src={friend.profilePic || '/PFP2.png'}
+                                        alt={friend.username}
                                     />
                                     <div className={`status-indicator ${friend.status || 'offline'}`} />
                                 </div>

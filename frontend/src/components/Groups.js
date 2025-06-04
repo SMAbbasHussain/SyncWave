@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import "../styles/Groups.css";
 import { FaSearch, FaTimes, FaUsers } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
+import CreateGroupModal from "./CreateGroupModal";
 
 function Groups({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const searchInputRef = useRef(null);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
-  const [groups] = useState([
+  const [groups, setGroups] = useState([
     { id: 1, name: "Group Name ni mila?", groupPicUrl: "https://via.placeholder.com/40/abcdef", image: "https://via.placeholder.com/35" },
     { id: 2, name: "itna dehan kabhi..", groupPicUrl: '', image: "https://via.placeholder.com/35" },
     { id: 3, name: "PARHAI Pr dete na", groupPicUrl: "https://via.placeholder.com/40/123456", image: "https://via.placeholder.com/35" },
@@ -20,6 +22,15 @@ function Groups({ onChatSelect }) {
     { id: 9, name: "kia dhoond rhy?", groupPicUrl: "https://via.placeholder.com/40/901234", image: "https://via.placeholder.com/35" },
     { id: 10, name: "bsss kro. bye", image: "https://via.placeholder.com/35" },
   ]);
+
+  // Mock friends list for the create group modal
+  const mockFriends = [
+    { id: 1, username: "John Doe", avatar: "https://via.placeholder.com/40" },
+    { id: 2, username: "Jane Smith", avatar: "https://via.placeholder.com/40" },
+    { id: 3, username: "Mike Johnson", avatar: null },
+    { id: 4, username: "Sarah Williams", avatar: "https://via.placeholder.com/40" },
+    { id: 5, username: "Alex Brown", avatar: null },
+  ];
 
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -49,6 +60,18 @@ function Groups({ onChatSelect }) {
     }
   };
 
+  const handleCreateGroup = (groupData) => {
+    // TODO: Replace with actual API call to create group
+    const newGroup = {
+      id: groups.length + 1,
+      name: groupData.title,
+      groupPicUrl: null, // Will be updated when group image upload is implemented
+      description: groupData.description,
+      members: groupData.members
+    };
+    setGroups(prevGroups => [...prevGroups, newGroup]);
+  };
+
   return (
     <div className="groups-container">
       <div className="groups-header">
@@ -58,6 +81,7 @@ function Groups({ onChatSelect }) {
             <button
               className="action-btn create-btn"
               title="Create New Group"
+              onClick={() => setIsCreateModalOpen(true)}
             >
               <FiPlus className="action-icon" />
             </button>
@@ -132,6 +156,13 @@ function Groups({ onChatSelect }) {
           </div>
         )}
       </div>
+
+      <CreateGroupModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        friends={mockFriends}
+        onCreateGroup={handleCreateGroup}
+      />
     </div>
   );
 }
