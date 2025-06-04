@@ -164,9 +164,9 @@ function FriendsAction() {
     const renderRequestItem = (request, type) => (
         <div key={request._id} className="request-item">
             <div className="friend-avatar">
-                <img 
-                    src={type === 'received' ? request.sender.profilePic : request.receiver.profilePic || '/PFP.png'} 
-                    alt={type === 'received' ? request.sender.username : request.receiver.username} 
+                <img
+                    src={type === 'received' ? request.sender.profilePic : request.receiver.profilePic || '/PFP.png'}
+                    alt={type === 'received' ? request.sender.username : request.receiver.username}
                 />
             </div>
             <div className="friend-info">

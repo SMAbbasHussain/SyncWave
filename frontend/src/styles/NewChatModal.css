@@ -179,8 +179,7 @@
 
 .search-close-button {
     position: absolute;
-    right: 0.9rem;
-    top: 50%;
+    left: 90% !important;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -258,9 +257,10 @@
 
 .friend-info {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
     flex: 1;
+    gap: 10px;
     overflow: hidden;
 }
 

@@ -1,0 +1,334 @@
+.create-group-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(25, 25, 25, 0.152);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.create-group-modal-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    max-width: 700px;
+    height: 75vh;
+    background: rgb(0, 2, 24);
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 119, 255, 0.2);
+    border: 1px solid rgba(0, 119, 255, 0.3);
+    animation: createGroupModalSlideIn 0.3s ease-out;
+}
+
+@keyframes createGroupModalSlideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.create-group-modal-header {
+    padding: 15px;
+    background: rgba(0, 119, 255, 0.131);
+    border-bottom: 1px solid rgba(0, 119, 255, 0.1);
+    position: relative;
+    min-height: 60px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.create-group-header-title {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 1rem;
+    white-space: nowrap;
+}
+
+.create-group-modal-content {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    min-height: 0;
+    overflow: hidden;
+    padding: 15px;
+}
+
+/* Left Section - Group Info */
+.create-group-info-section {
+    flex: 0 0 38%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+}
+
+.create-group-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.create-group-profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-group-profile-image:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.create-group-profile-image svg {
+    width: 30px;
+    height: 30px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.create-group-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.create-group-input-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+.create-group-input-group input,
+.create-group-input-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.create-group-input-group input:focus,
+.create-group-input-group textarea:focus {
+    border-color: rgba(0, 119, 255, 0.5);
+    outline: none;
+}
+
+.create-group-input-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Right Section - Friends List */
+.create-group-friends-section {
+    flex: 0 0 62%;
+    display: flex;
+    flex-direction: column;
+    padding-left: 15px;
+    overflow: hidden;
+}
+
+.create-group-section-title {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.create-group-friends-search {
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.create-group-friends-search input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+.create-group-friends-search svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+}
+
+.create-group-friends-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 5px;
+}
+
+.create-group-friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(74, 124, 182, 0.055);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.create-group-friend-item:hover {
+    background: rgba(255, 255, 255, 0.044);
+    border-color: rgba(255, 255, 255, 0.177);
+    transform: translateX(2px);
+}
+
+.create-group-friend-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.create-group-friend-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #3a3a3a;
+}
+
+.create-group-friend-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.create-group-friend-username {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.create-group-add-friend-button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    width: 28px;
+    height: 28px;
+}
+
+.create-group-add-friend-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.create-group-add-friend-button.selected {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.create-group-add-friend-button.selected:hover {
+    background: rgba(76, 175, 80, 0.2);
+}
+
+.create-group-modal-footer {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.create-group-modal-button {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-group-cancel-button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.create-group-cancel-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.create-group-save-button {
+    background: rgba(0, 119, 255, 0.8);
+    border: none;
+    color: #fff;
+}
+
+.create-group-save-button:hover:not(:disabled) {
+    background: rgba(0, 119, 255, 0.9);
+}
+
+.create-group-save-button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+}
+
+.create-group-no-results {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    padding: 15px;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Scrollbar styles */
+.create-group-friends-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.create-group-friends-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.create-group-friends-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 119, 255, 0.4);
+    border-radius: 3px;
+}
+
+.create-group-friends-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 119, 255, 0.6);
+}
