@@ -1,5 +1,4 @@
 const FriendRequest = require('../models/FriendRequest');
-const Friendship = require('../models/Friendship');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
@@ -26,10 +25,8 @@ exports.sendFriendRequest = async (req, res) => {
     }
 
     // Check if friendship already exists
-    const existingFriendship = await Friendship.findOne({
-      users: { $all: [senderId, receiverId] }
-    });
-    if (existingFriendship) {
+    const sender = await User.findById(senderId);
+    if (sender.friends.includes(receiverId)) {
       return res.status(400).json({ message: 'Friendship already exists' });
     }
 
@@ -81,26 +78,18 @@ exports.acceptFriendRequest = async (req, res) => {
       return res.status(400).json({ message: 'Friend request is not pending' });
     }
 
-    // Create friendship
-    const friendship = new Friendship({
-      users: [friendRequest.sender, friendRequest.receiver]
-    });
+    // Add each user to the other's friends array
+    await User.findByIdAndUpdate(friendRequest.sender, { $addToSet: { friends: friendRequest.receiver } });
+    await User.findByIdAndUpdate(friendRequest.receiver, { $addToSet: { friends: friendRequest.sender } });
 
-    // Save request update first
+    // Save request update
     friendRequest.status = 'accepted';
     await friendRequest.save();
 
-    try {
-      // Try to save friendship
-      await friendship.save();
-    } catch (error) {
-      // Roll back friendRequest status if friendship save fails
-      friendRequest.status = 'pending';
-      await friendRequest.save();
-      throw new Error(error.message);
-    }
+    // Delete the friend request after accepting
+    await FriendRequest.findByIdAndDelete(requestId);
 
-    res.json({ message: 'Friend request accepted', friendship });
+    res.json({ message: 'Friend request accepted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -130,6 +119,9 @@ exports.declineFriendRequest = async (req, res) => {
     friendRequest.status = 'declined';
     await friendRequest.save();
 
+    // Delete the friend request after declining
+    await FriendRequest.findByIdAndDelete(requestId);
+
     res.json({ message: 'Friend request declined' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -157,7 +149,8 @@ exports.cancelFriendRequest = async (req, res) => {
       return res.status(400).json({ message: 'Friend request is not pending' });
     }
 
-    await friendRequest.deleteOne(); // ✅ Use this instead of remove()
+    // Delete the friend request after cancelling
+    await FriendRequest.findByIdAndDelete(requestId);
     res.json({ message: 'Friend request cancelled' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -175,15 +168,10 @@ exports.removeFriend = async (req, res) => {
       return res.status(400).json({ message: 'Invalid friend ID' });
     }
 
-    const friendship = await Friendship.findOne({
-      users: { $all: [userId, friendId] }
-    });
+    // Remove each user from the other's friends array
+    await User.findByIdAndUpdate(userId, { $pull: { friends: friendId } });
+    await User.findByIdAndUpdate(friendId, { $pull: { friends: userId } });
 
-    if (!friendship) {
-      return res.status(404).json({ message: 'Friendship not found' });
-    }
-
-    await friendship.deleteOne(); 
     res.json({ message: 'Friend removed successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -194,16 +182,8 @@ exports.removeFriend = async (req, res) => {
 exports.getFriends = async (req, res) => {
   try {
     const userId = req.userId;
-
-    const friendships = await Friendship.find({ users: userId })
-      .populate('users', 'username profilePic');
-
-    const friends = friendships.map(friendship => {
-      const friend = friendship.users.find(user => user._id.toString() !== userId.toString());
-      return friend;
-    });
-
-    res.json(friends);
+    const user = await User.findById(userId).populate('friends', 'username profilePic');
+    res.json(user.friends);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
