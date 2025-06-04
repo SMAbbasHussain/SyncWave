@@ -2,6 +2,7 @@ const User = require('../models/User');
 const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
+const cloudinary = require('../utils/cloudinary');
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60 * 1000; // 30 minutes
