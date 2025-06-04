@@ -1,3 +1,5 @@
+
+// models/Group.js - GROUPS ONLY
 const mongoose = require('mongoose');
 
 const groupSchema = new mongoose.Schema({
@@ -17,7 +19,7 @@ const groupSchema = new mongoose.Schema({
     type: String,
     default: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
   },
-  creatorId: {
+  createdBy: { // Changed from creatorId to createdBy for consistency
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -89,10 +91,26 @@ const groupSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
-}, { timestamps: true });
+  }],
+  lastActivity: {
+    type: Date,
+    default: Date.now
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, { 
+  timestamps: true 
+});
 
-// Add methods to the schema
+// Indexes for efficient querying
+groupSchema.index({ 'members.userId': 1 });
+groupSchema.index({ createdBy: 1 });
+groupSchema.index({ lastActivity: -1 });
+groupSchema.index({ createdAt: -1 });
+
+// Methods
 groupSchema.methods.isMember = function(userId) {
   return this.members.some(member => member.userId.toString() === userId.toString());
 };
@@ -102,6 +120,14 @@ groupSchema.methods.isAdmin = function(userId) {
     member.userId.toString() === userId.toString() && 
     ['admin', 'moderator'].includes(member.role)
   );
+};
+
+groupSchema.methods.getMember = function(userId) {
+  return this.members.find(member => member.userId.toString() === userId.toString());
+};
+
+groupSchema.methods.getMemberCount = function() {
+  return this.members.length;
 };
 
 module.exports = mongoose.model('Group', groupSchema);

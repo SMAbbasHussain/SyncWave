@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const groupMessageController = require('../controllers/groupMessageController');
-const { verifyToken } = require('../utils/jwtUtils');
-const { checkGroupMember } = require('../middleware/chatMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.use(verifyToken);
+// Apply authentication middleware to all routes
+router.use(authMiddleware);
 
-// Group message operations
-router.post('/groups/:groupId/messages', checkGroupMember, groupMessageController.sendGroupMessage);
-router.get('/groups/:groupId/messages', checkGroupMember, groupMessageController.getGroupMessages);
-router.get('/groups/messages/recent', groupMessageController.getRecentGroupMessages);
-router.delete('/groups/messages/:messageId', groupMessageController.deleteGroupMessage);
+// Message routes
+router.post('/', groupMessageController.sendGroupMessage);
+router.get('/:groupId', groupMessageController.getGroupMessages);
+router.post('/:groupId/read', groupMessageController.markMessagesAsRead);
+router.delete('/:messageId', groupMessageController.deleteGroupMessage);
 
 module.exports = router;

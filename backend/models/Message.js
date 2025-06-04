@@ -1,6 +1,12 @@
+
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
+  chatId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Chat',
+    required: true // Now required since we're separating systems
+  },
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -17,10 +23,10 @@ const messageSchema = new mongoose.Schema({
     trim: true,
     maxlength: 2000
   },
-  attachments: [{
-    type: String, // URLs to files
+  attachments: {
+    type: [String], // Fixed array default issue
     default: []
-  }],
+  },
   isRead: {
     type: Boolean,
     default: false
@@ -32,24 +38,56 @@ const messageSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  deletedFor: [{
-    type: mongoose.Schema.Types.ObjectId,
+  deletedFor: {
+    type: [mongoose.Schema.Types.ObjectId], // Fixed array default issue
     ref: 'User',
     default: []
-  }],
+  },
   reactions: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
     emoji: {
       type: String,
       required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
     }
   }]
-}, { timestamps: true });
+}, { 
+  timestamps: true 
+});
 
-// Index for faster querying
-messageSchema.index({ senderId: 1, receiverId: 1 });
+// Comprehensive indexes for performance
+messageSchema.index({ chatId: 1, createdAt: -1 }); // Chat timeline
+messageSchema.index({ senderId: 1, receiverId: 1 }); // User conversations
+messageSchema.index({ receiverId: 1, isRead: 1 }); // Unread messages
+messageSchema.index({ isDeleted: 1, deletedFor: 1 }); // Soft deletes
+messageSchema.index({ createdAt: -1 }); // Recent messages
+
+// Methods
+messageSchema.methods.isDeletedFor = function(userId) {
+  return this.deletedFor.includes(userId);
+};
+
+messageSchema.methods.addReaction = function(userId, emoji) {
+  const existingReaction = this.reactions.find(r => 
+    r.userId.toString() === userId.toString() && r.emoji === emoji
+  );
+  
+  if (!existingReaction) {
+    this.reactions.push({ userId, emoji });
+  }
+};
+
+messageSchema.methods.removeReaction = function(userId, emoji) {
+  this.reactions = this.reactions.filter(r => 
+    !(r.userId.toString() === userId.toString() && r.emoji === emoji)
+  );
+};
 
 module.exports = mongoose.model('Message', messageSchema);

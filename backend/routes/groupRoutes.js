@@ -1,28 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const groupController = require('../controllers/groupController');
-const { verifyToken } = require('../utils/jwtUtils');
-const { checkGroupMember, checkGroupAdmin } = require('../middleware/chatMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
+// Apply authentication middleware to all routes
+router.use(authMiddleware);
 
-// Verify token for all group routes
-router.use(verifyToken);
-
-// Group CRUD
+// Group management routes
 router.post('/', groupController.createGroup);
 router.get('/', groupController.getUserGroups);
-router.get('/:groupId', checkGroupMember, groupController.getGroupDetails);
-router.put('/:groupId', checkGroupAdmin, groupController.updateGroupInfo);
+router.get('/:groupId', groupController.getGroupDetails);
 
-// Member management
-router.post('/:groupId/members', checkGroupAdmin, groupController.addMember);
-router.delete('/:groupId/members/:userId', checkGroupAdmin, groupController.removeMember);
-router.put('/:groupId/members/:userId/role', checkGroupAdmin, groupController.updateMemberRole);
+// Member management routes
+router.post('/:groupId/join-requests', groupController.handleJoinRequest);
+router.post('/:groupId/members', groupController.addMember);
+router.delete('/:groupId/members/:userId', groupController.removeMember);
+router.put('/:groupId/members/role', groupController.updateMemberRole);
 
-// Group features
-router.post('/:groupId/join-requests', checkGroupAdmin, groupController.handleJoinRequest);
-router.put('/:groupId/mute', checkGroupAdmin, groupController.toggleGroupMute);
-router.post('/:groupId/pins/:messageId', checkGroupAdmin, groupController.pinMessage);
-router.delete('/:groupId/pins/:messageId', checkGroupAdmin, groupController.unpinMessage);
+// Group settings routes
+router.put('/:groupId', groupController.updateGroupInfo);
+router.post('/:groupId/pin', groupController.pinMessage);
+router.delete('/:groupId/pin/:messageId', groupController.unpinMessage);
+router.put('/:groupId/mute', groupController.toggleGroupMute);
 
 module.exports = router;
