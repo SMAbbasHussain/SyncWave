@@ -3,6 +3,7 @@ import "../styles/Groups.css";
 import { FaSearch, FaTimes, FaUsers } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import CreateGroupModal from "./CreateGroupModal";
+import { getFriends } from '../services/friendService';
 
 function Groups({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,14 +24,19 @@ function Groups({ onChatSelect }) {
     { id: 10, name: "bsss kro. bye", image: "https://via.placeholder.com/35" },
   ]);
 
-  // Mock friends list for the create group modal
-  const mockFriends = [
-    { id: 1, username: "John Doe", avatar: "https://via.placeholder.com/40" },
-    { id: 2, username: "Jane Smith", avatar: "https://via.placeholder.com/40" },
-    { id: 3, username: "Mike Johnson", avatar: null },
-    { id: 4, username: "Sarah Williams", avatar: "https://via.placeholder.com/40" },
-    { id: 5, username: "Alex Brown", avatar: null },
-  ];
+  const [friends, setFriends] = useState([]);
+
+  useEffect(() => {
+    async function fetchFriends() {
+      try {
+        const data = await getFriends();
+        setFriends(data);
+      } catch (error) {
+        console.log(error.message)
+      }
+    }
+    fetchFriends();
+  }, []);
 
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -160,7 +166,7 @@ function Groups({ onChatSelect }) {
       <CreateGroupModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        friends={mockFriends}
+        friends={friends}
         onCreateGroup={handleCreateGroup}
       />
     </div>
