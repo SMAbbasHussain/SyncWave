@@ -6,12 +6,12 @@ const mongoose = require('mongoose');
 // Create a new group
 const createGroup = async (req, res) => {
   try {
-    const { name, description, members = [] } = req.body;
+    const { name, description, members = [], photo } = req.body;
     const createdBy = req.user._id;
-    
+
     // Convert string IDs to ObjectId
     const validMembers = members.map(memberId => ({
-      userId: new mongoose.Types.ObjectId(memberId), // Convert to ObjectId
+      userId: new mongoose.Types.ObjectId(memberId),
       role: 'member'
     }));
 
@@ -19,6 +19,7 @@ const createGroup = async (req, res) => {
       name,
       description,
       createdBy,
+      photo: photo || undefined, // Use the provided photo or fall back to default
       members: [
         { userId: createdBy, role: 'admin' },
         ...validMembers
@@ -26,7 +27,7 @@ const createGroup = async (req, res) => {
     });
 
     await group.save();
-    
+
 
     const populatedGroup = await Group.populate(group, [
       {
