@@ -151,11 +151,11 @@ function Profile() {
             localStorage.removeUser('user');
             setUser(null);
             setUserStatus('offline');
-            
+
             if (heartbeatInterval.current) {
                 clearInterval(heartbeatInterval.current);
             }
-            
+
             navigate('/login');
         }
     };
@@ -219,8 +219,8 @@ function Profile() {
                         {user?.username || "Guest"}
                     </span>
                     <span className="profile-status" style={{ color: getStatusColor() }}>
-                        <span 
-                            className="status-indicator" 
+                        <span
+                            className="status-indicator"
                             style={{ backgroundColor: getStatusColor() }}
                         ></span>
                         {getStatusDisplay()}

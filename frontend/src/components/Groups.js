@@ -86,36 +86,34 @@ function Groups({ onChatSelect }) {
 
   const handleCreateGroup = async (groupData) => {
     try {
-      console.log('Creating group with data:', {
-        title: groupData.title,
-        description: groupData.description,
-        members: groupData.members
-      });
+      console.log('Creating group with data:', groupData);
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/groups`,
         {
           name: groupData.title,
           description: groupData.description,
-          members: groupData.members.filter(id => id) // Filter out any null/undefined
+          members: groupData.members,
+          photo: groupData.photo
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
           }
         }
       );
 
-      const newGroup = response.data;
-      setGroups(prevGroups => [...prevGroups, newGroup]);
-      setIsCreateModalOpen(false);
+      if (response.data) {
+        const newGroup = response.data;
+        setGroups(prevGroups => [...prevGroups, newGroup]);
+        setIsCreateModalOpen(false);
+      } else {
+        throw new Error('No data received from server');
+      }
 
     } catch (err) {
-      console.error('Error creating group:', {
-        error: err,
-        requestData: err.config?.data,
-        response: err.response?.data
-      });
+      console.error('Error creating group:', err);
       setError(err.response?.data?.error || 'Failed to create group');
     }
   };

@@ -12,6 +12,34 @@
   border-top: 1px solid rgba(0, 119, 255, 0.15);
 }
 
+/* Error and empty state messages */
+.groups-container.error,
+.groups-container.loading,
+.no-groups-message,
+.no-results {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.groups-container.error {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.groups-container.loading {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 119, 255, 0.1);
+  border: 1px solid rgba(0, 119, 255, 0.2);
+}
+
 .groups-search-container {
   position: relative;
   width: 100%;
@@ -131,15 +159,6 @@
 .group-name {
   color: #fff;
   font-size: 1rem;
-}
-
-.no-results {
-  width: 100%;
-  padding: 15px;
-  color: #ffffff;
-  font-size: 0.9rem;
-  text-align: center;
-  background: rgba(211, 211, 211, 0.1);
 }
 
 /* Groups Header Styles */

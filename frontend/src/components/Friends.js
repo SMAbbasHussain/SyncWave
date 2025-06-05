@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus, FaUserMinus } from 'react-icons/fa';
 import '../styles/Friends.css';
 import * as friendService from '../services/friendService';
+import ConfirmationModal from './ConfirmationModal';
 
 function Friends() {
     const [isSearchActive, setIsSearchActive] = useState(false);
@@ -9,6 +10,9 @@ function Friends() {
     const [friends, setFriends] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [friendToRemove, setFriendToRemove] = useState(null);
+    const [fadingFriends, setFadingFriends] = useState(new Set());
     const searchInputRef = useRef(null);
 
     // Fetch friends list when component mounts
@@ -30,14 +34,39 @@ function Friends() {
         }
     };
 
-    const handleRemoveFriend = async (friendId) => {
-        try {
-            await friendService.removeFriend(friendId);
-            setFriends(prevFriends => prevFriends.filter(friend => friend._id !== friendId));
-        } catch (error) {
-            console.error('Failed to remove friend:', error);
-            setError('Failed to remove friend');
+    const handleRemoveFriendClick = (friendId, username) => {
+        setFriendToRemove({ id: friendId, username });
+        setShowConfirmModal(true);
+    };
+
+    const startFadeOut = (friendId) => {
+        setFadingFriends(prev => new Set([...prev, friendId]));
+        // Remove the item after animation completes
+        setTimeout(() => {
+            setFadingFriends(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(friendId);
+                return newSet;
+            });
+        }, 3000);
+    };
+
+    const handleConfirmRemove = async () => {
+        if (friendToRemove) {
+            try {
+                await friendService.removeFriend(friendToRemove.id);
+                startFadeOut(friendToRemove.id);
+                // Remove from friends list after animation
+                setTimeout(() => {
+                    setFriends(prev => prev.filter(friend => friend._id !== friendToRemove.id));
+                }, 3000);
+            } catch (error) {
+                console.error('Failed to remove friend:', error);
+                setError('Failed to remove friend');
+            }
         }
+        setShowConfirmModal(false);
+        setFriendToRemove(null);
     };
 
     const filteredFriends = friends.filter(friend =>
@@ -64,6 +93,31 @@ function Friends() {
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
+
+    const renderFriendItem = (friend) => (
+        <div
+            key={friend._id}
+            className={`friend-item ${fadingFriends.has(friend._id) ? 'fade-out' : ''}`}
+        >
+            <div className="friend-avatar">
+                <img
+                    src={friend.profilePic || '/PFP2.png'}
+                    alt={friend.username}
+                />
+                <div className={`status-indicator ${friend.status || 'offline'}`} />
+            </div>
+            <div className="friend-info">
+                <span className="friend-username">{friend.username}</span>
+            </div>
+            <button
+                className="remove-friend-button"
+                onClick={() => handleRemoveFriendClick(friend._id, friend.username)}
+                title="Remove friend"
+            >
+                <FaUserMinus />
+            </button>
+        </div>
+    );
 
     if (error) {
         return (
@@ -124,27 +178,7 @@ function Friends() {
                         No friends yet. Add some friends to start chatting!
                     </div>
                 ) : (
-                    friends.map(friend => (
-                        <div key={friend._id} className="friend-item">
-                            <div className="friend-avatar">
-                                <img
-                                    src={friend.profilePic || '/PFP2.png'}
-                                    alt={friend.username}
-                                />
-                                <div className={`status-indicator ${friend.status || 'offline'}`} />
-                            </div>
-                            <div className="friend-info">
-                                <span className="friend-username">{friend.username}</span>
-                            </div>
-                            <button
-                                className="remove-friend-button"
-                                onClick={() => handleRemoveFriend(friend._id)}
-                                title="Remove friend"
-                            >
-                                <FaUserMinus />
-                            </button>
-                        </div>
-                    ))
+                    friends.map(renderFriendItem)
                 )}
             </div>
 
@@ -152,27 +186,7 @@ function Friends() {
             {isSearchActive && searchQuery.trim() !== "" && (
                 <div className="search-results">
                     {filteredFriends.length > 0 ? (
-                        filteredFriends.map(friend => (
-                            <div key={friend._id} className="friend-item search-result">
-                                <div className="friend-avatar">
-                                    <img
-                                        src={friend.profilePic || '/PFP2.png'}
-                                        alt={friend.username}
-                                    />
-                                    <div className={`status-indicator ${friend.status || 'offline'}`} />
-                                </div>
-                                <div className="friend-info">
-                                    <span className="friend-username">{friend.username}</span>
-                                </div>
-                                <button
-                                    className="remove-friend-button"
-                                    onClick={() => handleRemoveFriend(friend._id)}
-                                    title="Remove friend"
-                                >
-                                    <FaUserMinus />
-                                </button>
-                            </div>
-                        ))
+                        filteredFriends.map(renderFriendItem)
                     ) : (
                         <div className="no-results">
                             No friends found matching "{searchQuery}"
@@ -180,6 +194,18 @@ function Friends() {
                     )}
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={showConfirmModal}
+                message={`Are you sure you want to remove ${friendToRemove?.username} from your friends?`}
+                onConfirm={handleConfirmRemove}
+                onClose={() => {
+                    setShowConfirmModal(false);
+                    setFriendToRemove(null);
+                }}
+                confirmText="Remove"
+                cancelText="Cancel"
+            />
         </div>
     );
 }

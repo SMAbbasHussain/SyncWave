@@ -3,6 +3,7 @@ import { FaSearch, FaTimes, FaUserPlus, FaUserFriends, FaPlus, FaCheck, FaTimes 
 import { FiUserPlus, FiUserCheck, FiUserX } from 'react-icons/fi';
 import '../styles/FriendsAction.css';
 import * as friendService from '../services/friendService';
+import ConfirmationModal from './ConfirmationModal';
 
 function FriendsAction() {
     // State for active box and tabs
@@ -18,6 +19,10 @@ function FriendsAction() {
     const [searchResults, setSearchResults] = useState([]);
     const [searchStatus, setSearchStatus] = useState(''); // 'notFound' or ''
     const [isLoading, setIsLoading] = useState(false);
+    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [requestToHandle, setRequestToHandle] = useState(null);
+    const [fadingRequests, setFadingRequests] = useState(new Set());
 
     // Load friend requests when component mounts or tab changes
     useEffect(() => {
@@ -106,12 +111,28 @@ function FriendsAction() {
         }
     };
 
+    const startFadeOut = (requestId) => {
+        setFadingRequests(prev => new Set([...prev, requestId]));
+        // Remove the item after animation completes
+        setTimeout(() => {
+            setFadingRequests(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(requestId);
+                return newSet;
+            });
+        }, 3000);
+    };
+
     // Handle friend request actions
     const handleRequestAction = async (requestId, action) => {
         try {
             if (action === 'accept') {
                 await friendService.acceptFriendRequest(requestId);
-                setReceivedRequests(prev => prev.filter(req => req._id !== requestId));
+                startFadeOut(requestId);
+                // Remove from received requests after animation
+                setTimeout(() => {
+                    setReceivedRequests(prev => prev.filter(req => req._id !== requestId));
+                }, 3000);
             } else if (action === 'reject') {
                 await friendService.declineFriendRequest(requestId);
                 setReceivedRequests(prev => prev.filter(req => req._id !== requestId));
@@ -141,6 +162,50 @@ function FriendsAction() {
         }
     };
 
+    const handleRejectClick = (requestId, username) => {
+        setRequestToHandle({ id: requestId, username, type: 'reject' });
+        setShowRejectConfirm(true);
+    };
+
+    const handleCancelClick = (requestId, username) => {
+        setRequestToHandle({ id: requestId, username, type: 'cancel' });
+        setShowCancelConfirm(true);
+    };
+
+    const handleConfirmReject = async () => {
+        if (requestToHandle?.id) {
+            try {
+                await friendService.declineFriendRequest(requestToHandle.id);
+                startFadeOut(requestToHandle.id);
+                // Remove from received requests after animation
+                setTimeout(() => {
+                    setReceivedRequests(prev => prev.filter(req => req._id !== requestToHandle.id));
+                }, 3000);
+            } catch (error) {
+                console.error('Failed to reject friend request:', error);
+            }
+        }
+        setShowRejectConfirm(false);
+        setRequestToHandle(null);
+    };
+
+    const handleConfirmCancel = async () => {
+        if (requestToHandle?.id) {
+            try {
+                await friendService.cancelFriendRequest(requestToHandle.id);
+                startFadeOut(requestToHandle.id);
+                // Remove from sent requests after animation
+                setTimeout(() => {
+                    setSentRequests(prev => prev.filter(req => req._id !== requestToHandle.id));
+                }, 3000);
+            } catch (error) {
+                console.error('Failed to cancel friend request:', error);
+            }
+        }
+        setShowCancelConfirm(false);
+        setRequestToHandle(null);
+    };
+
     // Render search results
     const renderSearchResult = (user) => (
         <div key={user._id} className="search-result-item">
@@ -162,7 +227,10 @@ function FriendsAction() {
 
     // Render friend request item
     const renderRequestItem = (request, type) => (
-        <div key={request._id} className="request-item">
+        <div
+            key={request._id}
+            className={`request-item ${fadingRequests.has(request._id) ? 'fade-out' : ''}`}
+        >
             <div className="friend-avatar">
                 <img
                     src={type === 'received' ? request.sender.profilePic : request.receiver.profilePic || '/PFP.png'}
@@ -190,7 +258,7 @@ function FriendsAction() {
                     </button>
                     <button
                         className="reject-request"
-                        onClick={() => handleRequestAction(request._id, 'reject')}
+                        onClick={() => handleRejectClick(request._id, request.sender.username)}
                         title="Reject request"
                     >
                         <FiUserX />
@@ -200,7 +268,7 @@ function FriendsAction() {
                 request.status === 'pending' && (
                     <button
                         className="reject-request"
-                        onClick={() => handleRequestAction(request._id, 'cancel')}
+                        onClick={() => handleCancelClick(request._id, request.receiver.username)}
                         title="Cancel request"
                     >
                         <FiUserX />
@@ -321,6 +389,30 @@ function FriendsAction() {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={showRejectConfirm}
+                message={`Are you sure you want to reject this friend request?`}
+                onConfirm={handleConfirmReject}
+                onClose={() => {
+                    setShowRejectConfirm(false);
+                    setRequestToHandle(null);
+                }}
+                confirmText="Reject"
+                cancelText="Cancel"
+            />
+
+            <ConfirmationModal
+                isOpen={showCancelConfirm}
+                message={`Are you sure you want to cancel this friend request?`}
+                onConfirm={handleConfirmCancel}
+                onClose={() => {
+                    setShowCancelConfirm(false);
+                    setRequestToHandle(null);
+                }}
+                confirmText="Cancel Request"
+                cancelText="Keep Request"
+            />
         </div>
     );
 }

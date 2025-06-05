@@ -301,7 +301,9 @@
 .start-chat-button {
     background: none;
     border: none;
-    color: rgba(0, 255, 255, 0.8);
+    color: rgba(0, 255, 255, 0.592);
+    background-color: rgba(0, 255, 255, 0.066);
+
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
@@ -312,7 +314,7 @@
 }
 
 .start-chat-button:hover {
-    color: #fff;
+    color: rgba(0, 255, 255, 0.8);
     background-color: rgba(0, 255, 255, 0.15);
 }
 
