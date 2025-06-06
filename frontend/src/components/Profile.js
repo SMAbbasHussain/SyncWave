@@ -3,18 +3,19 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaChevronDown, FaCog, FaMoon, FaSignOutAlt, FaUser, FaPlus } from "react-icons/fa";
 import "../styles/Profile.css";
+import ProfileSettingsModal from './ProfileSettingsModal';
 
 function Profile() {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userStatus, setUserStatus] = useState('offline');
-    const dropdownRef = useRef(null);
+    const profileContainerRef = useRef(null);
     const profileRef = useRef(null);
     const heartbeatInterval = useRef(null);
     const navigate = useNavigate();
+    const [showProfileSettingsModal, setShowProfileSettingsModal] = useState(false);
 
-    // Heartbeat function to keep user online
     const sendHeartbeat = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -43,13 +44,11 @@ function Profile() {
                 const storedUser = localStorage.getItem('user');
                 if (storedUser) {
                     const parsedUser = JSON.parse(storedUser);
-                    // Make sure we have all required fields
                     if (parsedUser.username && parsedUser.email) {
                         setUser(parsedUser);
                         setUserStatus(parsedUser.status || 'online');
                         setLoading(false);
 
-                        // Start heartbeat for logged-in users
                         if (parsedUser.isLoggedIn) {
                             startHeartbeat();
                         }
@@ -57,7 +56,6 @@ function Profile() {
                     }
                 }
 
-                // If local storage data is incomplete, fetch from server
                 const token = localStorage.getItem('token');
                 if (!token) {
                     setLoading(false);
@@ -94,7 +92,6 @@ function Profile() {
         };
 
         const startHeartbeat = () => {
-            // Send heartbeat every 5 minutes to keep user online
             heartbeatInterval.current = setInterval(sendHeartbeat, 5 * 60 * 1000);
         };
 
@@ -107,7 +104,6 @@ function Profile() {
 
         window.addEventListener('userUpdated', handleUserUpdate);
 
-        // Cleanup heartbeat on unmount
         return () => {
             window.removeEventListener('userUpdated', handleUserUpdate);
             if (heartbeatInterval.current) {
@@ -116,9 +112,24 @@ function Profile() {
         };
     }, []);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showDropdown && profileContainerRef.current && !profileContainerRef.current.contains(event.target) && !showProfileSettingsModal) {
+                setShowDropdown(false);
+            }
+        };
+
+        if (showDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDropdown, showProfileSettingsModal]);
+
     const handleLogout = async () => {
         try {
-            // Clear heartbeat first
             if (heartbeatInterval.current) {
                 clearInterval(heartbeatInterval.current);
             }
@@ -132,23 +143,19 @@ function Profile() {
                 }
             );
 
-            // Clear client-side storage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
             setUserStatus('offline');
 
-            // Redirect to login
             navigate('/login', { replace: true });
 
-            // Optional: Refresh to ensure clean state
             window.location.reload();
 
         } catch (error) {
             console.error("Logout error:", error);
-            // Fallback cleanup if server request fails
             localStorage.removeItem('token');
-            localStorage.removeUser('user');
+            localStorage.removeItem('user');
             setUser(null);
             setUserStatus('offline');
 
@@ -160,39 +167,9 @@ function Profile() {
         }
     };
 
-    const toggleDropdown = (e) => {
-        e.stopPropagation();
-        setIsDropdownOpen(!isDropdownOpen);
+    const handleSaveProfileSettings = async (updatedData) => {
+        console.log('Saving profile with data:', updatedData);
     };
-
-    const handleOptionClick = (option) => {
-        setIsDropdownOpen(false);
-        switch (option) {
-            case 'settings':
-                navigate('/settings');
-                break;
-            case 'theme':
-                // Implement theme toggle logic
-                console.log("Theme toggle");
-                break;
-            case 'logout':
-                handleLogout();
-                break;
-            default:
-                break;
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="profile-section">
-                <div className="profile-skeleton">
-                    <div className="avatar-skeleton"></div>
-                    <div className="name-skeleton"></div>
-                </div>
-            </div>
-        );
-    }
 
     const getStatusDisplay = () => {
         if (!user) return "Offline";
@@ -208,127 +185,138 @@ function Profile() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="profile-section">
+                <div className="profile-skeleton">
+                    <div className="avatar-skeleton"></div>
+                    <div className="name-skeleton"></div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="profile-section" ref={profileRef}>
-            <div className="profile-content" onClick={toggleDropdown}>
-                <div className="dropdown-toggle">
-                    <FaChevronDown className={`dropdown-icon ${isDropdownOpen ? "active" : ""}`} />
-                </div>
-                <div className="profile-info">
-                    <span className="profile-name">
-                        {user?.username || "Guest"}
-                    </span>
-                    <span className="profile-status" style={{ color: getStatusColor() }}>
-                        <span
-                            className="status-indicator"
-                            style={{ backgroundColor: getStatusColor() }}
-                        ></span>
-                        {getStatusDisplay()}
-                    </span>
-                </div>
-                <div className="profile-avatar-container">
-                    {user?.profilePic ? (
-                        <img
-                            src={user.profilePic}
-                            alt="Profile"
-                            className="profile-avatar"
-                            onError={(e) => {
-                                e.target.src = "/PFP2.png";
-                                e.target.className = "profile-avatar placeholder";
-                            }}
-                        />
-                    ) : (
-                        <div className="profile-avatar placeholder">
-                            <FaUser className="default-avatar" />
+        <div className="profile-container" ref={profileContainerRef}>
+            <div
+                className="profile-trigger"
+                onClick={() => setShowDropdown(!showDropdown)}
+            >
+                <div className="profile-section" ref={profileRef}>
+                    <div className="profile-content">
+                        <div className="dropdown-toggle">
+                            <FaChevronDown className={`dropdown-icon ${showDropdown ? "active" : ""}`} />
                         </div>
-                    )}
+                        <div className="profile-info">
+                            <span className="profile-name">
+                                {user?.username || "Guest"}
+                            </span>
+                            <span className="profile-status" style={{ color: getStatusColor() }}>
+                                <span
+                                    className="status-indicator"
+                                    style={{ backgroundColor: getStatusColor() }}
+                                ></span>
+                                {getStatusDisplay()}
+                            </span>
+                        </div>
+                        <div className="profile-avatar-container">
+                            {user?.profilePic ? (
+                                <img
+                                    src={user.profilePic}
+                                    alt="Profile"
+                                    className="profile-avatar"
+                                    onError={(e) => {
+                                        e.target.src = "/PFP2.png";
+                                        e.target.className = "profile-avatar placeholder";
+                                    }}
+                                />
+                            ) : (
+                                <div className="profile-avatar placeholder">
+                                    <FaUser className="default-avatar" />
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
-            {isDropdownOpen && (
-                <div className="profile-dropdown" ref={dropdownRef}>
-                    {user ? (
-                        <>
-                            <div className="dropdown-header">
-                                <div className="dropdown-avatar-container">
-                                    {user.profilePic ? (
-                                        <img
-                                            src={user.profilePic}
-                                            alt="Profile"
-                                            className="dropdown-avatar"
-                                            onError={(e) => {
-                                                e.target.src = "https://via.placeholder.com/100";
-                                                e.target.className = "dropdown-avatar placeholder";
-                                            }}
-                                        />
-                                    ) : (
-                                        <div className="dropdown-avatar placeholder">
-                                            <FaUser className="default-avatar" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="dropdown-user-info">
-                                    <span className="dropdown-username">{user.username}</span>
-                                    <span className="dropdown-email">{user.email}</span>
-                                    <span className="dropdown-status" style={{ color: getStatusColor() }}>
-                                        {getStatusDisplay()}
-                                    </span>
-                                </div>
+            {showDropdown && (
+                <>
+                    <div className="profile-dropdown-backdrop" onClick={() => setShowDropdown(false)} />
+                    <div className="profile-dropdown">
+                        <div className="dropdown-header">
+                            <div className="dropdown-avatar-container">
+                                {user?.profilePic ? (
+                                    <img
+                                        src={user.profilePic}
+                                        alt="Profile"
+                                        className="dropdown-avatar"
+                                        onError={(e) => {
+                                            e.target.src = "https://via.placeholder.com/100";
+                                            e.target.className = "dropdown-avatar placeholder";
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="dropdown-avatar placeholder">
+                                        <FaUser className="default-avatar" />
+                                    </div>
+                                )}
                             </div>
-                            <div className="dropdown-divider"></div>
-                        </>
-                    ) : (
-                        <div className="dropdown-guest">
-                            <div className="guest-avatar">
-                                <FaUser />
+                            <div className="dropdown-user-info">
+                                <span className="dropdown-username">{user.username}</span>
+                                <span className="dropdown-email">{user.email}</span>
+                                <span className="dropdown-status" style={{ color: getStatusColor() }}>
+                                    {getStatusDisplay()}
+                                </span>
                             </div>
-                            <p>You're not signed in</p>
-                            <button
-                                className="signin-btn"
-                                onClick={() => navigate('/login')}
-                            >
-                                Sign In
-                            </button>
-                        </div>
-                    )}
-
-                    <div className="dropdown-menu">
-                        <div
-                            className="dropdown-item"
-                            onClick={() => handleOptionClick('settings')}
-                        >
-                            <FaCog className="dropdown-icon" />
-                            <span>Profile Settings</span>
-                        </div>
-                        <div
-                            className="dropdown-item"
-                            onClick={() => handleOptionClick('theme')}
-                        >
-                            <FaMoon className="dropdown-icon" />
-                            <span>Dark Mode</span>
                         </div>
                         <div className="dropdown-divider"></div>
-
-                        {user ? (
-                            <div
-                                className="dropdown-item logout"
-                                onClick={() => handleOptionClick('logout')}
-                            >
-                                <FaSignOutAlt className="dropdown-icon" />
-                                <span>Sign Out</span>
-                            </div>
-                        ) : (
+                        <div className="dropdown-menu">
                             <div
                                 className="dropdown-item"
-                                onClick={() => navigate('/signup')}
+                                onClick={() => {
+                                    setShowDropdown(false);
+                                    setShowProfileSettingsModal(true);
+                                }}
                             >
-                                <FaPlus className="dropdown-icon" />
-                                <span>Create Account</span>
+                                <FaCog className="dropdown-icon" />
+                                <span>Profile Settings</span>
                             </div>
-                        )}
+                            {user ? (
+                                <div
+                                    className="dropdown-item logout"
+                                    onClick={() => {
+                                        handleLogout();
+                                        setShowDropdown(false);
+                                    }}
+                                >
+                                    <FaSignOutAlt className="dropdown-icon" />
+                                    <span>Sign Out</span>
+                                </div>
+                            ) : (
+                                <div
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setShowDropdown(false);
+                                        navigate('/signup');
+                                    }}
+                                >
+                                    <FaPlus className="dropdown-icon" />
+                                    <span>Create Account</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
+
+            <ProfileSettingsModal
+                isOpen={showProfileSettingsModal}
+                onClose={() => setShowProfileSettingsModal(false)}
+                user={user}
+                onSave={handleSaveProfileSettings}
+            />
         </div>
     );
 }
