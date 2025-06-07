@@ -5,12 +5,6 @@ const chatSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    validate: {
-      validator: function(participants) {
-        return participants.length === 2; // Only private chats (2 participants)
-      },
-      message: 'Private chats must have exactly 2 participants'
-    }
   }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
