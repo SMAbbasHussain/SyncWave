@@ -3,7 +3,8 @@ const Group = require('../models/Group');
 
 exports.checkBlocked = async (req, res, next) => {
   try {
-    const receiver = await User.findById(req.params.userId || req.body.receiverId);
+    const receiver = await User.findById(req.body.participantId || req.body.receiverId);
+    console.log(req.body);
     if (!receiver) return res.status(404).json({ error: 'User not found' });
     
     if (receiver.blockedUsers.includes(req.user._id)) {
