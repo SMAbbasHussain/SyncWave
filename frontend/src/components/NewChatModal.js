@@ -57,6 +57,7 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
     };
 
     const handleCloseSearch = (e) => {
+
         e.stopPropagation();
         setIsSearchActive(false);
         setSearchQuery('');
@@ -113,7 +114,7 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
                     <div className="friends-list">
                         {searchQuery.trim() === "" ? (
                             friends.map(friend => (
-                                <div key={friend.id} className="friend-item">
+                                <div key={friend._id} className="friend-item">
                                     <div className="friend-info">
                                         <div className="friend-avatar">
                                             {friend.profilePic ? (
@@ -126,7 +127,7 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
                                     </div>
                                     <button
                                         className="start-chat-button"
-                                        onClick={() => handleStartChat(friend.id)}
+                                        onClick={() => handleStartChat(friend._id)}
                                         title="Start Chat"
                                     >
                                         <IoChatbubbleEllipses className="chat-icon" />
@@ -135,7 +136,7 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
                             ))
                         ) : filteredFriends.length > 0 ? (
                             filteredFriends.map(friend => (
-                                <div key={friend.id} className="friend-item">
+                                <div key={friend._id} className="friend-item">
                                     <div className="friend-info">
                                         <div className="friend-avatar">
                                             {friend.profilePicUrl ? (
@@ -148,7 +149,7 @@ const NewChatModal = ({ isOpen, onClose, onStartChat, friends }) => {
                                     </div>
                                     <button
                                         className="start-chat-button"
-                                        onClick={() => handleStartChat(friend.id)}
+                                        onClick={() => handleStartChat(friend._id)}
                                         title="Start Chat"
                                     >
                                         <IoChatbubbleEllipses className="chat-icon" />

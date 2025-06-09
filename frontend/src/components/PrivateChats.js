@@ -4,6 +4,7 @@ import { FiPlus } from 'react-icons/fi';
 import NewChatModal from './NewChatModal';
 import '../styles/PrivateChats.css';
 import { getFriends } from '../services/friendService';
+import axios from 'axios';
 
 function PrivateChats({ onChatSelect }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,20 +12,13 @@ function PrivateChats({ onChatSelect }) {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const searchInputRef = useRef(null);
-  const [chats, setChats] = useState([
-    { id: 1, name: 'John Doe', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { id: 2, name: 'Alice Smith', status: 'offline', profilePicUrl: '' },
-    { id: 3, name: 'Robert Johnson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { id: 4, name: 'Emily Brown', status: 'offline', profilePicUrl: null },
-    { id: 5, name: 'Michael Wilson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
-    { id: 6, name: 'Sarah Davis', status: 'offline' },
-    { id: 7, name: 'David Anderson', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
-    { id: 8, name: 'Jessica Taylor', status: 'offline', profilePicUrl: '' },
-    { id: 9, name: 'Christopher Martinez', status: 'online', profilePicUrl: 'https://randomuser.me/api/portraits/men/5.jpg' },
-    { id: 10, name: 'Amanda Thompson', status: 'offline' }
-  ]);
+const [chats, setChats] = useState([]); // initially empty
+
 
   const [friends, setFriends] = useState([]);
+
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 
   useEffect(() => {
     async function fetchFriends() {
@@ -38,16 +32,61 @@ function PrivateChats({ onChatSelect }) {
     fetchFriends();
   }, []);
 
+  useEffect(() => {
+  async function fetchChats() {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${API_URL}/api/chat/messages/allconversations`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const conversations = response.data.conversations;
+
+      // Format conversations into the shape expected by your UI
+      const formattedChats = conversations.map(conv => ({
+        id: conv.chatId,
+        name: conv.user?.username || 'Unknown User', // Fallback if username is missing
+        profilePicUrl: conv.user?.profilePic || '', // Fallback if profilePic is missing
+        status: 'offline' // You can later add real-time status with sockets
+      }));
+
+      setChats(formattedChats);
+    } catch (error) {
+      console.error('Error fetching chats:', error.response?.data || error.message);
+    }
+  }
+
+  fetchChats();
+}, []);
+
   const filteredChats = chats.filter(chat =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleChatClick = (chatId) => {
+ const handleChatClick = async (chatId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await axios.get(`${API_URL}/api/chat/${chatId}/other-participant`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const participantId = response.data._id;
     setSelectedChatId(chatId);
     if (onChatSelect) {
-      onChatSelect('private', chatId);
+      onChatSelect(chatId, participantId);  // pass participantId here
     }
-  };
+  } catch (error) {
+    console.error('Error fetching participant:', error);
+    // You might want to still call onChatSelect with chatId and null pid or handle error differently
+    if (onChatSelect) {
+      onChatSelect(chatId, null);
+    }
+  }
+};
+
 
   const toggleSearch = () => {
     setIsSearchActive(!isSearchActive);
@@ -66,21 +105,44 @@ function PrivateChats({ onChatSelect }) {
     setSearchQuery('');
   };
 
-  const handleStartNewChat = (friendId) => {
-    // In a real app, this would create a new chat with the selected friend
-    // For now, we'll just simulate it by adding a new chat
-    const friend = friends.find(f => f.id === friendId);
+  const handleStartNewChat = async (participantId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${API_URL}/api/chat/initialize`,
+      { participantId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const { chat } = response.data;
+    console.log(chat)
+
+    // Get the other participant (not the current user)
+    const userId = JSON.parse(atob(token.split('.')[1])).userId; // Decode userId from token
+    const friend = chat.participants.find(p => p._id !== userId);
+
     if (friend) {
       const newChat = {
-        id: Date.now(), // Use timestamp as temporary ID
+        id: chat._id,
         name: friend.username,
-        status: 'offline',
-        profilePicUrl: friend.profilePicUrl
+        status: 'offline', // You can set online status separately via socket
+        profilePicUrl: friend.profilePic || '', // Use empty string if not available
       };
+
       setChats(prevChats => [newChat, ...prevChats]);
-      handleChatClick(newChat.id);
+      handleChatClick(chat._id);
     }
-  };
+
+  } catch (error) {
+    console.error('Error starting new chat:', error.response?.data || error.message);
+    alert(error.response?.data?.error || 'Failed to start chat.');
+  }
+};
+
 
   return (
     <>

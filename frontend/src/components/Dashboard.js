@@ -8,11 +8,12 @@ import ChatScreen from "./ChatScreen";
 import Friends from "./Friends";
 import FriendsAction from "./FriendsAction";
 import "../styles/Dashboard.css";
+import axios from "axios";
 
 function Dashboard({ activeNavItem = 'home' }) {
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
-
+    
     // Reset active chat when switching views
     useEffect(() => {
         if (activeNavItem === 'home' && ['group', 'anonymousGroup'].includes(activeChat.type)) {
@@ -24,9 +25,10 @@ function Dashboard({ activeNavItem = 'home' }) {
     }, [activeNavItem]);
 
     // Function to handle chat selection
-    const handleChatSelect = (chatType, chatId) => {
-        setActiveChat({ type: chatType, chatId: chatId });
-    };
+    const handleChatSelect = (chatType, chatId, pid) => {
+  setActiveChat({ type: chatType, chatId: chatId, pid: pid });
+};
+
 
     // Function to handle anonymous groups toggle
     const handleAnonymousGroupsToggle = (isVisible) => {
@@ -44,7 +46,7 @@ function Dashboard({ activeNavItem = 'home' }) {
             <div className="left-sidebar-content">
                 <div className="chat-section">
                     <div className="private-chats-container">
-                        <PrivateChats onChatSelect={(userId) => handleChatSelect('private', userId)} />
+<PrivateChats onChatSelect={(chatId, pid) => handleChatSelect('private', chatId, pid)} />
                     </div>
                     <AiChat onChatSelect={() => handleChatSelect('ai')} />
                 </div>

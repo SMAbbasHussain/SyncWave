@@ -22,13 +22,13 @@ const MessageItem = React.memo(({ msg }) => {
                 )}
             </div>
             <span className="message-timestamp">
-                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
         </div>
     );
 });
 
-function ChatScreen({ activeChat }) {
+function ChatScreen({ activeChat}) {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [isScrolling, setIsScrolling] = useState(false);
@@ -39,6 +39,9 @@ function ChatScreen({ activeChat }) {
     const chatContainerRef = useRef(null);
     const scrollTimeoutRef = useRef(null);
     const isMounted = useRef(true);
+
+
+   
 
     // Message state management helpers
     const addMessage = useCallback((newMessage) => {
@@ -74,8 +77,27 @@ function ChatScreen({ activeChat }) {
 
         const fetchConversation = async () => {
             if (activeChat.type !== 'ai') {
-                setMessages([]);
-                return;
+                 try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/api/chat/messages/conversations/${activeChat.pid}`, // or .participantId if it's called that
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                params: {
+                    page: 1,
+                    limit: 50
+                }
+            }
+        );
+
+        setMessages(response.data); 
+        return;// assuming `setMessages` updates the message state
+    } catch (error) {
+        console.error('Error fetching conversation:', error);
+        return;
+    }
             }
 
             try {
@@ -164,18 +186,34 @@ function ChatScreen({ activeChat }) {
         setError(null);
 
         if (activeChat.type !== 'ai') {
-            setTimeout(() => {
-                const receivedMessage = {
-                    id: Date.now() + 1,
-                    content: "This is a sample response from the other user/group.",
-                    sender: 'other',
-                    timestamp: new Date().toISOString()
-                };
-                addMessage(receivedMessage);
-                setIsLoading(false);
-            }, 1000);
-            return;
-        }
+    try {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chat/messages`, {
+            receiverId: activeChat.pid, // assuming activeChat has the userId of the other user
+            content: messageToSend,
+            attachments: [] // or whatever you're handling
+        }, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        const savedMessage = {
+            id: response.data._id,
+            content: response.data.content,
+            sender: 'user',
+            timestamp: response.data.createdAt || new Date().toISOString()
+        };
+
+    } catch (err) {
+        console.error('Error sending private message:', err);
+        setError('Failed to send private message.');
+    } finally {
+        setIsLoading(false);
+    }
+
+    return;
+}
+
 
         try {
             const apiMessages = [
@@ -292,10 +330,13 @@ function ChatScreen({ activeChat }) {
         setConversationMode(prev => prev === 'normal' ? 'stream' : 'normal');
     }, []);
 
+     
+
+
     const renderTopBar = useCallback(() => {
         switch (activeChat.type) {
             case 'private':
-                return <PrivateChatTopBar userId={activeChat.chatId} />;
+                return <PrivateChatTopBar activeChat={activeChat} />;
             case 'ai':
                 return (
                     <div className="chat-screen-top-bar-content">
@@ -332,6 +373,11 @@ function ChatScreen({ activeChat }) {
     }
 
     const chatContainerClass = `chat-screen-container ${activeChat.type !== 'none' ? activeChat.type + '-chat-background' : ''}`;
+    
+
+   
+
+
 
     return (
         <div className={chatContainerClass}>
@@ -401,5 +447,6 @@ function ChatScreen({ activeChat }) {
         </div>
     );
 }
+
 
 export default ChatScreen;
