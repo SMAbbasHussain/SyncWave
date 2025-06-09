@@ -8,12 +8,15 @@ const { checkBlocked } = require('../middleware/chatMiddleware');
 router.use(verifyToken);
 
 // Chat initialization and management
+router.get('/messages/allconversations', chatController.getAllConversations);
+
 router.post('/initialize', checkBlocked, chatController.initializeChat);
 router.get('/:chatId', chatController.getChatById);
+router.get('/:chatId/other-participant',  chatController.getOtherParticipant);
+
 
 // Message operations (simplified since sendMessage now handles chat creation)
 router.post('/messages', checkBlocked, chatController.sendMessage);
-router.get('/messages/conversations', chatController.getAllConversations);
 router.get('/messages/conversations/:userId', chatController.getConversation);
 
 // Message status operations

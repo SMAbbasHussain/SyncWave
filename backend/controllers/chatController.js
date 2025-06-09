@@ -116,19 +116,20 @@ const getConversation = async (req, res) => {
 const getAllConversations = async (req, res) => {
   try {
     const currentUserId = req.user.userId;
-    console.log(currentUserId);
     const { page = 1, limit = 20 } = req.query;
 
     // Use the static method from Chat schema
     const chats = await Chat.findUserChats(currentUserId, { 
       page: parseInt(page), 
       limit: parseInt(limit) 
-    });
+    }).populate('participants', 'username profilePic');
 
     const conversations = await Promise.all(
       chats.map(async (chat) => {
-        // Use the schema method to get other participant
-        const otherParticipant = chat.getOtherParticipant(currentUserId);
+        // Find the other participant
+        const otherParticipant = chat.participants.find(
+          p => p._id.toString() !== currentUserId.toString()
+        );
 
         // Get last message for this chat
         const lastMessage = await Message.findOne({
@@ -148,9 +149,19 @@ const getAllConversations = async (req, res) => {
           deletedFor: { $ne: currentUserId }
         });
 
+        // Ensure otherParticipant exists before assigning
+        if (!otherParticipant) {
+          console.warn(`No other participant found for chat ${chat._id}`);
+          return null; // Skip this chat if no valid other participant
+        }
+
         return {
           chatId: chat._id,
-          user: chat.participants.find(p => p._id.toString() === otherParticipant.toString()),
+          user: {
+            _id: otherParticipant._id,
+            username: otherParticipant.username || 'Unknown User',
+            profilePic: otherParticipant.profilePic || ''
+          },
           lastMessage,
           unreadCount,
           lastActivity: chat.lastActivity,
@@ -160,9 +171,9 @@ const getAllConversations = async (req, res) => {
       })
     );
 
-    // Filter out conversations without messages
+    // Filter out null entries and conversations without messages, then sort
     const validConversations = conversations
-      .filter(conv => conv.lastMessage)
+      .filter(conv => conv && conv.lastMessage)
       .sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
 
     res.json({
@@ -178,7 +189,6 @@ const getAllConversations = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 // Mark messages as read
 const markAsRead = async (req, res) => {
   try {
@@ -326,6 +336,53 @@ const initializeChat = async (req, res) => {
   } catch (error) {
     console.error('Initialize chat error:', error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+const getOtherParticipant = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const currentUserId = req.user.userId;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(chatId)) {
+      return res.status(400).json({ error: 'Invalid chat ID' });
+    }
+
+    const chat = await Chat.findById(chatId).populate('participants', 'username profilePic status');
+    
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    // Ensure the user is a participant
+    const isUserParticipant = chat.participants.some(
+      p => p._id.toString() === currentUserId
+    );
+
+    if (!isUserParticipant) {
+      return res.status(403).json({ error: 'Access denied. Not a participant in this chat.' });
+    }
+
+    // Find the other participant
+    const other = chat.participants.find(
+      p => p._id.toString() !== currentUserId
+    );
+
+    if (!other) {
+      return res.status(404).json({ error: 'Other participant not found' });
+    }
+
+    res.status(200).json({
+      _id: other._id,
+      username: other.username,
+      profilePic: other.profilePic || '',
+      status: other.status || 'offline'
+    });
+
+  } catch (error) {
+    console.error('Error in getOtherParticipant:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -576,5 +633,6 @@ module.exports = {
   getChatMessages,
   updateChatActivity,
   updateChatSettings,
-  deactivateChat
+  deactivateChat,
+  getOtherParticipant,
 };
