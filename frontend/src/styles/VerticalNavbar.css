@@ -8,18 +8,17 @@
     background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
     backdrop-filter: blur(1000px);
     border: 1px solid rgba(0, 119, 255, 0.2);
-
     border-radius: 25px;
-    padding: 15px 0;
+    padding: clamp(12px, 1.5vh, 15px) 0;
     box-sizing: border-box;
-    width: 4vw;
+    width: clamp(60px, 4vw, 80px);
     position: relative;
-    transition: height 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .vertical-navbar .icon-container {
-    width: 35px;
-    height: 35px;
+    width: clamp(32px, 2.2vw, 35px);
+    height: clamp(32px, 2.2vw, 35px);
     background-color: transparent;
     border-radius: 50%;
     display: flex;
@@ -29,8 +28,8 @@
     color: #b0bec5;
     cursor: pointer;
     transition: all 0.3s ease, margin 0.3s ease;
-    margin-bottom: 10px;
-    padding: 5px;
+    margin-bottom: clamp(8px, 1vh, 10px);
+    padding: clamp(4px, 0.5vw, 5px);
     position: relative;
 }
 
@@ -51,19 +50,19 @@
     align-items: center;
     position: relative;
     z-index: 1;
-    height: 40px;
+    height: clamp(35px, 2.5vw, 40px);
     background-color: transparent;
     border-radius: 50%;
-    transition: background-color 0.3s ease, border-radius 0.3s ease, color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 /* Combined active and expanded styles */
 .vertical-navbar .icon-container.active {
     border-radius: 25px;
-    padding: 7px;
-    margin-top: 5px;
-    margin-bottom: 25px;
-    width: 4vw;
+    padding: clamp(6px, 0.8vw, 7px);
+    margin-top: clamp(4px, 0.6vh, 5px);
+    margin-bottom: clamp(20px, 2.5vh, 25px);
+    width: clamp(60px, 4vw, 80px);
     height: auto;
     display: flex;
     flex-direction: column;
@@ -84,7 +83,7 @@
 }
 
 .vertical-navbar .icon-label {
-    font-size: 0.6rem;
+    font-size: clamp(0.55rem, 0.8vw, 0.6rem);
     color: #ffffff;
     font-family: 'Poppins', sans-serif;
     text-align: center;
@@ -93,7 +92,7 @@
     max-width: 100%;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+    transition: all 0.3s ease;
     position: absolute;
     top: 100%;
     left: 50%;
@@ -113,32 +112,87 @@
     text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
 }
 
-/* Add responsive styles */
-@media (max-width: 1440px) {
-    .homepage-layout {
-        margin: 0 8%;
+/* Responsive styles for larger screens */
+@media screen and (min-width: 1024px) {
+    .vertical-navbar {
+        width: clamp(65px, 4.2vw, 85px);
+        padding: clamp(15px, 1.8vh, 18px) 0;
+    }
+
+    .vertical-navbar .icon-container {
+        width: clamp(34px, 2.4vw, 38px);
+        height: clamp(34px, 2.4vw, 38px);
+        margin-bottom: clamp(10px, 1.2vh, 12px);
+    }
+
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(38px, 2.7vw, 42px);
+    }
+
+    .vertical-navbar .icon-container.active {
+        width: clamp(65px, 4.2vw, 85px);
+        padding: clamp(7px, 0.9vw, 8px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.58rem, 0.85vw, 0.65rem);
     }
 }
 
-@media (max-width: 1024px) {
-    .homepage-layout {
-        margin: 0 5%;
-        flex-direction: column;
-        height: auto;
+@media screen and (min-width: 1280px) {
+    .vertical-navbar {
+        width: clamp(70px, 4.5vw, 90px);
+        padding: clamp(18px, 2vh, 20px) 0;
     }
 
-    .left-sidebar {
-        width: 80%;
-        height: auto;
-        margin-right: 0;
-        margin-bottom: 20px;
+    .vertical-navbar .icon-container {
+        width: clamp(36px, 2.6vw, 40px);
+        height: clamp(36px, 2.6vw, 40px);
+        margin-bottom: clamp(12px, 1.4vh, 14px);
     }
 
-    .main-dashboard-area {
-        width: 80%;
-        height: auto;
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(40px, 2.9vw, 44px);
     }
 
+    .vertical-navbar .icon-container.active {
+        width: clamp(70px, 4.5vw, 90px);
+        padding: clamp(8px, 1vw, 9px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.6rem, 0.9vw, 0.7rem);
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .vertical-navbar {
+        width: clamp(75px, 4.8vw, 95px);
+        padding: clamp(20px, 2.2vh, 22px) 0;
+    }
+
+    .vertical-navbar .icon-container {
+        width: clamp(38px, 2.8vw, 42px);
+        height: clamp(38px, 2.8vw, 42px);
+        margin-bottom: clamp(14px, 1.6vh, 16px);
+    }
+
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(42px, 3.1vw, 46px);
+    }
+
+    .vertical-navbar .icon-container.active {
+        width: clamp(75px, 4.8vw, 95px);
+        padding: clamp(9px, 1.1vw, 10px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.65rem, 0.95vw, 0.75rem);
+    }
+}
+
+/* Keep existing mobile responsive styles */
+@media (max-width: 768px) {
     .vertical-navbar {
         flex-direction: row;
         justify-content: space-around;
@@ -148,8 +202,8 @@
     }
 
     .vertical-navbar .icon-container {
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
         margin-bottom: 0;
         margin-right: 10px;
     }
@@ -167,32 +221,7 @@
     }
 
     .vertical-navbar .icon-label {
-        font-size: 0.55rem;
-        max-width: 100%;
-        position: static;
-        transform: none;
-        margin-top: 5px;
-    }
-}
-
-@media (max-width: 768px) {
-    .homepage-layout {
-        margin: 0 2%;
-    }
-
-    .left-sidebar,
-    .main-dashboard-area {
-        width: 95%;
-    }
-
-    .vertical-navbar .icon-container {
-        width: 30px;
-        height: 30px;
-    }
-
-    .vertical-navbar .icon-label {
         font-size: 0.5rem;
-        max-width: 100%;
         position: static;
         transform: none;
         margin-top: 5px;

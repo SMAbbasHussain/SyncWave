@@ -8,6 +8,10 @@
     position: relative;
     z-index: 1;
     gap: 0 !important;
+    background: linear-gradient(135deg, rgba(1, 10, 29, 0.95) 0%, rgba(3, 1, 29, 0.9) 50%, rgba(2, 1, 29, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    overflow: hidden;
 }
 
 .dashboard-top-bar {
@@ -20,8 +24,9 @@
     border-bottom: 1px solid rgba(0, 119, 255, 0.2);
     margin-bottom: 20px;
     position: relative;
-    border-radius: 20px;
+    border-radius: 20px 20px 0 0;
     z-index: 2;
+    background: linear-gradient(90deg, rgba(1, 10, 29, 0.8) 0%, rgba(3, 1, 29, 0.7) 100%);
 }
 
 .wave-bg {
@@ -126,18 +131,20 @@
 
 .dashboard-content {
     flex: 1;
-    padding: 0 20px;
-    overflow-y: auto;
+    padding: 0 20px !important;
+    overflow: hidden;
     display: flex;
     position: relative;
     z-index: 1;
+    gap: 20px !important;
+    height: calc(100% - 90px);
 }
 
 .left-sidebar-content {
     width: 28.5%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 20px !important;
     max-height: 80vh;
     margin-right: 0;
 }
@@ -187,19 +194,77 @@
     opacity: 0.7;
 }
 
-@media (max-width: 768px) {
+/* Responsive styles for larger screens */
+@media screen and (min-width: 1024px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.97) 0%, rgba(3, 1, 29, 0.95) 50%, rgba(2, 1, 29, 0.93) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 75px;
+        padding: 0 25px;
+    }
+
+    .dashboard-content {
+        padding: 0 25px;
+        gap: 25px;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.98) 0%, rgba(3, 1, 29, 0.97) 50%, rgba(2, 1, 29, 0.96) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 80px;
+        padding: 0 30px;
+    }
+
+    .dashboard-content {
+        padding: 0 30px;
+        gap: 30px;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.99) 0%, rgba(3, 1, 29, 0.98) 50%, rgba(2, 1, 29, 0.97) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 85px;
+        padding: 0 35px;
+    }
+
+    .dashboard-content {
+        padding: 0 35px;
+        gap: 35px;
+    }
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+    .dashboard-container {
+        border-radius: 15px;
+    }
+
     .dashboard-top-bar {
         height: 60px;
         padding: 0 15px;
-    }
-
-    .dashboard-logo span {
-        font-size: 1.5rem;
+        margin-bottom: 15px;
+        border-radius: 15px 15px 0 0;
     }
 
     .dashboard-content {
         padding: 0 15px;
         flex-direction: column;
+        height: calc(100% - 75px);
+        gap: 15px;
+    }
+
+    .dashboard-logo span {
+        font-size: 1.5rem;
     }
 
     .left-sidebar-content {
@@ -221,6 +286,8 @@
         height: 60vh;
     }
 }
+
+
 
 /* Styles for the Friends section layout */
 .friends-dashboard-layout {
