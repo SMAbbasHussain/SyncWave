@@ -10,7 +10,6 @@ import FriendsAction from "./FriendsAction";
 import "../styles/Dashboard.css";
 
 function Dashboard({ activeNavItem = 'home' }) {
-    // State to manage the currently active chat
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
 

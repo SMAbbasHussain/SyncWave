@@ -8,43 +8,47 @@
 }
 
 .profile-setup-container {
-  width: 60vw !important;
-  height: 80vh;
+  width: clamp(320px, 32vw, 480px) !important;
+  min-height: clamp(420px, 55vh, 550px) !important;
+  height: auto !important;
   backdrop-filter: blur(1000px);
   border-radius: 12px;
-  padding: 20px;
+  padding: clamp(15px, 1vh, 25px) clamp(30px, 4vw, 50px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: clamp(15px, 3vh, 25px);
+  position: relative;
+  margin: 0 auto;
 }
 
 .profile-setup-head-text {
   color: #ffffff;
   text-align: center;
-  margin: 1rem auto;
-  font-size: 2rem;
+  margin: clamp(0.1rem, 0.3vh, 0.3rem) auto clamp(0.8rem, 1.5vh, 1.5rem);
+  font-size: clamp(1.5rem, 2vw, 2rem);
   font-weight: 600;
 }
 
 .profile-setup-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: clamp(2rem, 3vh, 3rem);
   align-items: center;
+  width: 100%;
 }
 
 .setup-profile-pic-container {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.8rem, 1.5vh, 1.5rem);
 }
 
 .setup-profile-pic-circle {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: clamp(90px, 10vw, 110px);
+  height: clamp(90px, 10vw, 110px);
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(0, 255, 255, 0.3);
@@ -87,19 +91,20 @@
 .bio-input-container {
   width: 100%;
   position: relative;
+  max-width: clamp(280px, 28vw, 350px);
+  margin-top: clamp(0.5rem, 1vh, 1rem);
 }
 
 .bio-input-container textarea {
-  width: 250px;
-  padding: 1rem;
+  width: 100%;
+  padding: clamp(0.8rem, 1.5vh, 1rem);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1vw, 1rem);
   resize: none;
-  width: 350px;
-  height: 100px;
+  height: clamp(100px, 15vh, 130px);
   transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
@@ -119,10 +124,11 @@
 
 .profile-setup-actions {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: clamp(20px, 3vh, 25px);
+  right: clamp(15px, 2vw, 20px);
   display: flex;
-  gap: 20px;
+  gap: clamp(15px, 2vw, 20px);
+  margin-top: clamp(2rem, 3vh, 3rem);
 }
 
 .skip-btn,
@@ -131,9 +137,11 @@
   font-weight: 500;
   background: transparent;
   border: none;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1vw, 1rem);
   transition: color 0.3s ease;
   cursor: pointer;
+  padding: clamp(5px, 0.8vh, 8px) clamp(10px, 1.5vw, 15px);
+  margin-top: clamp(0.8rem, 1.2vh, 1.2rem);
 }
 
 .skip-btn:hover:not(.disabled),
@@ -149,7 +157,56 @@
   pointer-events: none;
 }
 
-/* Responsive Design */
+/* Responsive Design for larger screens */
+@media screen and (min-width: 1024px) {
+  .profile-setup-container {
+    width: clamp(380px, 35vw, 450px) !important;
+    min-height: clamp(460px, 60vh, 600px) !important;
+  }
+
+  .setup-profile-pic-circle {
+    width: clamp(95px, 11vw, 120px);
+    height: clamp(95px, 11vw, 120px);
+  }
+
+  .bio-input-container {
+    max-width: clamp(300px, 30vw, 380px);
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .profile-setup-container {
+    width: clamp(400px, 38vw, 480px) !important;
+    min-height: clamp(480px, 63vh, 630px) !important;
+  }
+
+  .setup-profile-pic-circle {
+    width: clamp(100px, 12vw, 130px);
+    height: clamp(100px, 12vw, 130px);
+  }
+
+  .bio-input-container {
+    max-width: clamp(320px, 32vw, 400px);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .profile-setup-container {
+    width: clamp(420px, 40vw, 500px) !important;
+    min-height: clamp(500px, 65vh, 650px) !important;
+  }
+
+  .setup-profile-pic-circle {
+    width: clamp(105px, 13vw, 140px);
+    height: clamp(105px, 13vw, 140px);
+  }
+
+  .bio-input-container {
+    max-width: clamp(340px, 34vw, 420px);
+  }
+}
+
+/* Keep existing mobile responsive styles */
 @media screen and (max-width: 768px) {
   .profile-setup-container {
     width: 90vw !important;

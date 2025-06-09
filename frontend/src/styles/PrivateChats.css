@@ -3,7 +3,7 @@
 }
 
 .private-chats-container {
-  width: 22vw;
+  width: 80%;
   height: calc(80vh - 120px);
   display: flex;
   flex-direction: column;
@@ -316,7 +316,7 @@
 /* Responsive styles */
 @media (min-width: 1024px) {
   .private-chats-container {
-    width: 22vw;
+    width: 90%;
   }
 
   .private-chats-header {
@@ -342,7 +342,7 @@
 
 @media (min-width: 1440px) {
   .private-chats-container {
-    width: 18vw;
+    width: 90%;
   }
 
   .header-title {
@@ -372,6 +372,7 @@
   .search-close-button .search-icon {
     font-size: 0.8rem;
   }
+
 }
 
 @media (max-width: 768px) {
@@ -437,64 +438,9 @@
   .search-close-button .search-icon {
     font-size: 0.5rem;
   }
+
 }
 
-@media (max-width: 480px) {
-  .private-chats-container {
-    height: 60vh;
-  }
-
-  .private-chats-header {
-    min-height: 2.2rem;
-    padding: 0.3rem;
-  }
-
-  .header-content.search-active {
-    width: calc(100% - 0.6rem);
-    top: 0.3rem;
-    left: 0.3rem;
-  }
-
-  .search-toggle {
-    padding: 0.2rem;
-  }
-
-  .search-toggle-content {
-    gap: 0;
-  }
-
-  .search-label {
-    font-size: 0.55rem;
-  }
-
-  .search-container {
-    padding: 0;
-    top: 0.3rem;
-    left: 0.3rem;
-    right: 0.3rem;
-  }
-
-  .search-bar {
-    padding: 0 0.1rem;
-  }
-
-  .search-bar input {
-    height: 1.8rem !important;
-    font-size: 0.75rem;
-    padding: 0 2rem 0 2rem;
-  }
-
-  .search-icon-left,
-  .search-close-button {
-    font-size: 0.7rem;
-    right: 0.8rem;
-    left: 0.8rem;
-  }
-
-  .search-close-button .search-icon {
-    font-size: 0.55rem;
-  }
-}
 
 /* Search Toggle Styles */
 .private-chats-header .search-toggle {
