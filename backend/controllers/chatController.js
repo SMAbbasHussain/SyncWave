@@ -4,43 +4,102 @@ const Chat = require('../models/Chat');
 const mongoose = require("mongoose");
 
 // Send a message (now requires chat initialization)
+// const sendMessage = async (req, res) => {
+//   try {
+//     const { receiverId, content, attachments = [] } = req.body;
+//     const senderId = req.user.userId;
+
+//     // Validate content
+//     if (!content || content.trim().length === 0) {
+//       return res.status(400).json({ error: 'Message content is required' });
+//     }
+
+//     // Find or create chat between users
+//     let chat = await Chat.findOne({
+//       participants: { 
+//         $all: [senderId, receiverId],
+//         $size: 2 
+//       }
+//     });
+
+
+//     if (!chat) {
+//       // Verify receiver exists
+//       const receiver = await User.findById(receiverId);
+//       if (!receiver) {
+//         return res.status(404).json({ error: 'Receiver not found' });
+//       }
+
+//       // Create new chat
+//       chat = new Chat({
+//         participants: [senderId, receiverId],
+//         createdBy: senderId,
+//         lastActivity: new Date()
+//       });
+      
+//       await chat.save();
+//     }
+
+//     // Create message with required chatId
+//     const message = new Message({
+//       chatId: chat._id,
+//       senderId,
+//       receiverId,
+//       content: content.trim(),
+//       attachments
+//     });
+
+//     await message.save();
+
+//     // Update chat's last activity
+//     chat.lastActivity = new Date();
+//     await chat.save();
+    
+//     // Populate sender info for response
+//     const populatedMessage = await Message.populate(message, {
+//       path: 'senderId',
+//       select: 'username profilePic'
+//     });
+
+//     res.status(201).json(populatedMessage);
+    
+//     // Emit to receiver via socket
+//     if (req.io) {
+//       req.io.to(receiverId.toString()).emit('newMessage', populatedMessage);
+//     }
+//   } catch (error) {
+//     console.error('Send message error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 const sendMessage = async (req, res) => {
   try {
     const { receiverId, content, attachments = [] } = req.body;
     const senderId = req.user.userId;
 
-    // Validate content
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
     // Find or create chat between users
     let chat = await Chat.findOne({
-      participants: { 
-        $all: [senderId, receiverId],
-        $size: 2 
-      }
+      participants: { $all: [senderId, receiverId], $size: 2 }
     });
 
-
     if (!chat) {
-      // Verify receiver exists
       const receiver = await User.findById(receiverId);
       if (!receiver) {
         return res.status(404).json({ error: 'Receiver not found' });
       }
-
-      // Create new chat
       chat = new Chat({
         participants: [senderId, receiverId],
         createdBy: senderId,
-        lastActivity: new Date()
       });
-      
-      await chat.save();
     }
-
-    // Create message with required chatId
+    chat.lastActivity = new Date();
+    await chat.save();
+    
     const message = new Message({
       chatId: chat._id,
       senderId,
@@ -48,28 +107,26 @@ const sendMessage = async (req, res) => {
       content: content.trim(),
       attachments
     });
-
     await message.save();
 
-    // Update chat's last activity
-    chat.lastActivity = new Date();
-    await chat.save();
-    
-    // Populate sender info for response
-    const populatedMessage = await Message.populate(message, {
+    const populatedMessage = await message.populate({
       path: 'senderId',
       select: 'username profilePic'
     });
+    
+    // <<< FIX: Emit the message to all participants in the chat
+    if (req.io) {
+      chat.participants.forEach(participantId => {
+        // Send to each participant's personal room
+        req.io.to(participantId.toString()).emit('newMessage', populatedMessage);
+      });
+    }
 
     res.status(201).json(populatedMessage);
-    
-    // Emit to receiver via socket
-    if (req.io) {
-      req.io.to(receiverId.toString()).emit('newMessage', populatedMessage);
-    }
+
   } catch (error) {
     console.error('Send message error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to send message.' });
   }
 };
 
