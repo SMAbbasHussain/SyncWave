@@ -416,6 +416,7 @@
 @media (min-width: 1024px) {
   .groups-container {
     width: 22vw;
+    height: calc(80vh-100px);
   }
 
   .groups-header {
@@ -439,9 +440,17 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .groups-container {
+    width: 22vw !important;
+    height: calc(80vh - 110px);
+  }
+}
+
 @media (min-width: 1440px) {
   .groups-container {
     width: 22vw !important;
+    height: calc(80vh - 100px);
   }
 
   .header-title {
