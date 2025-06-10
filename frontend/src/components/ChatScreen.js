@@ -47,7 +47,7 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
 
     return (
         <div
-            className={`message ${displaySender} ${msg.isError ? 'error' : ''}`}
+            className={`message ${displaySender} ${msg.isError ? 'error' : ''} ${msg.isTemp ? 'pending' : ''}`}
             role="log"
             aria-label={`Message from ${displaySender}`}
         >
@@ -62,7 +62,7 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
                 )}
             </div>
             <span className="message-timestamp">
-                {new Date(msg.timestamp).toLocaleTimeString([], {
+                {msg.isTemp ? 'Sending...' : new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                 })}
@@ -160,8 +160,7 @@ function ChatScreen({ activeChat }) {
 
             const response = await axios.get(endpoint, { headers: { Authorization: `Bearer ${token}` } });
             const fetchedMessages = Array.isArray(response.data) ? response.data : response.data.messages || [];
-            const normalized = fetchedMessages.map(msg => normalizeMessage(msg, chatInfo.type, currentUserId));
-            setMessages(normalized);
+            setMessages(fetchedMessages.map(msg => normalizeMessage(msg, chatInfo.type, currentUserId)));
         } catch (err) {
             console.error('Failed to fetch conversation:', err);
             setError('Failed to load conversation.');
@@ -187,6 +186,8 @@ function ChatScreen({ activeChat }) {
         socketRef.current.on('newMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
             const isForCurrentChat = (currentChat.type === 'private' || currentChat.type === 'group' || currentChat.type === 'anonymousGroup') && newMsg.chatId === currentChat.chatId;
+            // The sender already updated their UI optimistically. This is mainly for the receiver.
+            // The duplicate check in `addMessage` will prevent the sender from getting a second copy.
             if (isForCurrentChat) {
                 addMessage(newMsg);
             }
@@ -213,90 +214,176 @@ function ChatScreen({ activeChat }) {
 
         const content = message.trim();
         setMessage('');
-        setIsLoading(true);
-        setError(null);
         
-        // --- BRANCH FOR AI CHAT vs. REAL-TIME CHAT ---
-
         if (activeChat.type === 'ai') {
-            // AI CHAT LOGIC (NO SOCKETS)
-            const userMessage = { role: 'user', content };
-            addMessage({ ...userMessage, sender: 'user', timestamp: new Date().toISOString() });
-            
-            const apiMessages = [...messages, { role: 'user', content }].map(m => ({
-                role: m.sender === 'user' ? 'user' : 'assistant',
-                content: m.content.replace(/<[^>]*>/g, '') // Strip HTML for API
-            }));
+        const messageToSend = message.trim();
+        const apiMessages = [
+            ...messages
+                .filter(msg => !msg.isTemp)
+                .map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'assistant',
+                    content: msg.content.replace(/<[^>]*>/g, '') // Strip HTML for API
+                })),
+            {
+                role: 'user',
+                content: messageToSend
+            }
+        ];
+
+        // Add user message
+        addMessage({
+            id: `user-${Date.now()}`,
+            content: messageToSend,
+            sender: 'user',
+            timestamp: new Date().toISOString()
+        });
+
+        if (conversationMode === 'normal') {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ai/complete`, {
+                messages: apiMessages
+            }, {
+                headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+                timeout: 30000
+            });
+
+            const aiResponse = {
+                id: `ai-${Date.now()}`,
+                content: formatAIResponse(response.data.choices[0].message.content),
+                sender: 'ai',
+                timestamp: new Date().toISOString()
+            };
+            addMessage(aiResponse);
+
+        } else {
+            // Streaming mode with proper formatting
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete/stream`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify({ messages: apiMessages })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Stream request failed: ${response.status}`);
+            }
+
+            const aiResponseId = `ai-${Date.now()}`;
+            const aiResponse = {
+                id: aiResponseId,
+                content: '',
+                sender: 'ai',
+                timestamp: new Date().toISOString(),
+                isStreaming: true
+            };
+            addMessage(aiResponse);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let formattedContent = '';
 
             try {
-                if (conversationMode === 'normal') {
-                    // Normal Request/Response
-                    const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ai/complete`, { messages: apiMessages }, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
-                    addMessage({ ...response.data.choices[0].message, sender: 'ai', timestamp: new Date().toISOString() });
-                } else {
-                    // Streaming Response
-                    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete/stream`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` },
-                        body: JSON.stringify({ messages: apiMessages })
-                    });
-                    if (!response.ok) throw new Error(`Stream request failed: ${response.status}`);
-                    
-                    const aiResponseId = `ai-${Date.now()}`;
-                    addMessage({ id: aiResponseId, content: '', sender: 'ai', timestamp: new Date().toISOString(), isStreaming: true });
-                    
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let buffer = '';
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        buffer += decoder.decode(value, { stream: true });
-                        let boundary;
-                        while ((boundary = buffer.indexOf('\n')) !== -1) {
-                            const line = buffer.substring(0, boundary).trim();
-                            buffer = buffer.substring(boundary + 1);
-                            if (line.startsWith('data:') && !line.includes('[DONE]')) {
-                                try {
-                                    const data = JSON.parse(line.substring(5).trim());
-                                    if (data.content) {
-                                        updateMessage(aiResponseId, { content: (prev) => prev + data.content });
-                                    }
-                                } catch (e) { console.error('Error parsing stream data:', e); }
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    let boundary;
+                    while ((boundary = buffer.indexOf('\n')) !== -1) {
+                        const line = buffer.substring(0, boundary).trim();
+                        buffer = buffer.substring(boundary + 1);
+
+                        if (!line.startsWith('data:')) continue;
+                        if (line.includes('[DONE]')) break;
+
+                        try {
+                            const data = JSON.parse(line.substring(5).trim());
+                            if (data.content) {
+                                // Format the content as it streams in
+                                formattedContent += data.content;
+                                updateMessage(aiResponseId, {
+                                    content: formatAIResponse(formattedContent)
+                                });
                             }
+                        } catch (e) {
+                            console.error('Error parsing stream data:', e);
                         }
                     }
-                    updateMessage(aiResponseId, { isStreaming: false });
                 }
-            } catch (err) {
-                console.error('Error with AI chat:', err);
-                addMessage({ content: 'Sorry, I ran into an error. Please try again.', sender: 'ai', isError: true, timestamp: new Date().toISOString() });
             } finally {
-                setIsLoading(false);
+                updateMessage(aiResponseId, { 
+                    isStreaming: false,
+                    content: formatAIResponse(formattedContent) // Final formatting pass
+                });
             }
-        } else {
-            // PRIVATE & GROUP CHAT LOGIC (SOCKET-BASED)
-            const tempId = `temp-${Date.now()}`;
-            addMessage({ id: tempId, content, senderId: currentUserId, timestamp: new Date().toISOString(), isTemp: true });
+        }
+    } else {
+            // *** FIXED PRIVATE & GROUP CHAT LOGIC ***
+            setIsLoading(true);
+            setError(null);
+
+            // 1. Create a unique temporary ID for the optimistic message
+            const tempId = `temp-${Date.now()}-${Math.random()}`;
+
+            // 2. Add the optimistic message to the UI
+            addMessage({
+                id: tempId,
+                content: content,
+                senderId: currentUserId,
+                timestamp: new Date().toISOString(),
+                isTemp: true,
+            });
 
             try {
                 const endpoint = activeChat.type === 'private' ? '/api/chat/messages' : '/api/chat/messages/group';
                 const payload = activeChat.type === 'private' ? { receiverId: activeChat.pid, content } : { chatId: activeChat.chatId, content };
-                await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, payload, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
-                removeMessage(tempId); // Remove temp message, real one comes from socket
+                
+                // 3. Send to server and get the final, saved message back in the response
+                const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, payload, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
+                const savedMessage = response.data;
+
+                // 4. Update the UI by replacing the temporary message with the real one from the server
+                setMessages(prevMessages => 
+                    prevMessages.map(msg => 
+                        msg.id === tempId 
+                        ? normalizeMessage(savedMessage, activeChat.type, currentUserId) 
+                        : msg
+                    )
+                );
+
             } catch (err) {
                 console.error('Error sending message:', err);
-                setError('Failed to send message.');
-                removeMessage(tempId); // Remove failed temp message
+                setError('Failed to send message. Please try again.');
+                // 5. If the API call fails, remove the optimistic message from the UI
+                removeMessage(tempId);
             } finally {
                 setIsLoading(false);
             }
         }
     };
 
-    const toggleConversationMode = useCallback(() => {
-        setConversationMode(prev => (prev === 'normal' ? 'stream' : 'normal'));
-    }, []);
+    const formatAIResponse = (text) => {
+    if (!text) return text;
+    
+    // Replace double newlines with paragraphs
+    let formatted = text.replace(/\n\n/g, '\n');
+    
+    // Replace single newlines with line breaks
+    formatted = formatted.replace(/\n/g, '\n');
+    
+    // Handle markdown-style lists
+    formatted = formatted.replace(/\*\s(.*?)(<br\/>|$)/g, '\n');
+    
+    // Handle code blocks (if present)
+    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+    
+    return formatted;
+};
+
+    const toggleConversationMode = useCallback(() => setConversationMode(prev => (prev === 'normal' ? 'stream' : 'normal')), []);
 
     const renderTopBar = useCallback(() => {
         switch (activeChat.type) {
@@ -326,18 +413,18 @@ function ChatScreen({ activeChat }) {
             </div>
         );
     }
-
+    
     return (
         <ChatErrorBoundary>
             <div className={`chat-screen-container ${activeChat.type}-chat-background`}>
                 <div className="chat-screen-content">
                     <div className="chat-screen-top-bar">{renderTopBar()}</div>
-                    <div className={`chat-screen-messages ${isFetching ? 'loading' : ''}`} role="log" aria-live="polite">
+                    <div className={`chat-screen-messages`} role="log" aria-live="polite">
                         <div className="messages-wrapper">
                             {isFetching && messages.length === 0 ? (
                                 <div className="loading-message"><div className="loading-spinner"></div><p>Loading conversation...</p></div>
                             ) : messages.length === 0 ? (
-                                <div className="welcome-message"><FaRobot className="empty-chat-icon" /><p>Start the conversation!</p></div>
+                                <div className="welcome-message"><div><FaRobot className="empty-chat-icon" /><p>Start a conversation!</p></div></div>
                             ) : (
                                 messages.map(msg => <MessageItem key={msg.id} msg={msg} currentUserId={currentUserId} />)
                             )}
@@ -351,7 +438,7 @@ function ChatScreen({ activeChat }) {
                                 <button onClick={clearError} aria-label="Close error message" className="error-close">×</button>
                             </div>
                         )}
-                        <form onSubmit={handleSendMessage} style={{ display: 'flex', width: '100%' }}>
+                        <form onSubmit={handleSendMessage} style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
                             <input
                                 type="text"
                                 value={message}
@@ -359,6 +446,7 @@ function ChatScreen({ activeChat }) {
                                 placeholder={isLoading ? "Sending..." : activeChat.type === 'ai' ? "Ask AI anything..." : "Type a message..."}
                                 className="message-input-field"
                                 disabled={isLoading || isFetching}
+                                maxLength={4000}
                                 aria-label="Type your message"
                             />
                             <button type="submit" className="send-message-button" disabled={!message.trim() || isLoading}>
