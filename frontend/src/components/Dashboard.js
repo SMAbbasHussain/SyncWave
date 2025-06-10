@@ -13,7 +13,7 @@ import axios from "axios";
 function Dashboard({ activeNavItem = 'home' }) {
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
-    
+
     // Reset active chat when switching views
     useEffect(() => {
         if (activeNavItem === 'home' && ['group', 'anonymousGroup'].includes(activeChat.type)) {
@@ -26,8 +26,8 @@ function Dashboard({ activeNavItem = 'home' }) {
 
     // Function to handle chat selection
     const handleChatSelect = (chatType, chatId, pid) => {
-  setActiveChat({ type: chatType, chatId: chatId, pid: pid });
-};
+        setActiveChat({ type: chatType, chatId: chatId, pid: pid });
+    };
 
 
     // Function to handle anonymous groups toggle
@@ -46,7 +46,7 @@ function Dashboard({ activeNavItem = 'home' }) {
             <div className="left-sidebar-content">
                 <div className="chat-section">
                     <div className="private-chats-container">
-<PrivateChats onChatSelect={(chatId, pid) => handleChatSelect('private', chatId, pid)} />
+                        <PrivateChats onChatSelect={(chatId, pid) => handleChatSelect('private', chatId, pid)} />
                     </div>
                     <AiChat onChatSelect={() => handleChatSelect('ai')} />
                 </div>

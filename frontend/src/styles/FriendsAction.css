@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    height: calc(80vh - 50px);
+    height: calc(100vh - 150px);
     padding: 10px 15px 0px;
     box-sizing: border-box;
     overflow: hidden;
@@ -64,14 +64,10 @@
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-    height: calc(100% - 20px);
-    /* Account for action buttons + gap */
-    min-height: 370px;
-    /* Minimum height */
-    max-height: calc(80vh - 150px);
-    /* Maximum height relative to container */
+    height: calc(100% - 60px);
+    min-height: 400px;
+    max-height: calc(100vh - 220px);
     overflow: hidden;
-    /* Add this back to contain scrolling content */
 }
 
 /* Action Box Header */
@@ -528,9 +524,79 @@
 }
 
 /* Responsive Styles */
+@media (min-width: 1024px) {
+    .friends-action-container {
+        height: calc(100vh - 150px);
+    }
+
+    .action-box {
+        height: calc(100% - 60px);
+        min-height: 400px;
+        max-height: calc(100vh - 220px);
+    }
+}
+
+@media (min-width: 1280px) {
+    .friends-action-container {
+        height: calc(100vh - 160px);
+    }
+
+    .action-box {
+        min-height: 450px;
+        max-height: calc(100vh - 230px);
+    }
+}
+
+@media (min-width: 1440px) {
+    .friends-action-container {
+        height: calc(100vh - 170px);
+    }
+
+    .action-box {
+        min-height: 500px;
+        max-height: calc(100vh - 240px);
+    }
+}
+
 @media (max-width: 768px) {
     .friends-action-container {
+        height: calc(100vh - 120px);
         padding: 10px;
+    }
+
+    .action-box {
+        height: calc(100% - 50px);
+        min-height: 350px;
+        max-height: calc(100vh - 190px);
+    }
+
+    .action-button span {
+        display: none;
+    }
+
+    .action-button {
+        padding: 10px;
+    }
+
+    .action-button svg {
+        margin: 0;
+    }
+
+    .search-toggle span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .friends-action-container {
+        height: calc(100vh - 100px);
+        padding: 8px;
+    }
+
+    .action-box {
+        height: calc(100% - 45px);
+        min-height: 300px;
+        max-height: calc(100vh - 160px);
     }
 
     .action-button span {

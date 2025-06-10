@@ -1,15 +1,13 @@
 .chat-screen-container {
+    width: calc(100% - 20px) !important;
+    height: calc(100% - 20px) !important;
+    background: rgba(0, 6, 22, 0.902);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    background: rgba(0, 6, 22, 0.902);
-    border-radius: 10px;
-    border-top: 1px solid rgba(0, 119, 255, 0.2);
     overflow: hidden;
-    margin-left: 0;
-    height: 435px;
-    width: 100%;
     position: relative;
+    border: 1px solid rgba(0, 255, 255, 0.1);
 }
 
 /* AI Chat background */
@@ -86,7 +84,7 @@
 .chat-screen-placeholder img {
 
     position: absolute;
-    bottom: 0;
+    bottom: 14%;
     width: 500px;
     height: auto;
     opacity: 0.4;
@@ -490,48 +488,162 @@
     border-radius: 12px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Responsive styles */
+@media screen and (min-width: 1024px) {
     .chat-screen-container {
-        width: calc(100% - 20px);
-        /* 10px gap on mobile */
-        margin: 0 10px;
-        height: calc(100vh - 100px);
-        /* Adjust height for mobile */
+        width: calc(100% -20px);
+        height: calc(100% - 20px);
     }
 
     .chat-screen-top-bar {
-        padding: 0 15px;
+        height: 65px;
+        padding: 0 25px;
+    }
+
+    .chat-screen-messages {
+        padding: 25px;
     }
 
     .chat-screen-input {
-        padding: 12px 15px;
-        gap: 8px;
+        padding: 15px 25px;
     }
 
     .message-input-field {
-        padding: 10px 14px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .chat-screen-container {
+        width: calc(100% - 20px);
+        height: calc(100% - 20px);
+    }
+
+    .chat-screen-top-bar {
+        height: 70px;
+        padding: 0 30px;
+    }
+
+    .chat-screen-messages {
+        padding: 30px;
+    }
+
+    .chat-screen-input {
+        padding: 20px 30px;
+    }
+
+    .message-input-field {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .chat-screen-container {
+        width: calc(100% - 20px);
+        height: calc(100% - 20px);
+    }
+
+    .chat-screen-top-bar {
+        height: 75px;
+        padding: 0 35px;
+    }
+
+    .chat-screen-messages {
+        padding: 35px;
+    }
+
+    .chat-screen-input {
+        padding: 25px 35px;
+    }
+
+    .message-input-field {
+        padding: 16px 28px;
+        font-size: 1.05rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .chat-screen-container {
+        width: calc(100% - 40px);
+        height: calc(100% - 40px);
+        margin: 20px;
+    }
+
+    .chat-screen-top-bar {
+        height: 55px;
+        padding: 0 15px;
+    }
+
+    .chat-screen-messages {
+        padding: 15px;
+    }
+
+    .chat-screen-input {
+        padding: 10px 15px;
+    }
+
+    .message-input-field {
+        padding: 10px 15px;
         font-size: 0.9rem;
-    }
-
-    .send-message-button {
-        width: 36px;
-        height: 36px;
-    }
-
-    .send-icon {
-        width: 14px;
-        height: 14px;
     }
 
     .message {
         max-width: 85%;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .chat-screen-container {
+        width: calc(100% - 40px);
+        height: calc(100% - 40px);
+        margin: 20px;
+    }
+
+    .chat-screen-top-bar {
+        height: 50px;
+        padding: 0 12px;
+    }
+
+    .chat-screen-messages {
+        padding: 12px;
+    }
+
+    .chat-screen-input {
+        padding: 8px 12px;
+    }
+
+    .message-input-field {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .chat-avatar,
+    .chat-avatar-icon-container {
+        width: 35px;
+        height: 35px;
+    }
+
+    .chat-avatar-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .chat-partner-name {
         font-size: 0.9rem;
     }
 
-    .chat-screen-placeholder {
-        font-size: 1rem;
-        padding: 15px;
+    .user-status-row {
+        font-size: 0.75rem;
     }
 }
 
