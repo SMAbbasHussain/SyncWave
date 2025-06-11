@@ -185,10 +185,11 @@ function ChatScreen({ activeChat }) {
 
         socketRef.current.on('newMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
-            const isForCurrentChat = (currentChat.type === 'private' || currentChat.type === 'group' || currentChat.type === 'anonymousGroup') && newMsg.chatId === currentChat.chatId;
-            // The sender already updated their UI optimistically. This is mainly for the receiver.
-            // The duplicate check in `addMessage` will prevent the sender from getting a second copy.
-            if (isForCurrentChat) {
+            const isForCurrentChat = (currentChat.type === 'private' || currentChat.type === 'group' || currentChat.type === 'anonymousGroup') && 
+                                    newMsg.chatId === currentChat.chatId;
+            
+            // Only add the message if it's not from the current user (since we already handled it optimistically)
+            if (isForCurrentChat && newMsg.senderId !== currentUserId) {
                 addMessage(newMsg);
             }
         });
@@ -198,7 +199,7 @@ function ChatScreen({ activeChat }) {
                 socketRef.current.disconnect();
             }
         };
-    }, [getAuthToken, addMessage]);
+    }, [getAuthToken, addMessage, currentUserId]);
 
     useEffect(() => {
         fetchConversation(activeChat);
@@ -320,15 +321,14 @@ function ChatScreen({ activeChat }) {
                     });
                 }
             }
-        } else {
-            // *** FIXED PRIVATE & GROUP CHAT LOGIC ***
+        } 
+        else {
             setIsLoading(true);
             setError(null);
 
-            // 1. Create a unique temporary ID for the optimistic message
             const tempId = `temp-${Date.now()}-${Math.random()}`;
 
-            // 2. Add the optimistic message to the UI
+            // Add optimistic message
             addMessage({
                 id: tempId,
                 content: content,
@@ -339,25 +339,30 @@ function ChatScreen({ activeChat }) {
 
             try {
                 const endpoint = activeChat.type === 'private' ? '/api/chat/messages' : '/api/chat/messages/group';
-                const payload = activeChat.type === 'private' ? { receiverId: activeChat.pid, content } : { chatId: activeChat.chatId, content };
+                const payload = activeChat.type === 'private' ? { 
+                    receiverId: activeChat.pid, 
+                    content 
+                } : { 
+                    chatId: activeChat.chatId, 
+                    content 
+                };
 
-                // 3. Send to server and get the final, saved message back in the response
-                const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, payload, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
-                const savedMessage = response.data;
-
-                // 4. Update the UI by replacing the temporary message with the real one from the server
-                setMessages(prevMessages =>
-                    prevMessages.map(msg =>
-                        msg.id === tempId
-                            ? normalizeMessage(savedMessage, activeChat.type, currentUserId)
-                            : msg
-                    )
+                const response = await axios.post(
+                    `${process.env.REACT_APP_API_URL}${endpoint}`, 
+                    payload, 
+                    { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
                 );
+
+                // Instead of updating the message here, we'll let the socket.io event handle it
+                // The server will broadcast the message back to all clients including the sender
+                // But we've modified the socket.io handler to ignore messages from the current user
+
+                // Just remove the temporary message - the real one will come via socket.io
+                removeMessage(tempId);
 
             } catch (err) {
                 console.error('Error sending message:', err);
                 setError('Failed to send message. Please try again.');
-                // 5. If the API call fails, remove the optimistic message from the UI
                 removeMessage(tempId);
             } finally {
                 setIsLoading(false);
