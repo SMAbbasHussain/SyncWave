@@ -155,7 +155,7 @@ function ChatScreen({ activeChat }) {
             if (chatInfo.type === 'private') endpoint = `${process.env.REACT_APP_API_URL}/api/chat/messages/conversations/${chatInfo.pid}`;
             else if (chatInfo.type === 'group' || chatInfo.type === 'anonymousGroup') endpoint = `${process.env.REACT_APP_API_URL}/api/chat/messages/group/${chatInfo.chatId}`;
             else if (chatInfo.type === 'ai') endpoint = `${process.env.REACT_APP_API_URL}/api/ai/conversation`;
-            
+
             if (!endpoint) return;
 
             const response = await axios.get(endpoint, { headers: { Authorization: `Bearer ${token}` } });
@@ -214,113 +214,113 @@ function ChatScreen({ activeChat }) {
 
         const content = message.trim();
         setMessage('');
-        
+
         if (activeChat.type === 'ai') {
-        const messageToSend = message.trim();
-        const apiMessages = [
-            ...messages
-                .filter(msg => !msg.isTemp)
-                .map(msg => ({
-                    role: msg.sender === 'user' ? 'user' : 'assistant',
-                    content: msg.content.replace(/<[^>]*>/g, '') // Strip HTML for API
-                })),
-            {
-                role: 'user',
-                content: messageToSend
-            }
-        ];
+            const messageToSend = message.trim();
+            const apiMessages = [
+                ...messages
+                    .filter(msg => !msg.isTemp)
+                    .map(msg => ({
+                        role: msg.sender === 'user' ? 'user' : 'assistant',
+                        content: msg.content.replace(/<[^>]*>/g, '') // Strip HTML for API
+                    })),
+                {
+                    role: 'user',
+                    content: messageToSend
+                }
+            ];
 
-        // Add user message
-        addMessage({
-            id: `user-${Date.now()}`,
-            content: messageToSend,
-            sender: 'user',
-            timestamp: new Date().toISOString()
-        });
-
-        if (conversationMode === 'normal') {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ai/complete`, {
-                messages: apiMessages
-            }, {
-                headers: { 'Authorization': `Bearer ${getAuthToken()}` },
-                timeout: 30000
-            });
-
-            const aiResponse = {
-                id: `ai-${Date.now()}`,
-                content: formatAIResponse(response.data.choices[0].message.content),
-                sender: 'ai',
+            // Add user message
+            addMessage({
+                id: `user-${Date.now()}`,
+                content: messageToSend,
+                sender: 'user',
                 timestamp: new Date().toISOString()
-            };
-            addMessage(aiResponse);
-
-        } else {
-            // Streaming mode with proper formatting
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete/stream`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getAuthToken()}`
-                },
-                body: JSON.stringify({ messages: apiMessages })
             });
 
-            if (!response.ok) {
-                throw new Error(`Stream request failed: ${response.status}`);
-            }
+            if (conversationMode === 'normal') {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ai/complete`, {
+                    messages: apiMessages
+                }, {
+                    headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+                    timeout: 30000
+                });
 
-            const aiResponseId = `ai-${Date.now()}`;
-            const aiResponse = {
-                id: aiResponseId,
-                content: '',
-                sender: 'ai',
-                timestamp: new Date().toISOString(),
-                isStreaming: true
-            };
-            addMessage(aiResponse);
+                const aiResponse = {
+                    id: `ai-${Date.now()}`,
+                    content: formatAIResponse(response.data.choices[0].message.content),
+                    sender: 'ai',
+                    timestamp: new Date().toISOString()
+                };
+                addMessage(aiResponse);
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-            let formattedContent = '';
+            } else {
+                // Streaming mode with proper formatting
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify({ messages: apiMessages })
+                });
 
-            try {
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
+                if (!response.ok) {
+                    throw new Error(`Stream request failed: ${response.status}`);
+                }
 
-                    buffer += decoder.decode(value, { stream: true });
+                const aiResponseId = `ai-${Date.now()}`;
+                const aiResponse = {
+                    id: aiResponseId,
+                    content: '',
+                    sender: 'ai',
+                    timestamp: new Date().toISOString(),
+                    isStreaming: true
+                };
+                addMessage(aiResponse);
 
-                    let boundary;
-                    while ((boundary = buffer.indexOf('\n')) !== -1) {
-                        const line = buffer.substring(0, boundary).trim();
-                        buffer = buffer.substring(boundary + 1);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let formattedContent = '';
 
-                        if (!line.startsWith('data:')) continue;
-                        if (line.includes('[DONE]')) break;
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
 
-                        try {
-                            const data = JSON.parse(line.substring(5).trim());
-                            if (data.content) {
-                                // Format the content as it streams in
-                                formattedContent += data.content;
-                                updateMessage(aiResponseId, {
-                                    content: formatAIResponse(formattedContent)
-                                });
+                        buffer += decoder.decode(value, { stream: true });
+
+                        let boundary;
+                        while ((boundary = buffer.indexOf('\n')) !== -1) {
+                            const line = buffer.substring(0, boundary).trim();
+                            buffer = buffer.substring(boundary + 1);
+
+                            if (!line.startsWith('data:')) continue;
+                            if (line.includes('[DONE]')) break;
+
+                            try {
+                                const data = JSON.parse(line.substring(5).trim());
+                                if (data.content) {
+                                    // Format the content as it streams in
+                                    formattedContent += data.content;
+                                    updateMessage(aiResponseId, {
+                                        content: formatAIResponse(formattedContent)
+                                    });
+                                }
+                            } catch (e) {
+                                console.error('Error parsing stream data:', e);
                             }
-                        } catch (e) {
-                            console.error('Error parsing stream data:', e);
                         }
                     }
+                } finally {
+                    updateMessage(aiResponseId, {
+                        isStreaming: false,
+                        content: formatAIResponse(formattedContent) // Final formatting pass
+                    });
                 }
-            } finally {
-                updateMessage(aiResponseId, { 
-                    isStreaming: false,
-                    content: formatAIResponse(formattedContent) // Final formatting pass
-                });
             }
-        }
-    } else {
+        } else {
             // *** FIXED PRIVATE & GROUP CHAT LOGIC ***
             setIsLoading(true);
             setError(null);
@@ -340,17 +340,17 @@ function ChatScreen({ activeChat }) {
             try {
                 const endpoint = activeChat.type === 'private' ? '/api/chat/messages' : '/api/chat/messages/group';
                 const payload = activeChat.type === 'private' ? { receiverId: activeChat.pid, content } : { chatId: activeChat.chatId, content };
-                
+
                 // 3. Send to server and get the final, saved message back in the response
                 const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, payload, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
                 const savedMessage = response.data;
 
                 // 4. Update the UI by replacing the temporary message with the real one from the server
-                setMessages(prevMessages => 
-                    prevMessages.map(msg => 
-                        msg.id === tempId 
-                        ? normalizeMessage(savedMessage, activeChat.type, currentUserId) 
-                        : msg
+                setMessages(prevMessages =>
+                    prevMessages.map(msg =>
+                        msg.id === tempId
+                            ? normalizeMessage(savedMessage, activeChat.type, currentUserId)
+                            : msg
                     )
                 );
 
@@ -366,22 +366,22 @@ function ChatScreen({ activeChat }) {
     };
 
     const formatAIResponse = (text) => {
-    if (!text) return text;
-    
-    // Replace double newlines with paragraphs
-    let formatted = text.replace(/\n\n/g, '\n');
-    
-    // Replace single newlines with line breaks
-    formatted = formatted.replace(/\n/g, '\n');
-    
-    // Handle markdown-style lists
-    formatted = formatted.replace(/\*\s(.*?)(<br\/>|$)/g, '\n');
-    
-    // Handle code blocks (if present)
-    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-    
-    return formatted;
-};
+        if (!text) return text;
+
+        // Replace double newlines with paragraphs
+        let formatted = text.replace(/\n\n/g, '\n');
+
+        // Replace single newlines with line breaks
+        formatted = formatted.replace(/\n/g, '\n');
+
+        // Handle markdown-style lists
+        formatted = formatted.replace(/\*\s(.*?)(<br\/>|$)/g, '\n');
+
+        // Handle code blocks (if present)
+        formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+        return formatted;
+    };
 
     const toggleConversationMode = useCallback(() => setConversationMode(prev => (prev === 'normal' ? 'stream' : 'normal')), []);
 
@@ -409,11 +409,10 @@ function ChatScreen({ activeChat }) {
         return (
             <div className="chat-screen-placeholder">
                 <img src="/network.png" alt="No chat selected" className="network-illustration" />
-                <p>Select a chat to start messaging</p>
             </div>
         );
     }
-    
+
     return (
         <ChatErrorBoundary>
             <div className={`chat-screen-container ${activeChat.type}-chat-background`}>
