@@ -17,16 +17,17 @@ const CreateAnonymousGroupModal = ({ isOpen, onClose, onCreateGroup }) => {
     const dropdownRef = useRef(null);
 
     const categories = [
-        "Friends & Family",
-        "Work & Business",
-        "Education & Study Groups",
-        "Gaming",
-        "Technology & Programming",
-        "Entertainment & Movies",
-        "Music & Podcasts",
-        "Sports & Fitness",
-        "Health & Wellness",
-        "Travel & Adventure"
+        "Confessions & Secrets",
+        "Emotional Support",
+        "Random Chats",
+        "Deep Conversations",
+        "Taboo Topics",
+        "Unpopular Opinions",
+        "Dark Humor & Memes",
+        "Story Sharing",
+        "Voice Without Face",
+        "Adulting Struggles",
+        "Other"
     ];
 
     // Add click outside handler for dropdown
@@ -123,7 +124,7 @@ const CreateAnonymousGroupModal = ({ isOpen, onClose, onCreateGroup }) => {
 
     return (
         <div className={`anon-create-modal-overlay ${isOpen ? 'visible' : ''}`}>
-            <div className={`anon-create-modal-container ${isCategoryOpen ? 'dropdown-open' : ''}`} ref={modalRef} tabIndex="-1" onKeyDown={handleKeyPress}>
+            <div className="anon-create-modal-container" ref={modalRef} tabIndex="-1" onKeyDown={handleKeyPress}>
                 <div className="anon-create-modal-header">
                     <h2 className="anon-header-title">Create Anonymous Group</h2>
                 </div>

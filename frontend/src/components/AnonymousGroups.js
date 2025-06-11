@@ -22,34 +22,35 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     }, []);
 
     const [groups, setGroups] = useState([
-        { id: 1, name: "Whisper Circle #1", members: 15, category: "Gaming" },
-        { id: 2, name: "Tech Hub Connect", members: 8, category: "Technology & Programming" },
-        { id: 3, name: "Movie Buffs Anonymous", members: 12, category: "Entertainment & Movies" },
-        { id: 4, name: "Study Squad Alpha", members: 20, category: "Education & Study Groups" },
-        { id: 5, name: "Music Makers Unite", members: 10, category: "Music & Podcasts" },
-        { id: 6, name: "Fitness Warriors", members: 25, category: "Sports & Fitness" },
-        { id: 7, name: "Code Masters", members: 18, category: "Technology & Programming" },
-        { id: 8, name: "Book Club Secret", members: 14, category: "Education & Study Groups" },
-        { id: 9, name: "Gaming League X", members: 30, category: "Gaming" },
-        { id: 10, name: "Health & Wellness Circle", members: 22, category: "Health & Wellness" },
-        { id: 11, name: "Travel Tales", members: 16, category: "Travel & Adventure" },
-        { id: 12, name: "Business Innovators", members: 19, category: "Work & Business" },
-        { id: 13, name: "Family Connect", members: 13, category: "Friends & Family" },
-        { id: 14, name: "Sports Talk Anonymous", members: 28, category: "Sports & Fitness" },
-        { id: 15, name: "Movie Critics Circle", members: 17, category: "Entertainment & Movies" }
+        { id: 1, name: "Whisper Circle #1", members: 15, category: "Confessions & Secrets" },
+        { id: 2, name: "Tech Hub Connect", members: 8, category: "Random Chats" },
+        { id: 3, name: "Movie Buffs Anonymous", members: 12, category: "Dark Humor & Memes" },
+        { id: 4, name: "Study Squad Alpha", members: 20, category: "Adulting Struggles" },
+        { id: 5, name: "Music Makers Unite", members: 10, category: "Voice Without Face" },
+        { id: 6, name: "Fitness Warriors", members: 25, category: "Emotional Support" },
+        { id: 7, name: "Code Masters", members: 18, category: "Deep Conversations" },
+        { id: 8, name: "Book Club Secret", members: 14, category: "Story Sharing" },
+        { id: 9, name: "Gaming League X", members: 30, category: "Random Chats" },
+        { id: 10, name: "Health & Wellness Circle", members: 22, category: "Emotional Support" },
+        { id: 11, name: "Travel Tales", members: 16, category: "Story Sharing" },
+        { id: 12, name: "Business Innovators", members: 19, category: "Adulting Struggles" },
+        { id: 13, name: "Family Connect", members: 13, category: "Deep Conversations" },
+        { id: 14, name: "Sports Talk Anonymous", members: 28, category: "Random Chats" },
+        { id: 15, name: "Movie Critics Circle", members: 17, category: "Dark Humor & Memes" }
     ]);
 
     const categories = [
-        "Friends & Family",
-        "Work & Business",
-        "Education & Study Groups",
-        "Gaming",
-        "Technology & Programming",
-        "Entertainment & Movies",
-        "Music & Podcasts",
-        "Sports & Fitness",
-        "Health & Wellness",
-        "Travel & Adventure"
+        "Confessions & Secrets",
+        "Emotional Support",
+        "Random Chats",
+        "Deep Conversations",
+        "Taboo Topics",
+        "Unpopular Opinions",
+        "Dark Humor & Memes",
+        "Story Sharing",
+        "Voice Without Face",
+        "Adulting Struggles",
+        "Other"
     ];
 
     const handleRefresh = () => {
