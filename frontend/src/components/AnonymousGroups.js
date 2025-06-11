@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiPlus, FiEye, FiEyeOff } from 'react-icons/fi';
 import { IoFilterOutline } from 'react-icons/io5';
+import CreateAnonymousGroupModal from './CreateAnonymousGroupModal';
 import '../styles/AnonymousGroups.css';
 
 const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -73,6 +75,24 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
         }
     };
 
+    const handleCreateGroup = async (groupData) => {
+        try {
+            // TODO: Replace with actual API call
+            console.log('Creating anonymous group with data:', groupData);
+            // Mock implementation - in real app, this would be an API call
+            const newGroup = {
+                id: Date.now(),
+                name: groupData.title,
+                members: 1,
+                category: groupData.category
+            };
+            setGroups(prevGroups => [...prevGroups, newGroup]);
+            setIsCreateModalOpen(false);
+        } catch (error) {
+            console.error('Error creating anonymous group:', error);
+        }
+    };
+
     const filteredGroups = selectedCategory
         ? groups.filter(group => group.category === selectedCategory)
         : groups;
@@ -119,7 +139,11 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
                                     </div>
                                 )}
                             </div>
-                            <button className="anon-action-btn create-btn" title="Create New Group">
+                            <button
+                                className="anon-action-btn create-btn"
+                                title="Create New Group"
+                                onClick={() => setIsCreateModalOpen(true)}
+                            >
                                 <FiPlus className="action-icon" />
                             </button>
                         </div>
@@ -141,6 +165,12 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
                     </div>
                 </div>
             )}
+
+            <CreateAnonymousGroupModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onCreateGroup={handleCreateGroup}
+            />
         </div>
     );
 };
