@@ -11,6 +11,8 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const AnonymousGroup = require('./models/AnonymousGroup');
+
 
 const aiRoutes = require('./routes/aiRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -19,6 +21,7 @@ const groupRoutes = require('./routes/groupRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const friendRoutes = require('./routes/friendRoutes');
 const groupMessageRoutes = require('./routes/groupMessageRoutes');
+const anonymousGroupRoutes = require('./routes/anonymousGroupRoutes');
 const { initializeSocket } = require('./services/socket');
 require('./services/passport');
 
@@ -49,9 +52,9 @@ const apiLimiter = rateLimit({
 
 app.use('/api/', apiLimiter);
 
-// Body parsing
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+// Body parsing - Increased limit for base64 images
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session configuration for OAuth
 const sessionMiddleware = session({
@@ -64,11 +67,13 @@ const sessionMiddleware = session({
     httpOnly: true,
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   },
-  store: process.env.NODE_ENV === 'production' ?
-    new (require('connect-mongo')(session))({
-      mongooseConnection: mongoose.connection,
-      ttl: 24 * 60 * 60 // 1 day
-    }) : null
+  // In production, you must use a session store like connect-mongo
+  // For now, checking if connect-mongo is available.
+  store: mongoose.connection.readyState === 1 ? require('connect-mongo').create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 24 * 60 * 60, // 1 day
+    collectionName: 'sessions'
+  }) : null
 });
 
 app.use(sessionMiddleware);
@@ -107,7 +112,6 @@ const connectWithRetry = () => {
 
 connectWithRetry();
 
-// <<< FIX: Middleware to attach io to each request
 app.use((req, res, next) => {
   req.io = io;
   next();
@@ -121,6 +125,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/group-messages', groupMessageRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/anonymous-groups', anonymousGroupRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -154,7 +159,6 @@ const verifyJWT = async (token) => {
   }
 };
 
-
 // Socket.IO authentication middleware
 io.use(async (socket, next) => {
   try {
@@ -172,16 +176,74 @@ io.use(async (socket, next) => {
   }
 });
 
+// <<< NEW: Map to track which anonymous group a socket is in. Key: socket.id, Value: groupId >>>
+const socketToAnonymousGroupMap = new Map();
+
 // Connection event handler
 io.on('connection', (socket) => {
   console.log(`✅ User connected: ${socket.user.username} (${socket.id})`);
 
-  // <<< FIX: Join a room based on the user's ID
   socket.join(socket.userId);
   console.log(`   > User ${socket.userId} joined their personal room.`);
+  
+  // <<< NEW: Reusable logic for leaving an anonymous group >>>
+  const handleAnonymousGroupLeave = async () => {
+    const groupId = socketToAnonymousGroupMap.get(socket.id);
+    if (groupId) {
+      try {
+        socket.leave(groupId);
+        socketToAnonymousGroupMap.delete(socket.id);
 
+        const updatedGroup = await AnonymousGroup.findByIdAndUpdate(
+          groupId,
+          { $inc: { activeMembersCount: -1 } },
+          { new: true }
+        );
+
+        console.log(`   > User ${socket.user.username} left group ${groupId}. New count: ${updatedGroup ? updatedGroup.activeMembersCount : 'N/A'}`);
+        io.to(groupId).emit('userLeft', { userId: socket.userId, username: socket.user.username });
+
+        if (updatedGroup && updatedGroup.activeMembersCount <= 0 && updatedGroup.isTemporary) {
+          await AnonymousGroup.findByIdAndDelete(groupId);
+          console.log(`   > Deleted empty temporary group: ${groupId}`);
+          // Optionally, you can emit an event to the clients to remove this group from their list
+          io.emit('groupDeleted', { groupId });
+        }
+      } catch (error) {
+        console.error(`Error handling leave for group ${groupId}:`, error);
+      }
+    }
+  };
+
+  // <<< NEW: Listener for joining an anonymous group >>>
+  socket.on('joinAnonymousGroup', async (groupId) => {
+    // First, leave any anonymous group the user might currently be in
+    await handleAnonymousGroupLeave();
+
+    try {
+      socket.join(groupId);
+      socketToAnonymousGroupMap.set(socket.id, groupId);
+
+      await AnonymousGroup.findByIdAndUpdate(groupId, { $inc: { activeMembersCount: 1 } });
+      
+      console.log(`   > User ${socket.user.username} joined anonymous group ${groupId}`);
+      io.to(groupId).emit('userJoined', { userId: socket.userId, username: socket.user.username });
+    } catch (error) {
+      console.error(`Error joining anonymous group ${groupId}:`, error);
+      socket.emit('error', 'Could not join the anonymous group.');
+    }
+  });
+
+  // <<< NEW: Listener for explicitly leaving an anonymous group >>>
+  socket.on('leaveAnonymousGroup', async () => {
+    await handleAnonymousGroupLeave();
+  });
+  
+  // <<< UPDATED: Disconnect logic >>>
   socket.on('disconnect', (reason) => {
     console.log(`❌ User disconnected: ${socket.user.username} - Reason: ${reason}`);
+    // Trigger the same leave logic when a user disconnects
+    handleAnonymousGroupLeave();
   });
 
   socket.on('error', (error) => {
