@@ -169,7 +169,7 @@
 
 .anon-category-dropdown {
     position: absolute;
-    top: 180%;
+    top: 0;
     left: 0;
     max-width: 260px;
     min-width: 160px;
@@ -181,7 +181,7 @@
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
-    margin-top: 5px;
+    margin-top: 25px;
 }
 
 .anon-category-dropdown::-webkit-scrollbar {
