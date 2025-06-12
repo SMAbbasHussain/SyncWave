@@ -77,10 +77,9 @@ function Groups({ onChatSelect }) {
   const handleGroupClick = (groupId) => {
     setSelectedGroupId(groupId);
     if (onChatSelect) {
-      onChatSelect({
-        type: 'group',
-        chatId: groupId
-      });
+      onChatSelect(
+        groupId
+      );
     }
   };
 

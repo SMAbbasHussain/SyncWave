@@ -1,45 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers } from 'react-icons/fa';
 import '../styles/ChatScreen.css';
+import axios from 'axios';
 
 function GroupChatTopBar({ groupId }) {
-    const [groupInfo, setGroupInfo] = useState({
-        name: '',
-        memberCount: 0,
-        groupPicUrl: ''
-    });
+    const [group, setGroup] = useState({});
 
-    useEffect(() => {
-        // TODO: Replace with actual API call to fetch group info
-        // This is a mock implementation
-        const mockGroups = {
-            1: { name: "Group Name ni mila?", memberCount: 15, groupPicUrl: "https://via.placeholder.com/40/abcdef" },
-            2: { name: "itna dehan kabhi..", memberCount: 8, groupPicUrl: '' },
-            3: { name: "PARHAI Pr dete na", memberCount: 12, groupPicUrl: "https://via.placeholder.com/40/123456" },
-            // Add more mock groups as needed
-        };
+     useEffect(() => {
+            const fetchGroup = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await axios.get(
+                        `${process.env.REACT_APP_API_URL}/api/groups/${groupId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    );
+                    setGroup(response.data);
+                } catch (error) {
+                    console.error('Error fetching Group:', error);
+                }
+            };
+    fetchGroup();
+           
+        }, [groupId]);
 
-        const group = mockGroups[groupId] || {
-            name: `Group ${groupId}`,
-            memberCount: 0,
-            groupPicUrl: ''
-        };
 
-        setGroupInfo(group);
-    }, [groupId]);
+  
 
     return (
         <div className="chat-screen-top-bar-content">
             <div className="chat-info">
-                {groupInfo.groupPicUrl ? (
-                    <img src={groupInfo.groupPicUrl} alt={`${groupInfo.name}'s avatar`} className="chat-avatar" />
+                {group.photo ? (
+                    <img src={group.photo} alt={`${group.name}'s avatar`} className="chat-avatar" />
                 ) : (
                     <div className="chat-avatar-icon-container">
                         <FaUsers className="chat-avatar-icon" />
                     </div>
                 )}
                 <div className="user-status-info">
-                    <span className="chat-partner-name">{groupInfo.name}</span>
+                    <span className="chat-partner-name">{group.name}</span>
                     {/* Group chat doesn't typically show online status per member in the header */}
                     {/* <div className="user-status-row">
                         <div className={`status-indicator ${groupInfo.status}`} />
