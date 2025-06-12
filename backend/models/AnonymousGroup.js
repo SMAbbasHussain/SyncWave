@@ -1,6 +1,6 @@
 // models/AnonymousGroup.js
 
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const anonymousGroupSchema = new mongoose.Schema({
     name: {
@@ -52,6 +52,5 @@ const anonymousGroupSchema = new mongoose.Schema({
 // Create an index on activeMembersCount to quickly find empty groups if needed.
 anonymousGroupSchema.index({ activeMembersCount: 1, isTemporary: 1 });
 
-const AnonymousGroup = mongoose.model('AnonymousGroup', anonymousGroupSchema);
+module.exports = mongoose.model('AnonymousGroup', anonymousGroupSchema);
 
-export default AnonymousGroup;

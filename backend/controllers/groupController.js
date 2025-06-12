@@ -94,6 +94,7 @@ const getUserGroups = async (req, res) => {
     );
 
     res.json(groupsWithDetails);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -115,9 +116,12 @@ const getGroupDetails = async (req, res) => {
     }
 
     // Check if user is a member
-    if (!group.isMember(req.user._id)) {
-      return res.status(403).json({ error: 'Not a group member' });
-    }
+    const isMember = group.members.some(member => member.userId.equals(req.user._id));
+
+if (!isMember) {
+  return res.status(403).json({ error: 'Not a group member' });
+}
+
 
     res.json(group);
   } catch (error) {
