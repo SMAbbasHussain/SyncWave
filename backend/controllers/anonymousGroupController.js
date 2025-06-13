@@ -72,9 +72,59 @@ const deleteGroup = async (req, res) => {
     }
 };
 
+const sendGroupMessage = async (req, res) => {
+  try {
+
+    const { content, groupId} = req.body;
+            const currentUserId = req.user._id;
+
+
+   
+
+    const messagePayload = {
+      content,
+      groupId,
+      senderId: currentUserId,
+      timestamp: new Date()
+    };
+
+    // Emit to all connected clients
+    if (req.io) {
+      req.io.emit('newAnonymousGroupMessage', messagePayload);
+    }
+
+    // Optional: Add logic here to store the message in DB, etc.
+
+    res.status(201).json({ message: 'Message sent successfully', data: messagePayload });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getGroupById = async (req, res) => {
+    try {
+        const group = await AnonymousGroup.findById(req.params.id);
+
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found.' });
+        }
+
+        res.status(200).json(group);
+    } catch (error) {
+        console.error('Error fetching group:', error);
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid group ID.' });
+        }
+        res.status(500).json({ message: 'Server error while fetching group.' });
+    }
+};
+
+
 // Change 'export' syntax to 'module.exports'
 module.exports = {
     createGroup,
     getAllGroups,
-    deleteGroup
+    deleteGroup,
+    sendGroupMessage,
+    getGroupById
 };

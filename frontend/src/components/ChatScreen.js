@@ -36,7 +36,7 @@ const normalizeMessage = (msg, chatType, currentUserId) => {
         return {
             ...baseMessage,
             senderId: senderId,
-            profilePic: msg.senderId.profilePic,
+            profilePic: chatType === 'anonymousGroup' ? null : msg.senderId?.profilePic || null,
             sender: senderId === currentUserId ? 'user' : 'other'
         };
     }
@@ -52,7 +52,7 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
             role="log"
             aria-label={`Message from ${displaySender}`}
         >
-            <img src={msg.profilePic}/>
+{msg.profilePic && <img src={msg.profilePic} alt="Profile" />}
             <div className="message-content">
                 <span dangerouslySetInnerHTML={{ __html: msg.content }} />
                 {msg.isStreaming && (
@@ -64,7 +64,7 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
                 )}
             </div>
             <span className="message-timestamp">
-                {msg.isTemp ? 'Sending...' : new Date(msg.timestamp).toLocaleTimeString([], {
+                { new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                 })}
@@ -128,6 +128,18 @@ function ChatScreen({ activeChat }) {
         });
     }, [currentUserId]);
 
+    const addAnonymousMessage = useCallback((content) => {
+    const tempMessage = {
+        content,
+        isTemp: true,
+        createdAt: new Date().toISOString()
+    };
+
+    // Reuse your existing `addMessage` logic
+    addMessage(tempMessage);
+}, [addMessage]);
+
+
     const updateMessage = useCallback((id, updates) => {
         setMessages(prev => prev.map(msg => {
             if (msg.id === id) {
@@ -155,7 +167,7 @@ function ChatScreen({ activeChat }) {
         try {
             let endpoint = '';
             if (chatInfo.type === 'private') endpoint = `${process.env.REACT_APP_API_URL}/api/chat/messages/conversations/${chatInfo.pid}`;
-            else if (chatInfo.type === 'group' || chatInfo.type === 'anonymousGroup') endpoint = `${process.env.REACT_APP_API_URL}/api/group-messages/${chatInfo.chatId}`;
+            else if (chatInfo.type === 'group') endpoint = `${process.env.REACT_APP_API_URL}/api/group-messages/${chatInfo.chatId}`;
             else if (chatInfo.type === 'ai') endpoint = `${process.env.REACT_APP_API_URL}/api/ai/conversation`;
 
             if (!endpoint) return;
@@ -187,7 +199,7 @@ function ChatScreen({ activeChat }) {
 
         socketRef.current.on('newMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
-            const isForCurrentChat = (currentChat.type === 'private' && newMsg.chatId === currentChat.chatId )|| (currentChat.type === 'group' && newMsg.groupId === currentChat.chatId )
+            const isForCurrentChat = currentChat.type === 'private' && newMsg.chatId === currentChat.chatId 
                                     
             
             // Only add the message if it's not from the current user (since we already handled it optimistically)
@@ -197,7 +209,7 @@ function ChatScreen({ activeChat }) {
         });
          socketRef.current.on('newGroupMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
-            const isForCurrentChat = (currentChat.type === 'private' && newMsg.chatId === currentChat.chatId )|| (currentChat.type === 'group' && newMsg.groupId === currentChat.chatId )
+            const isForCurrentChat =  currentChat.type === 'group' && newMsg.groupId === currentChat.chatId 
                                     
             
             // Only add the message if it's not from the current user (since we already handled it optimistically)
@@ -205,6 +217,20 @@ function ChatScreen({ activeChat }) {
                 addMessage(newMsg);
             }
         });
+        socketRef.current.on('newAnonymousGroupMessage', (newMsg) => {
+  const currentChat = activeChatRef.current;
+
+  if (!currentChat) return;
+
+  const { groupId, senderId,content } = newMsg;
+
+  // Add message only if it belongs to the current chat and is not from the current user
+  if (groupId === currentChat.chatId && senderId !== currentUserId) {
+    addAnonymousMessage(content);
+  }
+});
+
+
 
         return () => {
             if (socketRef.current) {
@@ -359,12 +385,34 @@ function ChatScreen({ activeChat }) {
                     content 
                 };
 
-                const response = await axios.post(
-                    `${process.env.REACT_APP_API_URL}${endpoint}`, 
-                    payload, 
-                    { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
-                );
+                if (activeChat.type === 'anonymousGroup') {
+    // Handle anonymous group message sending separately
+                    const response = await axios.post(
+                        `${process.env.REACT_APP_API_URL}/api/anonymous-groups/message`, payload,
+                        { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
+                    );
 
+                                const tempId = `temp-${Date.now()}-${Math.random()}`;
+
+            // Add optimistic message
+            addMessage({
+                id: tempId,
+                content: content,
+                senderId: currentUserId,
+                timestamp: new Date().toISOString(),
+                isTemp: true,
+            });
+
+                } else {
+                    // Handle regular message sending
+                    const response = await axios.post(
+                        `${process.env.REACT_APP_API_URL}${endpoint}`, 
+                        payload, 
+                        { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
+                    );
+                }
+
+               
                 // Instead of updating the message here, we'll let the socket.io event handle it
                 // The server will broadcast the message back to all clients including the sender
                 // But we've modified the socket.io handler to ignore messages from the current user

@@ -3,12 +3,15 @@ import { FiPlus, FiEye, FiEyeOff } from 'react-icons/fi';
 import { IoFilterOutline } from 'react-icons/io5';
 import CreateAnonymousGroupModal from './CreateAnonymousGroupModal';
 import '../styles/AnonymousGroups.css';
+import axios from 'axios';
+import { FaUsers } from 'react-icons/fa';
 
 const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+     const [groups, setGroups] = useState([]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -21,23 +24,25 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const [groups, setGroups] = useState([
-        { id: 1, name: "Whisper Circle #1", members: 15, category: "Confessions & Secrets" },
-        { id: 2, name: "Tech Hub Connect", members: 8, category: "Random Chats" },
-        { id: 3, name: "Movie Buffs Anonymous", members: 12, category: "Dark Humor & Memes" },
-        { id: 4, name: "Study Squad Alpha", members: 20, category: "Adulting Struggles" },
-        { id: 5, name: "Music Makers Unite", members: 10, category: "Voice Without Face" },
-        { id: 6, name: "Fitness Warriors", members: 25, category: "Emotional Support" },
-        { id: 7, name: "Code Masters", members: 18, category: "Deep Conversations" },
-        { id: 8, name: "Book Club Secret", members: 14, category: "Story Sharing" },
-        { id: 9, name: "Gaming League X", members: 30, category: "Random Chats" },
-        { id: 10, name: "Health & Wellness Circle", members: 22, category: "Emotional Support" },
-        { id: 11, name: "Travel Tales", members: 16, category: "Story Sharing" },
-        { id: 12, name: "Business Innovators", members: 19, category: "Adulting Struggles" },
-        { id: 13, name: "Family Connect", members: 13, category: "Deep Conversations" },
-        { id: 14, name: "Sports Talk Anonymous", members: 28, category: "Random Chats" },
-        { id: 15, name: "Movie Critics Circle", members: 17, category: "Dark Humor & Memes" }
-    ]);
+    useEffect(() => {
+        const fetchGroups = async () => {
+          try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/anonymous-groups`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+            setGroups(response.data);
+          } catch (err) {
+            console.error('Error fetching groups:', err);
+          } finally {
+          }
+        };
+    
+        fetchGroups();
+      }, []);
+
+   
 
     const categories = [
         "Confessions & Secrets",
@@ -72,27 +77,43 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const handleAnonymousGroupClick = (groupId) => {
         setSelectedGroupId(groupId);
         if (onChatSelect) {
-            onChatSelect('anonymousGroup', groupId);
+            onChatSelect( groupId);
         }
     };
 
     const handleCreateGroup = async (groupData) => {
-        try {
-            // TODO: Replace with actual API call
-            console.log('Creating anonymous group with data:', groupData);
-            // Mock implementation - in real app, this would be an API call
-            const newGroup = {
-                id: Date.now(),
-                name: groupData.title,
-                members: 1,
-                category: groupData.category
-            };
-            setGroups(prevGroups => [...prevGroups, newGroup]);
-            setIsCreateModalOpen(false);
-        } catch (error) {
-            console.error('Error creating anonymous group:', error);
+    try {
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/anonymous-groups`,
+        {
+          name: groupData.title,
+          description: groupData.description,
+          photo: groupData.photo,
+          category: groupData.category
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
         }
-    };
+      );
+
+      if (response.data) {
+        const newGroup = response.data;
+        setGroups(prevGroups => [...prevGroups, newGroup]);
+        setIsCreateModalOpen(false);
+      } else {
+        throw new Error('No data received from server');
+      }
+
+    } catch (err) {
+      console.error('Error creating anonymous group:', err);
+    }
+  };
+
+   
 
     const filteredGroups = selectedCategory
         ? groups.filter(group => group.category === selectedCategory)
@@ -154,9 +175,15 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
                         {filteredGroups.map(group => (
                             <div
                                 key={group.id}
-                                className={`anon-group-item ${selectedGroupId === group.id ? 'active' : ''}`}
-                                onClick={() => handleAnonymousGroupClick(group.id)}
-                            >
+                                className={`anon-group-item ${selectedGroupId === group._id ? 'active' : ''}`}
+                                onClick={() => handleAnonymousGroupClick(group._id)}
+                            ><div className="group-pic">
+                                            {group.photo ? (
+                                              <img src={group.photo} alt={`${group.name}'s picture`} className="group-pic-img" />
+                                            ) : (
+                                              <FaUsers className="group-pic-icon" />
+                                            )}
+                                          </div>
                                 <div className="anon-group-info">
                                     <span className="anon-group-name">{group.name}</span>
                                     <span className="anon-group-members">{group.members} members</span>

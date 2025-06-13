@@ -85,7 +85,6 @@ function Groups({ onChatSelect }) {
 
   const handleCreateGroup = async (groupData) => {
     try {
-      console.log('Creating group with data:', groupData);
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/groups`,
