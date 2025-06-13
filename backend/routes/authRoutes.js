@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login, logout, googleAuth, verifyRecaptcha } = require('../controllers/authController');
+const { signup, login, logout, googleAuth, verifyRecaptchaToken } = require('../controllers/authController');
 const passport = require('passport');
 const { generateToken } = require('../utils/jwtUtils');
 const authenticateToken = require('../middleware/authMiddleware'); // Updated middleware
@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/verify-recaptcha', verifyRecaptcha);
+router.post('/verify-recaptcha', verifyRecaptchaToken);
 
 // Protected logout route - requires authentication to identify user
 router.get('/logout', authenticateToken, logout);
