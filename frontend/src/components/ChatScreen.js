@@ -52,7 +52,12 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
             role="log"
             aria-label={`Message from ${displaySender}`}
         >
-{msg.profilePic && <img src={msg.profilePic} alt="Profile" />}
+            {displaySender === 'other' && msg.profilePic && (
+                <img src={msg.profilePic} alt="Profile" className="message-avatar" />
+            )}
+            {displaySender === 'user' && msg.profilePic && (
+                <img src={msg.profilePic} alt="Profile" className="message-avatar" />
+            )}
             <div className="message-content">
                 <span dangerouslySetInnerHTML={{ __html: msg.content }} />
                 {msg.isStreaming && (
@@ -63,8 +68,9 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
                     </div>
                 )}
             </div>
+
             <span className="message-timestamp">
-                { new Date(msg.timestamp).toLocaleTimeString([], {
+                {new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                 })}
@@ -129,15 +135,15 @@ function ChatScreen({ activeChat }) {
     }, [currentUserId]);
 
     const addAnonymousMessage = useCallback((content) => {
-    const tempMessage = {
-        content,
-        isTemp: true,
-        createdAt: new Date().toISOString()
-    };
+        const tempMessage = {
+            content,
+            isTemp: true,
+            createdAt: new Date().toISOString()
+        };
 
-    // Reuse your existing `addMessage` logic
-    addMessage(tempMessage);
-}, [addMessage]);
+        // Reuse your existing `addMessage` logic
+        addMessage(tempMessage);
+    }, [addMessage]);
 
 
     const updateMessage = useCallback((id, updates) => {
@@ -199,36 +205,36 @@ function ChatScreen({ activeChat }) {
 
         socketRef.current.on('newMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
-            const isForCurrentChat = currentChat.type === 'private' && newMsg.chatId === currentChat.chatId 
-                                    
-            
+            const isForCurrentChat = currentChat.type === 'private' && newMsg.chatId === currentChat.chatId
+
+
             // Only add the message if it's not from the current user (since we already handled it optimistically)
             if (isForCurrentChat && newMsg.senderId !== currentUserId) {
                 addMessage(newMsg);
             }
         });
-         socketRef.current.on('newGroupMessage', (newMsg) => {
+        socketRef.current.on('newGroupMessage', (newMsg) => {
             const currentChat = activeChatRef.current;
-            const isForCurrentChat =  currentChat.type === 'group' && newMsg.groupId === currentChat.chatId 
-                                    
-            
+            const isForCurrentChat = currentChat.type === 'group' && newMsg.groupId === currentChat.chatId
+
+
             // Only add the message if it's not from the current user (since we already handled it optimistically)
             if (isForCurrentChat && newMsg.senderId !== currentUserId) {
                 addMessage(newMsg);
             }
         });
         socketRef.current.on('newAnonymousGroupMessage', (newMsg) => {
-  const currentChat = activeChatRef.current;
+            const currentChat = activeChatRef.current;
 
-  if (!currentChat) return;
+            if (!currentChat) return;
 
-  const { groupId, senderId,content } = newMsg;
+            const { groupId, senderId, content } = newMsg;
 
-  // Add message only if it belongs to the current chat and is not from the current user
-  if (groupId === currentChat.chatId && senderId !== currentUserId) {
-    addAnonymousMessage(content);
-  }
-});
+            // Add message only if it belongs to the current chat and is not from the current user
+            if (groupId === currentChat.chatId && senderId !== currentUserId) {
+                addAnonymousMessage(content);
+            }
+        });
 
 
 
@@ -359,7 +365,7 @@ function ChatScreen({ activeChat }) {
                     });
                 }
             }
-        } 
+        }
         else {
             setIsLoading(true);
             setError(null);
@@ -377,42 +383,42 @@ function ChatScreen({ activeChat }) {
 
             try {
                 const endpoint = activeChat.type === 'private' ? '/api/chat/messages' : '/api/group-messages/';
-                const payload = activeChat.type === 'private' ? { 
-                    receiverId: activeChat.pid, 
-                    content 
-                } : { 
-                    groupId: activeChat.chatId, 
-                    content 
+                const payload = activeChat.type === 'private' ? {
+                    receiverId: activeChat.pid,
+                    content
+                } : {
+                    groupId: activeChat.chatId,
+                    content
                 };
 
                 if (activeChat.type === 'anonymousGroup') {
-    // Handle anonymous group message sending separately
+                    // Handle anonymous group message sending separately
                     const response = await axios.post(
                         `${process.env.REACT_APP_API_URL}/api/anonymous-groups/message`, payload,
                         { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
                     );
 
-                                const tempId = `temp-${Date.now()}-${Math.random()}`;
+                    const tempId = `temp-${Date.now()}-${Math.random()}`;
 
-            // Add optimistic message
-            addMessage({
-                id: tempId,
-                content: content,
-                senderId: currentUserId,
-                timestamp: new Date().toISOString(),
-                isTemp: true,
-            });
+                    // Add optimistic message
+                    addMessage({
+                        id: tempId,
+                        content: content,
+                        senderId: currentUserId,
+                        timestamp: new Date().toISOString(),
+                        isTemp: true,
+                    });
 
                 } else {
                     // Handle regular message sending
                     const response = await axios.post(
-                        `${process.env.REACT_APP_API_URL}${endpoint}`, 
-                        payload, 
+                        `${process.env.REACT_APP_API_URL}${endpoint}`,
+                        payload,
                         { headers: { 'Authorization': `Bearer ${getAuthToken()}` } }
                     );
                 }
 
-               
+
                 // Instead of updating the message here, we'll let the socket.io event handle it
                 // The server will broadcast the message back to all clients including the sender
                 // But we've modified the socket.io handler to ignore messages from the current user

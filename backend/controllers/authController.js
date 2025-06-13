@@ -3,6 +3,7 @@ const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../utils/cloudinary');
+dotenv.config({ path: './.env' });
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60 * 1000; // 30 minutes
@@ -170,7 +171,7 @@ const googleAuth = async (req, res) => {
     const isNewUser = req.user.isNew;
     
     // Redirect to frontend with token instead of sending JSON
-    res.redirect(`http://localhost:3000/auth-success?token=${token}&isNewUser=${isNewUser}`);
+    res.redirect(`${process.env.CLIENT_URLS}/auth-success?token=${token}&isNewUser=${isNewUser}`);
   } catch (error) {
     console.error('Google auth error:', error);
     res.redirect('/login?error=google_auth_failed');
