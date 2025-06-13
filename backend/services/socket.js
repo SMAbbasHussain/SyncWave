@@ -1,33 +1,41 @@
-const socketIO = require('socket.io');
+const { saveMessage } = require('../controllers/chatController');
 
-const setupSocket = (server) => {
-  const io = socketIO(server, {
-    cors: {
-      origin: '*', // Allow all origins (update in production)
-    },
-  });
-
+function initializeSocket(io) {
   io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+    console.log(`New connection: ${socket.id} (User: ${socket.user?.id || 'unknown'})`);
 
-    // Join a room for private messaging
-    socket.on('joinRoom', (room) => {
-      socket.join(room);
-      console.log(`User joined room: ${room}`);
-    });
+    // Join user to their personal room
+    if (socket.user?.id) {
+      socket.join(`user_${socket.user.id}`);
+    }
 
     // Handle private messages
-    socket.on('privateMessage', ({ room, message, username }) => {
-      const timestamp = new Date().toISOString(); // Send timestamp as ISO string
-      io.to(room).emit('privateMessage', { username, message, timestamp });
+    socket.on('privateMessage', async ({ receiverId, content }, callback) => {
+      try {
+        const message = await saveMessage({
+          senderId: socket.user.id,
+          receiverId,
+          content
+        }, { io });
+
+        // Emit to sender and receiver
+        io.to(`user_${receiverId}`).emit('newMessage', message);
+        callback({ status: 'delivered', message });
+      } catch (err) {
+        callback({ status: 'failed', error: err.message });
+      }
     });
 
+    // Handle disconnection
     socket.on('disconnect', () => {
-      console.log('A user disconnected:', socket.id);
+      console.log(`User disconnected: ${socket.user?.id || 'unknown'}`);
+    });
+
+    // Error handling
+    socket.on('error', (err) => {
+      console.error('Socket error:', err);
     });
   });
-
-  return io;
 };
 
-module.exports = setupSocket;
+module.exports = {initializeSocket};

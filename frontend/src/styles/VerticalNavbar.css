@@ -1,0 +1,234 @@
+.vertical-navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    box-shadow: 0 0 30px rgba(0, 119, 255, 0.1);
+    background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
+    backdrop-filter: blur(1000px);
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    border-radius: 25px;
+    padding: clamp(12px, 1.5vh, 15px) 0;
+    box-sizing: border-box;
+    width: clamp(60px, 4vw, 80px);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.vertical-navbar .icon-container {
+    width: clamp(32px, 2.2vw, 35px);
+    height: clamp(32px, 2.2vw, 35px);
+    background-color: transparent;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #b0bec5;
+    cursor: pointer;
+    transition: all 0.3s ease, margin 0.3s ease;
+    margin-bottom: clamp(8px, 1vh, 10px);
+    padding: clamp(4px, 0.5vw, 5px);
+    position: relative;
+}
+
+.vertical-navbar .icon-container:last-child {
+    margin-bottom: 0;
+}
+
+.vertical-navbar .icon-container:hover .icon-wrapper {
+    background-color: #033c58e5;
+    border-radius: 10px;
+    padding: 5px;
+    color: #ffffff;
+}
+
+.vertical-navbar .icon-container .icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    height: clamp(35px, 2.5vw, 40px);
+    background-color: transparent;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+/* Combined active and expanded styles */
+.vertical-navbar .icon-container.active {
+    border-radius: 25px;
+    padding: clamp(6px, 0.8vw, 7px);
+    margin-top: clamp(4px, 0.6vh, 5px);
+    margin-bottom: clamp(20px, 2.5vh, 25px);
+    width: clamp(60px, 4vw, 80px);
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.vertical-navbar .icon-container.active:first-child {
+    margin-top: 0;
+}
+
+.vertical-navbar .icon-container.active .icon-wrapper {
+    background-color: #1439617d;
+    border-radius: 10px;
+    padding: 5px;
+    color: #00ffff;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.335));
+}
+
+.vertical-navbar .icon-label {
+    font-size: clamp(0.55rem, 0.8vw, 0.6rem);
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    word-break: break-word;
+    text-shadow: 0 0 5px rgba(0, 119, 255, 0.5);
+    max-width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 0;
+    width: 100%;
+}
+
+.vertical-navbar .icon-container:hover .icon-label,
+.vertical-navbar .icon-container.active .icon-label {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.vertical-navbar .icon-container.active .icon-label {
+    color: #00ffff;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
+}
+
+/* Responsive styles for larger screens */
+@media screen and (min-width: 1024px) {
+    .vertical-navbar {
+        width: clamp(65px, 4.2vw, 85px);
+        padding: clamp(15px, 1.8vh, 18px) 0;
+    }
+
+    .vertical-navbar .icon-container {
+        width: clamp(34px, 2.4vw, 38px);
+        height: clamp(34px, 2.4vw, 38px);
+        margin-bottom: clamp(10px, 1.2vh, 12px);
+    }
+
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(38px, 2.7vw, 42px);
+    }
+
+    .vertical-navbar .icon-container.active {
+        width: clamp(65px, 4.2vw, 85px);
+        padding: clamp(7px, 0.9vw, 8px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.58rem, 0.85vw, 0.65rem);
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .vertical-navbar {
+        width: clamp(70px, 4.5vw, 90px);
+        padding: clamp(18px, 2vh, 20px) 0;
+    }
+
+    .vertical-navbar .icon-container {
+        width: clamp(36px, 2.6vw, 40px);
+        height: clamp(36px, 2.6vw, 40px);
+        margin-bottom: clamp(12px, 1.4vh, 14px);
+    }
+
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(40px, 2.9vw, 44px);
+    }
+
+    .vertical-navbar .icon-container.active {
+        width: clamp(70px, 4.5vw, 90px);
+        padding: clamp(8px, 1vw, 9px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.6rem, 0.9vw, 0.7rem);
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .vertical-navbar {
+        width: clamp(75px, 4.8vw, 95px);
+        padding: clamp(20px, 2.2vh, 22px) 0;
+    }
+
+    .vertical-navbar .icon-container {
+        width: clamp(38px, 2.8vw, 42px);
+        height: clamp(38px, 2.8vw, 42px);
+        margin-bottom: clamp(14px, 1.6vh, 16px);
+    }
+
+    .vertical-navbar .icon-container .icon-wrapper {
+        height: clamp(42px, 3.1vw, 46px);
+    }
+
+    .vertical-navbar .icon-container.active {
+        width: clamp(75px, 4.8vw, 95px);
+        padding: clamp(9px, 1.1vw, 10px);
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: clamp(0.65rem, 0.95vw, 0.75rem);
+    }
+}
+
+/* Keep existing mobile responsive styles */
+@media (max-width: 768px) {
+    .vertical-navbar {
+        flex-direction: row;
+        justify-content: space-around;
+        height: auto;
+        padding: 0 10px;
+        width: auto;
+    }
+
+    .vertical-navbar .icon-container {
+        width: 30px;
+        height: 30px;
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    .vertical-navbar .icon-container:last-child {
+        margin-right: 0;
+    }
+
+    .vertical-navbar .icon-container.active {
+        flex-direction: column;
+        width: auto;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding: 10px;
+    }
+
+    .vertical-navbar .icon-label {
+        font-size: 0.5rem;
+        position: static;
+        transform: none;
+        margin-top: 5px;
+    }
+}
+
+/* Define Poppins font family */
+body {
+    font-family: 'Poppins', sans-serif;
+}
