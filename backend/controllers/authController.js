@@ -3,6 +3,7 @@ const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../utils/cloudinary');
+const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 
@@ -220,13 +221,7 @@ const logout = async (req, res) => {
   }
 };
 
-const verifyRecaptcha = async (req, res) => {
-  const { token } = req.body;
-  
-  if (!token) {
-    return res.status(400).json({ error: 'reCAPTCHA token is required' });
-  }
-
+const verifyRecaptchaToken = async (token) => {
   try {
     const response = await axios.post(
       'https://www.google.com/recaptcha/api/siteverify',
@@ -236,19 +231,10 @@ const verifyRecaptcha = async (req, res) => {
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
-
-    if (!response.data.success) {
-      console.error('reCAPTCHA verification failed:', response.data['error-codes']);
-      return res.status(400).json({ 
-        error: 'reCAPTCHA verification failed',
-        details: response.data['error-codes']
-      });
-    }
-    
-    res.json({ success: true, score: response.data.score });
+    return response.data;
   } catch (error) {
-    console.error('reCAPTCHA server error:', error);
-    res.status(500).json({ error: 'Failed to verify reCAPTCHA' });
+    console.error('reCAPTCHA verification failed:', error);
+    throw new Error('Failed to verify reCAPTCHA');
   }
 };
 
