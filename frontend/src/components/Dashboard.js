@@ -12,6 +12,7 @@ import axios from "axios";
 
 function Dashboard({ activeNavItem = 'home' }) {
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
+    
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
 
     // Reset active chat when switching views
@@ -27,6 +28,7 @@ function Dashboard({ activeNavItem = 'home' }) {
     // Function to handle chat selection
     const handleChatSelect = (chatType, chatId, pid) => {
         setActiveChat({ type: chatType, chatId: chatId, pid: pid });
+        console.log(activeChat);
     };
 
 
