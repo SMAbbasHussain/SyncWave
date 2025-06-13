@@ -69,10 +69,20 @@ function Login() {
       return;
     }
 
+    const token = captchaRef.current.getValue();
+    if (!token) {
+      setError("Please complete the reCAPTCHA");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/login`,
-        formData,
+        {
+          formData,
+          recaptchaToken: token
+        },
         {
           headers: {
             "Content-Type": "application/json"
