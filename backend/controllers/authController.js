@@ -60,6 +60,22 @@ const login = async (req, res) => {
   const ip = req.ip;
   const userAgent = req.get('User-Agent');
 
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      const recaptchaResponse = await axios.post(
+        `${process.env.API_URL}/api/auth/verify-recaptcha`,
+        { token: recaptchaToken }
+      );
+      
+      if (!recaptchaResponse.data.success) {
+        return res.status(400).json({ error: 'reCAPTCHA verification failed' });
+      }
+    } catch (error) {
+      console.error('reCAPTCHA verification error:', error);
+      return res.status(500).json({ error: 'Error verifying reCAPTCHA' });
+    }
+  }
+
   try {
     const user = await User.findOne({ email }).select('+password');
     
@@ -204,4 +220,36 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, googleAuth, logout };
+const verifyRecaptcha = async (req, res) => {
+  const { token } = req.body;
+  
+  if (!token) {
+    return res.status(400).json({ error: 'reCAPTCHA token is required' });
+  }
+
+  try {
+    const response = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      new URLSearchParams({
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: token
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    if (!response.data.success) {
+      console.error('reCAPTCHA verification failed:', response.data['error-codes']);
+      return res.status(400).json({ 
+        error: 'reCAPTCHA verification failed',
+        details: response.data['error-codes']
+      });
+    }
+    
+    res.json({ success: true, score: response.data.score });
+  } catch (error) {
+    console.error('reCAPTCHA server error:', error);
+    res.status(500).json({ error: 'Failed to verify reCAPTCHA' });
+  }
+};
+
+module.exports = { signup, login, googleAuth, logout, verifyRecaptcha };
