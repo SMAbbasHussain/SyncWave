@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login, logout, googleAuth } = require('../controllers/authController');
+const { signup, login, logout, googleAuth, verifyRecaptcha } = require('../controllers/authController');
 const passport = require('passport');
 const { generateToken } = require('../utils/jwtUtils');
 const authenticateToken = require('../middleware/authMiddleware'); // Updated middleware
