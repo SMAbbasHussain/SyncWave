@@ -238,4 +238,4 @@ const verifyRecaptchaToken = async (token) => {
   }
 };
 
-module.exports = { signup, login, googleAuth, logout, verifyRecaptcha };
+module.exports = { signup, login, googleAuth, logout, verifyRecaptchaToken };
