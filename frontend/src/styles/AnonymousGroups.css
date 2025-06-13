@@ -1,0 +1,384 @@
+/* Wrapper for positioning */
+.anon-groups-wrapper {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+}
+
+.anon-groups-toggle-button {
+    width: 22vw;
+    height: 10vh;
+    background: rgba(0, 6, 22, 0.902);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 119, 255, 0.1);
+}
+
+.anon-groups-toggle-button:hover {
+    background: rgba(8, 33, 100, 0.1);
+    border-color: rgba(0, 119, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+/* Remove hover glow effect for this button */
+.anon-groups-toggle-button::before {
+    display: none;
+}
+
+.anon-groups-button-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    padding: 0 1rem;
+}
+
+.anon-groups-icon {
+    color: #00ffff;
+    font-size: 1.2rem;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.335));
+    flex-shrink: 0;
+}
+
+.anon-groups-text {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: left;
+}
+
+.anon-groups-container {
+    position: fixed;
+    bottom: calc(10vh + 40px) !important;
+    left: 20px;
+    z-index: 998;
+    width: 22vw;
+    height: calc(80vh - 120px);
+    background: rgba(0, 119, 255, 0.055);
+    border-radius: 8px;
+    padding: 5px 10px;
+    overflow: hidden;
+    border-top: 1px solid rgba(0, 119, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    transform: translateX(-20px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.anon-groups-container.visible {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.anon-groups-header {
+    padding: 0.6rem 0.8rem;
+    position: relative;
+    transition: all 0.3s ease;
+    min-height: 2.8rem;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    justify-content: space-between;
+    background: rgba(0, 6, 22, 0.902);
+    border-bottom: 1px solid rgba(0, 119, 255, 0.18);
+}
+
+.anon-groups-header h2 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.anon-groups-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.anon-action-btn {
+    background: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.anon-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.3s ease;
+    filter: blur(8px);
+}
+
+.anon-action-btn:hover::before {
+    opacity: 1;
+    width: 120%;
+    height: 120%;
+}
+
+.action-icon {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.anon-action-btn:hover .action-icon {
+    color: #00ffff;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.335));
+}
+
+/* Updated Category Dropdown Styles */
+.anon-category-container {
+    position: relative;
+    display: inline-block;
+}
+
+.anon-category-dropdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: 260px;
+    min-width: 160px;
+    background: rgb(0, 6, 22);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
+    margin-top: 25px;
+}
+
+.anon-category-dropdown::-webkit-scrollbar {
+    width: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.anon-category-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 20px;
+}
+
+.anon-category-dropdown::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 255, 255, 0.4);
+    border-radius: 20px;
+}
+
+.category-option {
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(104, 138, 201, 0.155);
+    font-size: 0.75rem;
+}
+
+.category-option:last-child {
+    border-bottom: none;
+}
+
+.category-option:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: #00ffff;
+}
+
+/* Anonymous Groups List Styles */
+.anon-groups-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
+    transition: filter 0.3s ease;
+}
+
+/* Add blur effect when dropdown is visible */
+.anon-groups-list.dropdown-visible {
+    filter: blur(1px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.anon-groups-list::-webkit-scrollbar {
+    width: 2px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.anon-groups-list::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 20px;
+}
+
+.anon-groups-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 255, 255, 0.4);
+    border-radius: 20px;
+}
+
+/* Anonymous Group Item Styles */
+.anon-group-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(104, 138, 201, 0.1);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.anon-group-item:hover {
+    background: rgba(211, 211, 211, 0.08);
+}
+
+.anon-group-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.anon-group-name {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.anon-group-members {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+}
+
+/* Responsive Styles */
+@media (min-width: 1024px) {
+    .anon-category-dropdown {
+        width: 160px;
+        left: auto;
+        right: 0;
+    }
+}
+
+@media (min-width: 1280px) {
+    .anon-category-dropdown {
+        width: 210px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .anon-category-dropdown {
+        width: 260px;
+    }
+}
+
+@media (max-width: 768px) {
+    .anon-groups-wrapper {
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .anon-groups-toggle-button {
+        width: calc(100% - 20px);
+        height: 45px;
+        padding: 0;
+    }
+
+    .anon-groups-button-content {
+        padding: 0 0.8rem;
+    }
+
+    .anon-groups-icon {
+        font-size: 1.1rem;
+    }
+
+    .anon-groups-text {
+        font-size: 0.9rem;
+    }
+
+    .anon-groups-container {
+        width: calc(100% - 40px);
+        height: 300px;
+        bottom: 70px;
+        left: 20px;
+    }
+
+    .anon-category-dropdown {
+        width: calc(100% - 60px);
+        left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .anon-groups-wrapper {
+        bottom: 5px;
+        left: 5px;
+    }
+
+    .anon-groups-toggle-button {
+        width: calc(100% - 10px);
+        height: 40px;
+        padding: 0;
+    }
+
+    .anon-groups-button-content {
+        padding: 0 0.6rem;
+    }
+
+    .anon-groups-icon {
+        font-size: 1rem;
+    }
+
+    .anon-groups-text {
+        font-size: 0.85rem;
+    }
+
+    .anon-groups-container {
+        width: calc(100% - 20px);
+        height: 250px;
+        bottom: 60px;
+        left: 10px;
+    }
+
+    .anon-category-dropdown {
+        width: calc(100% - 100px);
+    }
+}

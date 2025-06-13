@@ -1,0 +1,42 @@
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #080624cb;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.content {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.content.fade-out {
+    opacity: 0;
+}
+
+.content.fade-in {
+    opacity: 1;
+}
+
+.background-container.transitioning .content {
+    pointer-events: none;
+}

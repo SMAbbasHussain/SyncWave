@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+.dashboard-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    gap: 0 !important;
+    background: linear-gradient(135deg, rgba(1, 10, 29, 0.95) 0%, rgba(3, 1, 29, 0.9) 50%, rgba(2, 1, 29, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.dashboard-top-bar {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(0, 119, 255, 0.2);
+    margin-bottom: 20px;
+    position: relative;
+    border-radius: 20px 20px 0 0;
+    z-index: 2;
+    background: linear-gradient(90deg, rgba(1, 10, 29, 0.8) 0%, rgba(3, 1, 29, 0.7) 100%);
+}
+
+.wave-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.3;
+    overflow: hidden;
+    animation: waveMovement 15s linear infinite;
+    border-radius: 0 0 15px 15px;
+    pointer-events: none;
+}
+
+.wave-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+.dashboard-top-bar-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.dashboard-logo {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-top-bar>.Profile {
+    position: relative;
+    z-index: 2;
+}
+
+.wave-line {
+    position: absolute;
+    top: -10%;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(90deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 179, 255, 0.294) 50%, rgba(0, 162, 255, 0.254) 100%);
+    mask-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjcwIiB2aWV3Qm94PSIwIDAgNjAwIDcwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAzNUMxNTAgMzUgMjUwIDAgNDAwIDM1QzU1MCA3MCA2MDAgMzUgNjAwIDM1VjBIMFYzNVoiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+');
+    mask-size: 540px 70px;
+    mask-repeat: repeat-x;
+    animation: lineWaveAnimation 15s linear infinite;
+}
+
+.wave-line-1 {
+    mask-position: 0% 0%;
+    animation-delay: 0s;
+    opacity: 0.8;
+}
+
+.wave-line-2 {
+    mask-position: 50% 0%;
+    animation-delay: 2s;
+    opacity: 0.5;
+}
+
+.wave-line-3 {
+    mask-position: 100% 0%;
+    animation-delay: 4s;
+    opacity: 0.3;
+}
+
+@keyframes lineWaveAnimation {
+    0% {
+        mask-position: 0% 0%;
+    }
+
+    100% {
+        mask-position: 100% 0%;
+    }
+}
+
+.dashboard-logo span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-left: 1rem;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 0 20px !important;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    z-index: 1;
+    gap: 0px !important;
+    height: calc(100% - 90px);
+}
+
+.left-sidebar-content {
+    width: 28.5%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px !important;
+    max-height: 80vh;
+    margin-right: 0;
+}
+
+.home-view {
+    gap: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-view .chat-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: none;
+    flex: 1;
+}
+
+.home-view .private-chats-container {
+    width: 22vw;
+    height: calc(80vh - 120px);
+    margin-bottom: 20px;
+}
+
+.chat-screen-container {
+    flex: 1;
+}
+
+.groups-view {
+    flex-direction: column;
+    gap: 20px !important;
+    height: 100%;
+}
+
+.groups-view .top-section {
+    flex: 1;
+    min-height: 0;
+}
+
+.groups-view .bottom-section {
+    height: 300px;
+    min-height: 300px;
+}
+
+.dashboard-content h2 {
+    color: #fff;
+    text-align: left;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+/* Responsive styles for larger screens */
+@media screen and (min-width: 1024px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.97) 0%, rgba(3, 1, 29, 0.95) 50%, rgba(2, 1, 29, 0.93) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 75px;
+        padding: 0 25px;
+    }
+
+    .dashboard-content {
+        padding: 0 25px;
+        gap: 25px;
+    }
+
+    .home-view .private-chats-container {
+        width: 22vw;
+        height: calc(80vh - 100px);
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.98) 0%, rgba(3, 1, 29, 0.97) 50%, rgba(2, 1, 29, 0.96) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 80px;
+        padding: 0 30px;
+    }
+
+    .dashboard-content {
+        padding: 0 30px;
+        gap: 30px;
+    }
+
+    .home-view .private-chats-container {
+        width: 22vw;
+        height: calc(80vh - 110px);
+    }
+}
+
+@media screen and (min-width: 1440px) {
+    .dashboard-container {
+        background: linear-gradient(135deg, rgba(1, 10, 29, 0.99) 0%, rgba(3, 1, 29, 0.98) 50%, rgba(2, 1, 29, 0.97) 100%);
+    }
+
+    .dashboard-top-bar {
+        height: 85px;
+        padding: 0 35px;
+    }
+
+    .dashboard-content {
+        padding: 0 35px;
+        gap: 35px;
+    }
+
+    .home-view .private-chats-container {
+        width: 22vw;
+        height: calc(80vh - 100px);
+    }
+}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+    .dashboard-container {
+        border-radius: 15px;
+    }
+
+    .dashboard-top-bar {
+        height: 60px;
+        padding: 0 15px;
+        margin-bottom: 15px;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .dashboard-content {
+        padding: 0 15px;
+        flex-direction: column;
+        height: calc(100% - 75px);
+        gap: 15px;
+    }
+
+    .dashboard-logo span {
+        font-size: 1.5rem;
+    }
+
+    .left-sidebar-content {
+        width: 100%;
+        max-height: none;
+    }
+
+    .home-view .chat-section {
+        width: 100%;
+        max-height: none;
+    }
+
+    .home-view .private-chats-container {
+        width: 100%;
+        height: 70vh;
+    }
+
+    .chat-screen-container {
+        width: 100%;
+        height: 60vh;
+    }
+}
+
+
+
+/* Styles for the Friends section layout */
+.friends-dashboard-layout {
+    display: flex;
+    height: 100%;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.friends-left-section {
+    flex: 0 0 54%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    margin: 0;
+}
+
+.friends-right-section {
+    flex: 0 0 44%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .friends-dashboard-layout {
+        flex-direction: column;
+        /* Stack columns on smaller screens */
+        padding: 10px;
+        /* Reduce padding */
+        gap: 10px;
+        /* Reduce gap */
+    }
+
+    .friends-left-section,
+    .friends-right-section {
+        flex: 0 0 auto;
+        /* Allow sections to take auto height */
+        width: 100%;
+        /* Full width */
+    }
+}
