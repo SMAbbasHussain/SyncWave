@@ -3,6 +3,7 @@ const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../utils/cloudinary');
+const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 
 const MAX_LOGIN_ATTEMPTS = 5;
