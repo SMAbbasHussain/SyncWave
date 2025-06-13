@@ -15,62 +15,6 @@
     background: rgba(0, 6, 22, 0.902);
 }
 
-.ai-chat-robot-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.ai-chat-robot-bg img {
-    width: 400px;
-    height: auto;
-    opacity: 0.3;
-}
-
-.ai-chat-background .chat-screen-messages,
-.ai-chat-background .chat-screen-input,
-.ai-chat-background .chat-screen-top-bar {
-    position: relative;
-    z-index: 1;
-}
-
-/* AI Glow Effect Container */
-.ai-chat-glow-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.ai-chat-glow-dot {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle at center,
-            rgba(0, 255, 255, 0.1) 0%,
-            transparent 50%);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.ai-chat-background:hover .ai-chat-glow-dot {
-    opacity: 1;
-}
-
 .chat-screen-placeholder {
     flex: 1;
     display: flex;
@@ -82,7 +26,6 @@
 }
 
 .chat-screen-placeholder img {
-
     position: absolute;
     bottom: 14%;
     width: 500px;
@@ -380,22 +323,68 @@
 }
 
 .message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.message.user {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.message.other {
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+    margin-bottom: 0;
+}
+
+.message-content {
     max-width: 70%;
-    padding: 10px 16px;
-    margin: 4px 0;
+    background: rgba(255, 255, 255, 0.713);
     border-radius: 12px;
+    padding: 10px 16px;
     font-size: 0.95rem;
     line-height: 1.4;
-    animation: messageAppear 0.3s ease-out;
-    position: relative;
-    /* Needed for timestamp positioning */
     word-break: break-word;
-    /* Prevent long words from overflowing */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.message.user .message-content {
+    background: rgba(0, 119, 255, 0.15);
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.message.other .message-content {
+    background: rgba(255, 255, 255, 0.08);
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.message .message-timestamp {
+    align-self: flex-end;
+    font-size: 0.7rem;
+    color: rgba(156, 156, 156, 0.5);
+    margin: 0 6px 2px 6px;
 }
 
 /* User message colors */
 .message.user {
-    background: rgba(0, 119, 255, 0.15);
     margin-left: auto;
     border-bottom-right-radius: 4px;
     color: rgba(255, 255, 255, 0.95);
@@ -404,23 +393,9 @@
 /* AI message colors */
 .message.ai,
 .message.received {
-    background: rgba(255, 255, 255, 0.08);
     margin-right: auto;
     border-bottom-left-radius: 4px;
     color: rgba(255, 255, 255, 0.9);
-}
-
-.message-timestamp {
-    display: block;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 4px;
-    text-align: right;
-}
-
-.message.ai .message-timestamp,
-.message.received .message-timestamp {
-    text-align: left;
 }
 
 /* Welcome message styling */
