@@ -78,17 +78,18 @@ function Login() {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
-        {
-          formData,
-          recaptchaToken: token
-        },
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
+      `${process.env.REACT_APP_API_URL}/api/auth/login`,
+      {
+        email: formData.email,  // Send fields individually
+        password: formData.password,
+        recaptchaToken: token   // Send token at root level
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
         }
-      );
+      }
+    );
 
       // Create complete user object with defaults
       const user = {
