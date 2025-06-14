@@ -1,31 +1,56 @@
-/* src/components/TitleBar.css */
-
 .title-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 32px; /* Standard title bar height */
-  padding: 0 10px;
-  background-color: #0d1a2e; /* Your custom dark blue color! */
-  color: white;
-  font-family: sans-serif;
-  user-select: none; /* Prevents text selection when dragging */
-
-  /* THIS IS THE MOST IMPORTANT PART */
   -webkit-app-region: drag;
-}
-
-.title {
+  height: 44px;
+  background-color: #0b111e;
+  color: #dbe0e9;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  padding: 0; /* Changed padding to 0 */
+  width: 100%;
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.icon {
-    height: 16px;
+.title-bar-left {
+  display: flex;
+  align-items: center;
+  padding-left: 10px; /* Add padding here instead */
 }
 
-/* Make sure buttons inside are not draggable */
-.window-controls button {
-    -webkit-app-region: no-drag;
+.title-bar-icon {
+  height: 40px;
+  width: 40px;
+  margin-right: 8px;
+}
+
+.title-bar-text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Styles for the window control buttons */
+.title-bar-right {
+  display: flex;
+  height: 100%;
+}
+
+.window-control {
+  -webkit-app-region: no-drag; /* CRITICAL: Makes the buttons clickable */
+  background: transparent;
+  border: none;
+  color: white;
+  font-family: "Segoe MDL2 Assets", sans-serif; /* Font for Windows icons */
+  font-size: 10px;
+  padding: 0 15px;
+  height: 100%;
+  cursor: default;
+}
+
+.window-control:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-control-close:hover {
+  background-color: #e81123; /* Red hover for close button */
 }
