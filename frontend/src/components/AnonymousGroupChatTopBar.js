@@ -125,15 +125,6 @@ function AnonymousGroupChatTopBar({ groupId }) {
             </div>
 
             <ConfirmationModal
-                isOpen={showClearChatConfirm}
-                message="Are you sure you want to clear all messages in this anonymous chat?"
-                onConfirm={handleConfirmClearChat}
-                onClose={() => setShowClearChatConfirm(false)}
-                confirmText="Clear Chat"
-                cancelText="Cancel"
-            />
-
-            <ConfirmationModal
                 isOpen={showLeaveGroupConfirm}
                 message={`Are you sure you want to leave "${group.name}"? You will no longer receive messages.`}
                 onConfirm={handleConfirmLeaveGroup}

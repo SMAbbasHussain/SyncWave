@@ -60,12 +60,6 @@ function ChatDropdownMenu({
                             </button>
                         </li>
                         <li>
-                            <button onClick={onClearChat}>
-                                <FaTrash />
-                                Clear Chat
-                            </button>
-                        </li>
-                        <li>
                             <button className="danger" onClick={onBlockUser}>
                                 <FaUserSlash />
                                 Block User
@@ -89,12 +83,6 @@ function ChatDropdownMenu({
                             </button>
                         </li>
                         <li>
-                            <button onClick={onClearChat}>
-                                <FaTrash />
-                                Clear Chat
-                            </button>
-                        </li>
-                        <li>
                             <button className="danger" onClick={onLeaveGroup}>
                                 <FaSignOutAlt />
                                 Leave Group
@@ -115,12 +103,6 @@ function ChatDropdownMenu({
                             <button onClick={onMuteNotifications}>
                                 <FaBell />
                                 {isMuted ? 'Unmute Notifications' : 'Mute Notifications'}
-                            </button>
-                        </li>
-                        <li>
-                            <button onClick={onClearChat}>
-                                <FaTrash />
-                                Clear Chat
                             </button>
                         </li>
                         <li>
