@@ -162,15 +162,6 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
             </div>
 
             <ConfirmationModal
-                isOpen={showClearChatConfirm}
-                message="Are you sure you want to clear all messages in this chat?"
-                onConfirm={handleConfirmClearChat}
-                onClose={() => setShowClearChatConfirm(false)}
-                confirmText="Clear Chat"
-                cancelText="Cancel"
-            />
-
-            <ConfirmationModal
                 isOpen={showBlockConfirm}
                 message={`Are you sure you want to block ${user.username}? You will no longer be able to send or receive messages from them.`}
                 onConfirm={handleConfirmBlockUser}
