@@ -1,0 +1,31 @@
+/* src/components/TitleBar.css */
+
+.title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px; /* Standard title bar height */
+  padding: 0 10px;
+  background-color: #0d1a2e; /* Your custom dark blue color! */
+  color: white;
+  font-family: sans-serif;
+  user-select: none; /* Prevents text selection when dragging */
+
+  /* THIS IS THE MOST IMPORTANT PART */
+  -webkit-app-region: drag;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+    height: 16px;
+}
+
+/* Make sure buttons inside are not draggable */
+.window-controls button {
+    -webkit-app-region: no-drag;
+}
