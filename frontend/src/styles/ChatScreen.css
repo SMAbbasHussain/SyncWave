@@ -327,6 +327,88 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 4px 8px;
+}
+
+.message.selected {
+    background-color: transparent;
+    border-radius: 12px;
+}
+
+.message-action-popup {
+    position: absolute;
+    background: rgba(0, 15, 40, 0.99);
+    /* Darker, slightly transparent grey */
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    padding: 8px 0;
+    min-width: 120px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Subtle border */
+}
+
+.message-action-popup.top {
+    bottom: 100%;
+    margin-bottom: 8px;
+}
+
+.message-action-popup.bottom {
+    top: 100%;
+    margin-top: 8px;
+}
+
+.message-action-popup.left {
+    right: 0;
+}
+
+.message-action-popup.right {
+    left: 0;
+}
+
+.message-action-item {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e0e0e0;
+    /* Light grey text */
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.message-action-item:hover {
+    background-color: rgba(60, 60, 60, 0.7);
+    /* Darker grey on hover */
+    color: #ffffff;
+}
+
+.message-action-item svg {
+    width: 16px;
+    height: 16px;
+    color: #b0b0b0;
+    /* Slightly darker icon */
+}
+
+.message-action-item.delete {
+    color: #ff6b6b;
+    /* Red for delete */
+}
+
+.message-action-item.delete svg {
+    color: #ff6b6b;
+}
+
+.message-action-item.delete:hover {
+    background-color: rgba(255, 107, 107, 0.2);
+    /* Reddish hover */
 }
 
 .message.user {
@@ -615,11 +697,21 @@
 
 /* Chat Screen Layout */
 .chat-screen-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    /* Ensure content doesn't overflow */
+    height: calc(100% - 70px - 20px - 20px);
+    position: relative;
+    z-index: 1;
+    /* To ensure it's above the background gradient but below top bar */
+    gap: 0px !important;
+    transition: filter 0.3s ease;
+    /* Smooth transition for blur */
+}
+
+.chat-screen-content.blurred {
+    filter: blur(5px);
+    pointer-events: none;
 }
 
 /* Top Bar */

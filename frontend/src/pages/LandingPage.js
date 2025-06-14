@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaDownload } from 'react-icons/fa';
 import '../styles/LandingPage.css';
 import Background from '../components/Background';
 
@@ -75,7 +76,15 @@ const LandingPage = () => {
                         >
                             Sign Up
                         </button>
+                        <button
+                            className="download-app-button"
+                            onClick={() => window.open('https://play.google.com/store/apps/details?id=com.syncwave.app', '_blank')}
+                        >
+                            <FaDownload className="download-icon" />
+                            Download App
+                        </button>
                     </div>
+
                 </div>
                 <div className="right-column">
                     <img src="/AiModel.svg" alt="AI Robot" className="robot-image" />
