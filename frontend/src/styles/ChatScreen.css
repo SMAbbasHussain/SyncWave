@@ -144,9 +144,7 @@
     border-radius: 5px;
     transition: background 0.3s ease;
     border-right: 1px solid rgba(0, 119, 255, 0.2);
-    /* Right border */
     margin-right: -5px;
-    /* Adjust margin to account for padding/border */
 }
 
 .hamburger-icon:hover {
@@ -198,19 +196,19 @@
 .chat-screen-messages {
     flex: 1;
     padding: 15px 20px;
-    overflow-y: auto;
+    overflow-y: scroll;
+    /* Force scrollbar to always be visible if content overflows */
     display: flex;
     flex-direction: column;
     gap: 10px;
     color: rgba(255, 255, 255, 0.9);
     background: transparent;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    /* For Firefox: Makes the scrollbar visible and thin */
+    scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
+    /* For Firefox: Sets thumb and track color */
     min-height: 0;
     position: relative;
-    transition: scrollbar-width 0.3s ease;
-    /* Ensure enough space at the bottom for the input area - this padding will be replaced by a spacer div */
-    padding-bottom: 0;
-    /* Reset padding bottom */
 }
 
 /* Messages Wrapper (inside chat-screen-messages) */
@@ -236,8 +234,11 @@
 /* Keep existing scrollbar styles for .chat-screen-messages */
 .chat-screen-messages::-webkit-scrollbar {
     width: 4px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    /* Width of the scrollbar for Webkit browsers */
+    opacity: 1;
+    /* Ensure scrollbar is always visible for Webkit browsers */
+    background-color: transparent;
+    /* Make track transparent for Webkit */
 }
 
 .chat-screen-messages.scrolling::-webkit-scrollbar {
@@ -246,13 +247,12 @@
 
 .chat-screen-messages::-webkit-scrollbar-track {
     background: transparent;
-    margin: 2px 0;
 }
 
 .chat-screen-messages::-webkit-scrollbar-thumb {
     background-color: rgba(0, 255, 255, 0.4);
+    /* Color of the scrollbar thumb */
     border-radius: 3px;
-    transition: background-color 0.3s ease;
 }
 
 .chat-screen-messages::-webkit-scrollbar-thumb:hover {
@@ -351,7 +351,7 @@
 
 .message-content {
     max-width: 70%;
-    background: rgba(255, 255, 255, 0.713);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 10px 16px;
     font-size: 0.95rem;
@@ -439,14 +439,7 @@
     box-shadow: none;
 }
 
-.ai-chat-background .message.user {
-    background: rgba(0, 119, 255, 0.15);
-}
 
-/* Remove AI-specific message background since we're using the standard style */
-.ai-chat-background .message.ai {
-    background: rgba(255, 255, 255, 0.08);
-}
 
 /* Anonymous group info styles */
 .anonymous-group-info {
@@ -458,9 +451,7 @@
 .group-category {
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 4px 0;
 }
 
 /* Responsive styles */

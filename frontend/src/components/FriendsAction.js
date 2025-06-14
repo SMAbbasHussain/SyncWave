@@ -23,6 +23,7 @@ function FriendsAction() {
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const [requestToHandle, setRequestToHandle] = useState(null);
     const [fadingRequests, setFadingRequests] = useState(new Set());
+    const [sendRequestError, setSendRequestError] = useState("");
 
     // Load friend requests when component mounts or tab changes
     useEffect(() => {
@@ -30,6 +31,15 @@ function FriendsAction() {
             loadFriendRequests();
         }
     }, [activeBox, activeTab]);
+
+    useEffect(() => {
+        if (sendRequestError) {
+            const timer = setTimeout(() => {
+                setSendRequestError("");
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [sendRequestError]);
 
     // Load friend requests
     const loadFriendRequests = async () => {
@@ -51,11 +61,11 @@ function FriendsAction() {
 
     // Toggle between Add Friend and Requests boxes
     const toggleBox = (box) => {
-        setActiveBox(activeBox === box ? null : box);
-        setIsSearchActive(false);
-        setSearchQuery('');
+        setActiveBox(box);
+        setSearchQuery("");
         setSearchResults([]);
-        setSearchStatus('');
+        setSearchStatus("");
+        setSendRequestError(""); // Clear error when changing boxes
     };
 
     // Handle search toggle
@@ -108,6 +118,7 @@ function FriendsAction() {
         } else {
             setSearchResults([]);
             setSearchStatus('');
+            setSendRequestError(""); // Clear error when search query is empty
         }
     };
 
@@ -150,15 +161,17 @@ function FriendsAction() {
         try {
             await friendService.sendFriendRequest(userId);
             const user = searchResults.find(user => user._id === userId);
-            const newRequest = {
-                _id: Date.now().toString(), // Temporary ID
-                receiver: user,
-                status: 'pending'
-            };
+            const newRequest = { _id: Date.now().toString(), receiver: user, status: 'pending' };
             setSentRequests(prev => [...prev, newRequest]);
             setSearchResults(prev => prev.filter(user => user._id !== userId));
+            setSendRequestError("");
         } catch (error) {
-            console.error('Failed to send friend request:', error);
+            console.error("Failed to send friend request:", error);
+            if (error.response && error.response.data) {
+                setSendRequestError(error.response.data.message);
+            } else {
+                setSendRequestError("An error occurred. Please try again.");
+            }
         }
     };
 
@@ -343,8 +356,15 @@ function FriendsAction() {
                             ) : (
                                 searchResults.map(renderSearchResult)
                             )}
+                            {sendRequestError && (
+                                <div className="friend-request-error">
+                                    {sendRequestError}
+                                </div>
+                            )}
                         </div>
+
                     )}
+
                 </div>
             )}
 
