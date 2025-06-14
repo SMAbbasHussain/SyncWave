@@ -14,7 +14,7 @@
   height: 100vh;
   width: 100vw;
   background-color: #03011d; /* Dark background for the whole app */
-  overflow: hidden; /* Important to prevent double scrollbars */
+  overflow: hidden; /* <-- THIS IS THE FIX. It prevents the whole window from scrolling. */
 }
 
 /* This container holds our router and pages */
