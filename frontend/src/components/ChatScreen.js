@@ -506,7 +506,7 @@ function ChatScreen({ activeChat }) {
 
             } catch (err) {
                 console.error('Error sending message:', err);
-                alert("You have been blocked by the recipient");
+                alert("Can't message this user!");
                 removeMessage(tempId);
             } finally {
                 setIsLoading(false);
