@@ -12,22 +12,35 @@ exports.sendFriendRequest = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(receiverId)) {
       return res.status(400).json({ message: 'Invalid receiver ID' });
     }
-
-    // Check if receiver exists
-    const receiver = await User.findById(receiverId);
-    if (!receiver) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
+    
     // Prevent self-friend request
     if (senderId.toString() === receiverId) {
       return res.status(400).json({ message: 'Cannot send friend request to yourself' });
     }
 
-    // Check if friendship already exists
+    // Fetch both users to check their status and lists
     const sender = await User.findById(senderId);
+    const receiver = await User.findById(receiverId);
+
+    if (!receiver || !sender) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // --- NEW: BLOCK CHECKS ---
+    // Check if the sender has blocked the receiver
+    if (sender.blockedUsers.includes(receiverId)) {
+      return res.status(403).json({ message: 'You have blocked this user. Unblock them to send a friend request.' });
+    }
+    // Check if the receiver has blocked the sender
+    if (receiver.blockedUsers.includes(senderId)) {
+      // Use a generic message for privacy; don't reveal that the user was blocked.
+      return res.status(403).json({ message: 'This user is not accepting friend requests.' });
+    }
+    // --- END NEW BLOCK CHECKS ---
+
+    // Check if friendship already exists
     if (sender.friends.includes(receiverId)) {
-      return res.status(400).json({ message: 'Friendship already exists' });
+      return res.status(400).json({ message: 'You are already friends with this user.' });
     }
 
     // Check if request already exists
@@ -38,7 +51,7 @@ exports.sendFriendRequest = async (req, res) => {
       ]
     });
     if (existingRequest) {
-      return res.status(400).json({ message: 'Friend request already exists' });
+      return res.status(400).json({ message: 'A friend request already exists between you and this user.' });
     }
 
     // Create new friend request
@@ -50,20 +63,20 @@ exports.sendFriendRequest = async (req, res) => {
     await friendRequest.save();
     res.status(201).json(friendRequest);
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(400).json({ message: 'Friend request already exists' });
-    }
     res.status(500).json({ message: error.message });
   }
 };
 
 // Accept a friend request
 exports.acceptFriendRequest = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { requestId } = req.params;
-    const userId = req.userId;
+    const userId = req.userId; // This is the receiver
 
-    const friendRequest = await FriendRequest.findById(requestId);
+    const friendRequest = await FriendRequest.findById(requestId).session(session);
     if (!friendRequest) {
       return res.status(404).json({ message: 'Friend request not found' });
     }
@@ -75,25 +88,50 @@ exports.acceptFriendRequest = async (req, res) => {
 
     // Check if request is pending
     if (friendRequest.status !== 'pending') {
-      return res.status(400).json({ message: 'Friend request is not pending' });
+      return res.status(400).json({ message: 'This friend request is no longer pending.' });
     }
 
-    // Add each user to the other's friends array
-    await User.findByIdAndUpdate(friendRequest.sender, { $addToSet: { friends: friendRequest.receiver } });
-    await User.findByIdAndUpdate(friendRequest.receiver, { $addToSet: { friends: friendRequest.sender } });
+    // --- NEW: BLOCK CHECKS ---
+    const receiver = await User.findById(userId).session(session);
+    const sender = await User.findById(friendRequest.sender).session(session);
 
-    // Save request update
-    friendRequest.status = 'accepted';
-    await friendRequest.save();
+    if (!sender || !receiver) {
+      throw new Error('Could not find one or both users for the transaction.');
+    }
+    
+    // Check if the receiver (current user) has blocked the sender
+    if (receiver.blockedUsers.includes(sender._id)) {
+      return res.status(403).json({ message: 'You have blocked this user. Unblock them to accept the request.' });
+    }
+    // Check if the sender has blocked the receiver
+    if (sender.blockedUsers.includes(receiver._id)) {
+      return res.status(403).json({ message: 'Cannot accept this request as the sender has blocked you.' });
+    }
+    // --- END NEW BLOCK CHECKS ---
+
+    // Add each user to the other's friends array
+    await User.findByIdAndUpdate(sender._id, { $addToSet: { friends: receiver._id } }, { session });
+    await User.findByIdAndUpdate(receiver._id, { $addToSet: { friends: sender._id } }, { session });
 
     // Delete the friend request after accepting
-    await FriendRequest.findByIdAndDelete(requestId);
+    await FriendRequest.findByIdAndDelete(requestId, { session });
+    
+    // Commit the transaction
+    await session.commitTransaction();
 
-    res.json({ message: 'Friend request accepted' });
+    res.json({ message: 'Friend request accepted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Abort transaction on error
+    await session.abortTransaction();
+    res.status(500).json({ message: 'An error occurred while accepting the request. Please try again.' });
+  } finally {
+    // End session
+    session.endSession();
   }
 };
+
+
+// ... (The rest of the functions: decline, cancel, remove, getFriends, etc., do not need changes) ...
 
 // Decline a friend request
 exports.declineFriendRequest = async (req, res) => {
@@ -219,4 +257,4 @@ exports.getOutgoingRequests = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}; 
+};
