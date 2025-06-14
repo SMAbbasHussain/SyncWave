@@ -7,27 +7,6 @@
   box-sizing: border-box;
 }
 
-/* This will be the root of our app, filling the whole window */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  background-color: #03011d; /* Dark background for the whole app */
-  overflow: hidden; /* <-- THIS IS THE FIX. It prevents the whole window from scrolling. */
-}
-
-/* This container holds our router and pages */
-.content-area {
-  flex-grow: 1; /* This makes it take up all remaining space */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow-y: hidden; /* Allows content to scroll if it's too tall */
-}
-
-/* Your original .container style remains the same */
-/* It will be centered within the .content-area */
 .container {
   width: 90vw;
   height: 90vh;
@@ -38,5 +17,5 @@
   align-items: center;
   box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
   background: linear-gradient(to right, rgba(1, 10, 29, 0.9) 0%, rgba(3, 1, 29, 0.8) 30%, rgba(2, 1, 29, 0.5) 60%, rgba(4, 3, 23, 0.2) 100%);
-  backdrop-filter: blur(10px); /* Reduced blur slightly for performance */
+  backdrop-filter: blur(1000px);
 }
