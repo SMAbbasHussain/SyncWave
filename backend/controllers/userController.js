@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const cloudinary = require("../utils/cloudinary");
+const mongoose = require('mongoose');
 
 // Helper function to format user data for responses
 const formatUserResponse = (user) => {
