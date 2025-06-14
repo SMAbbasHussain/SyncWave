@@ -615,3 +615,33 @@
         display: none;
     }
 }
+
+/* Insert new keyframes rule for fadeInOut animation */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.friend-request-error {
+    color: #d32f2f;
+    background: #ff151524;
+    border: 1px solid #ff54625b;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-top: 8px;
+    font-size: 0.95em;
+    animation: fadeInOut 5s ease-in-out forwards;
+}

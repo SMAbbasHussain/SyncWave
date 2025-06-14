@@ -8,9 +8,10 @@
   box-sizing: border-box;
   padding: clamp(2rem, 2vh, 2rem) !important;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0 !important;
+  left: 0 !important;
   overflow: hidden;
+  flex-grow: none;
 }
 
 .left-sidebar {
