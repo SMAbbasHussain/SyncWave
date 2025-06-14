@@ -1,6 +1,6 @@
 // src/components/TitleBar.js
 import React from 'react';
-import './TitleBar.css'; // We'll create this file next
+import '../styles/TitleBar.css'; // We'll create this file next
 
 const TitleBar = () => {
   return (
