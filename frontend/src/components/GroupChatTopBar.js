@@ -5,7 +5,8 @@ import ChatDropdownMenu from './ChatDropdownMenu';
 import ConfirmationModal from './ConfirmationModal';
 import '../styles/ChatScreen.css';
 
-function GroupChatTopBar({ groupId }) {
+// Add onLeaveSuccess to the component's props
+function GroupChatTopBar({ groupId, onLeaveSuccess }) {
     const [group, setGroup] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
@@ -72,22 +73,36 @@ function GroupChatTopBar({ groupId }) {
         setShowClearChatConfirm(false);
     };
 
+    // --- UPDATED FUNCTION ---
     const handleConfirmLeaveGroup = async () => {
         try {
+            // The API call is correct. We send a POST request with an empty body.
             await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/groups/${groupId}/leave`,
-                {},
+                {}, // The backend gets the user ID from the token, so the body is empty
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 }
             );
-            // TODO: Update UI to reflect leaving group
+            
+            // On success, call the callback function passed from the parent component.
+            // This lets the parent know it should remove this group from the chat list.
+            if (onLeaveSuccess) {
+                onLeaveSuccess(groupId);
+            }
         } catch (error) {
             console.error('Error leaving group:', error);
+            
+            // Display the specific error message from the backend (e.g., "You are the last admin...")
+            // Or show a generic message if the specific one isn't available.
+            const errorMessage = error.response?.data?.error || 'An unexpected error occurred. Please try again.';
+            alert(errorMessage); // Using alert for simplicity. A toast notification would be better UX.
+        } finally {
+            // Ensure the confirmation modal always closes, whether the action succeeded or failed.
+            setShowLeaveGroupConfirm(false);
         }
-        setShowLeaveGroupConfirm(false);
     };
 
     if (!group) return null;
@@ -104,14 +119,9 @@ function GroupChatTopBar({ groupId }) {
                 )}
                 <div className="user-status-info">
                     <span className="chat-partner-name">{group.name}</span>
-                    {/* Group chat doesn't typically show online status per member in the header */}
-                    {/* <div className="user-status-row">
-                        <div className={`status-indicator ${groupInfo.status}`} />
-                        <span className="user-status-text">{groupInfo.status}</span>
-                    </div> */}
                 </div>
             </div>
-            {/* Use custom hamburger icon */}
+            
             <div style={{ position: 'relative' }}>
                 <div className="hamburger-icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)} title="Group options">
                     <div className="hamburger-line"></div>
@@ -152,4 +162,4 @@ function GroupChatTopBar({ groupId }) {
     );
 }
 
-export default GroupChatTopBar; 
+export default GroupChatTopBar;
