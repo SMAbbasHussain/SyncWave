@@ -4,12 +4,10 @@ const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../utils/cloudinary');
-<<<<<<< HEAD
-=======
+
 const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
->>>>>>> 367703a4c9a1e32ecd0a858d780641bbb26ad294
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60 * 1000; // 30 minutes
@@ -81,16 +79,10 @@ const login = async (req, res) => {
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
 
-      if (!verification.data.success) {
-<<<<<<< Updated upstream
-        return res.status(400).json({
-          error: 'reCAPTCHA verification failed',
-          details: verification.data['error-codes']
-=======
-        return res.status(400).json({ 
+      if (!verification.data.success) {  
+          return res.status(400).json({ 
           error: 'reCAPTCHA verification failed',
           details: verification.data['error-codes'] 
->>>>>>> Stashed changes
         });
       }
     } catch (error) {
