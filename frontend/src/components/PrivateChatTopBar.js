@@ -5,7 +5,8 @@ import ChatDropdownMenu from './ChatDropdownMenu';
 import ConfirmationModal from './ConfirmationModal';
 import '../styles/ChatScreen.css';
 
-function PrivateChatTopBar({ activeChat }) {
+// Add onBlockSuccess to the component's props
+function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
     const [user, setUser] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
@@ -14,6 +15,13 @@ function PrivateChatTopBar({ activeChat }) {
 
     useEffect(() => {
         const fetchUserData = async () => {
+            // A check to ensure we don't try to fetch data if the user object is already in activeChat
+            if (activeChat.otherParticipant) {
+                setUser(activeChat.otherParticipant);
+                return;
+            }
+
+            // Fallback to fetch if not provided
             try {
                 const response = await axios.get(
                     `${process.env.REACT_APP_API_URL}/api/chat/${activeChat.chatId}/other-participant`,
@@ -32,7 +40,7 @@ function PrivateChatTopBar({ activeChat }) {
         if (activeChat?.chatId) {
             fetchUserData();
         }
-    }, [activeChat?.chatId]);
+    }, [activeChat]);
 
     const handleVisitProfile = () => {
         // TODO: Implement visit profile functionality
@@ -72,22 +80,42 @@ function PrivateChatTopBar({ activeChat }) {
         setShowClearChatConfirm(false);
     };
 
+    // --- UPDATED FUNCTION ---
     const handleConfirmBlockUser = async () => {
+        // Ensure user data is available before proceeding
+        if (!user?._id) {
+            alert('Cannot block user: User information is missing.');
+            setShowBlockConfirm(false);
+            return;
+        }
+
         try {
+            // Make the API call to the block user endpoint
             await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/users/block/${user._id}`,
-                {},
+                {}, // Body is empty as per the controller
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 }
             );
-            // TODO: Update UI to reflect blocked user
+            
+            // On success, call the callback from the parent component
+            // This allows the parent to remove the chat from the list and close the window
+            if (onBlockSuccess) {
+                onBlockSuccess(user._id, activeChat.chatId);
+            }
+
         } catch (error) {
             console.error('Error blocking user:', error);
+            // Display a specific error from the backend, or a generic one
+            const errorMessage = error.response?.data?.error || 'An unexpected error occurred. Please try again.';
+            alert(errorMessage); // Using alert for simplicity, a toast notification is better UX
+        } finally {
+            // Always close the confirmation modal
+            setShowBlockConfirm(false);
         }
-        setShowBlockConfirm(false);
     };
 
     if (!user) return null;
@@ -144,7 +172,7 @@ function PrivateChatTopBar({ activeChat }) {
 
             <ConfirmationModal
                 isOpen={showBlockConfirm}
-                message={`Are you sure to block ${user.username}? You will no longer receive messages from them.`}
+                message={`Are you sure you want to block ${user.username}? You will no longer be able to send or receive messages from them.`}
                 onConfirm={handleConfirmBlockUser}
                 onClose={() => setShowBlockConfirm(false)}
                 confirmText="Block User"
