@@ -506,7 +506,8 @@ function ChatScreen({ activeChat }) {
 
             } catch (err) {
                 console.error('Error sending message:', err);
-                alert("Can't message this user!");
+                const errorMessage = error.response?.data?.error || error.response?.data?.message || 'An unexpected error occurred. Please try again.';
+                alert(errorMessage);
                 removeMessage(tempId);
             } finally {
                 setIsLoading(false);
