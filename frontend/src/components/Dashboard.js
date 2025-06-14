@@ -12,7 +12,7 @@ import axios from "axios";
 
 function Dashboard({ activeNavItem = 'home' }) {
     const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
-    
+
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
 
     // Reset active chat when switching views
@@ -101,8 +101,6 @@ function Dashboard({ activeNavItem = 'home' }) {
                         </div>
                     </div>
                 );
-            case 'theme':
-                return <div className="dashboard-content"><h2>Theme Settings Coming Soon</h2></div>;
             case 'settings':
                 return <div className="dashboard-content"><h2>Settings Coming Soon</h2></div>;
             default:

@@ -617,16 +617,20 @@
 }
 
 /* Insert new keyframes rule for fadeInOut animation */
-@keyframes fadeInOut {
+@keyframes fadeOut {
     0% {
         opacity: 0;
     }
 
-    10% {
+    40% {
         opacity: 1;
     }
 
-    90% {
+    60% {
+        opacity: 1;
+    }
+
+    80% {
         opacity: 1;
     }
 
@@ -643,5 +647,5 @@
     border-radius: 20px;
     margin-top: 8px;
     font-size: 0.95em;
-    animation: fadeInOut 5s ease-in-out forwards;
+    animation: fadeOut 5s ease-out forwards;
 }

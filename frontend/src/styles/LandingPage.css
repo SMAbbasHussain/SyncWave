@@ -107,25 +107,22 @@
 .button-container {
     display: flex;
     flex-direction: column;
-    /* Stack buttons by default */
     gap: 15px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .auth-button {
-    padding: 12px 30px;
+    padding: 12px 30px !important;
     border: none;
     border-radius: 30px;
-    /* More rounded */
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
-    /* Transparent/blurred background */
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    /* White outline */
     backdrop-filter: blur(5px);
-    /* Apply blur */
     transition: all 0.3s ease;
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
@@ -135,6 +132,38 @@
     /* More transparent on hover */
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.6);
+}
+
+.download-app-button {
+    width: 220px !important;
+    padding: 20px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(90deg, rgba(11, 98, 157, 0.177) 0%, rgba(4, 155, 220, 0.262) 50%, rgba(11, 98, 157, 0.177) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+    margin-left: 10px;
+    transform: all 3s ease;
+}
+
+.download-app-button:hover {
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+    background: linear-gradient(90deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 179, 255, 0.307) 30%, rgba(0, 179, 255, 0.307) 60%, rgba(11, 98, 157, 0.177) 100%);
+}
+
+.download-app-button svg {
+    width: 14px;
+    height: 14px;
 }
 
 .right-column {
@@ -316,8 +345,13 @@
 
     .button-container {
         flex-direction: row;
-        /* Display buttons in a row */
-        gap: 20px;
+        flex-wrap: wrap;
+        max-width: none;
+    }
+
+    .download-app-button {
+        margin-top: 0;
+        width: 100%;
     }
 
     .right-column {
