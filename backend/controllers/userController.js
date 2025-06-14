@@ -110,20 +110,23 @@ exports.updateProfile = async (req, res) => {
 
 // Block a user
 exports.blockUser = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { userId } = req.params;
-    const currentUser = req.user.userId;
+    const { userId: userToBlockId } = req.params; // ID of the user to block
+    const { userId: currentUserId } = req.user;   // ID of the logged-in user
 
     // Prevent self-block
-    if (userId === currentUser.toString()) {
+    if (userToBlockId === currentUserId) {
       return res.status(400).json({ 
         success: false,
         error: 'Cannot block yourself' 
       });
     }
 
-    // Check if user exists
-    const userToBlock = await User.findById(userId);
+    // Check if user to block exists
+    const userToBlock = await User.findById(userToBlockId).session(session);
     if (!userToBlock) {
       return res.status(404).json({ 
         success: false,
@@ -131,26 +134,50 @@ exports.blockUser = async (req, res) => {
       });
     }
 
-    // Add to blocked list
-    const user = await User.findByIdAndUpdate(
-      currentUser,
-      { $addToSet: { blockedUsers: userId } },
-      { new: true }
+    // --- Perform all updates within the transaction ---
+
+    // 1. Update the current user: add to blockedUsers and remove from friends
+    const updatedCurrentUser = await User.findByIdAndUpdate(
+      currentUserId,
+      { 
+        $addToSet: { blockedUsers: userToBlockId }, // Add to blocked list
+        $pull: { friends: userToBlockId }           // Remove from friends list
+      },
+      { new: true, session } // Pass the session and get the updated doc
     );
+
+    // 2. Update the user who is being blocked: remove current user from their friends list
+    await User.findByIdAndUpdate(
+      userToBlockId,
+      {
+        $pull: { friends: currentUserId } // Remove from their friends list
+      },
+      { session } // Pass the session
+    );
+    
+    // If all operations were successful, commit the transaction
+    await session.commitTransaction();
 
     res.json({ 
       success: true,
-      message: 'User blocked successfully',
-      user: formatUserResponse(user)
+      message: 'User blocked and removed from friends successfully',
+      user: formatUserResponse(updatedCurrentUser) // Return the updated blocker's profile
     });
 
   } catch (error) {
+    // If any operation fails, abort the entire transaction
+    await session.abortTransaction();
+    console.error("Block user transaction error:", error);
     res.status(500).json({ 
       success: false,
-      error: error.message 
+      error: 'An error occurred while blocking the user. Please try again.' 
     });
+  } finally {
+    // End the session
+    session.endSession();
   }
 };
+
 
 // Unblock a user
 exports.unblockUser = async (req, res) => {
