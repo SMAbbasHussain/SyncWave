@@ -448,6 +448,64 @@ const toggleGroupMute = async (req, res) => {
   }
 };
 
+const leaveGroup = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const userId = req.user._id;
+
+        const group = await Group.findById(groupId);
+
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        const memberIndex = group.members.findIndex(m => m.userId.equals(userId));
+
+        if (memberIndex === -1) {
+            return res.status(400).json({ error: 'You are not a member of this group' });
+        }
+
+        // Check if the user is the last admin
+        const leavingMember = group.members[memberIndex];
+        if (leavingMember.role === 'admin') {
+            const adminCount = group.members.filter(m => m.role === 'admin').length;
+            if (adminCount === 1 && group.members.length > 1) {
+                return res.status(400).json({ error: 'You are the last admin. Please promote another member to admin before leaving.' });
+            }
+        }
+
+        // Remove the member from the array
+        const remainingMembers = group.members.filter(m => !m.userId.equals(userId));
+        group.members = remainingMembers;
+
+        // If the group becomes empty, deactivate it
+        if (group.members.length === 0) {
+            group.isActive = false;
+        }
+        
+        await group.save();
+
+        // Emit socket events
+        if (req.io) {
+            // Notify remaining members that a user has left
+            remainingMembers.forEach(member => {
+                req.io.to(member.userId.toString()).emit('memberLeft', {
+                    groupId: group._id,
+                    userId: userId,
+                });
+            });
+            // Notify the user who left that they have been removed
+            req.io.to(userId.toString()).emit('removedFromGroup', { groupId: group._id });
+        }
+
+        res.json({ message: 'Successfully left the group' });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 module.exports = {
   createGroup,
   getUserGroups,
@@ -459,5 +517,6 @@ module.exports = {
   updateGroupInfo,
   pinMessage,
   unpinMessage,
-  toggleGroupMute
+  toggleGroupMute,
+  leaveGroup
 };
