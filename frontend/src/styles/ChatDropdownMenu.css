@@ -1,0 +1,90 @@
+.chat-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 15, 40, 0.95);
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-width: 240px;
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+    z-index: 1000;
+}
+
+.chat-dropdown-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.chat-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: rgba(0, 15, 40, 0.95);
+    border-left: 1px solid rgba(0, 119, 255, 0.2);
+    border-top: 1px solid rgba(0, 119, 255, 0.2);
+    transform: rotate(45deg);
+}
+
+.chat-dropdown-menu ul {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+.chat-dropdown-menu li {
+    padding: 0;
+    margin: 0;
+}
+
+.chat-dropdown-menu button {
+    width: 100%;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.chat-dropdown-menu button:hover {
+    background: rgba(0, 119, 255, 0.1);
+    color: #fff;
+}
+
+.chat-dropdown-menu button svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.chat-dropdown-menu button.danger {
+    color: #ff6b6b;
+}
+
+.chat-dropdown-menu button.danger:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.chat-dropdown-menu button.danger svg {
+    color: #ff6b6b;
+}
+
+.chat-dropdown-menu .divider {
+    height: 1px;
+    background: rgba(0, 119, 255, 0.1);
+    margin: 4px 0;
+}

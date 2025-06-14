@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AiFillHome } from 'react-icons/ai';
 import { HiUserGroup } from 'react-icons/hi';
 import { FaUserFriends } from 'react-icons/fa';
-import { BsPaletteFill } from 'react-icons/bs';
 import { IoSettingsSharp } from 'react-icons/io5';
 import '../styles/VerticalNavbar.css'; // We will create this CSS file later
 
 function VerticalNavbar({ onNavItemChange }) {
-    const [activeNavItem, setActiveNavItem] = useState('home');
+    const [activeNavItem, setActiveNavItem] = useState(() => {
+        // Initialize from localStorage or default to 'home'
+        return localStorage.getItem('activeNavItem') || 'home';
+    });
+
+    // Update localStorage when activeNavItem changes
+    useEffect(() => {
+        localStorage.setItem('activeNavItem', activeNavItem);
+    }, [activeNavItem]);
 
     const handleIconClick = (iconName) => {
         setActiveNavItem(iconName);
@@ -38,7 +45,6 @@ function VerticalNavbar({ onNavItemChange }) {
             {renderIcon('home', 'Home', AiFillHome)}
             {renderIcon('groups', 'Groups', HiUserGroup)}
             {renderIcon('friends', 'Friends', FaUserFriends)}
-            {renderIcon('theme', 'Theme', BsPaletteFill)}
             {renderIcon('settings', 'Settings', IoSettingsSharp)}
         </div>
     );

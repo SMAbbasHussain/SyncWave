@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { FaPaperPlane, FaRobot, FaExchangeAlt } from 'react-icons/fa';
+import { FaPaperPlane, FaRobot, FaExchangeAlt, FaCopy, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/ChatScreen.css';
 import PrivateChatTopBar from './PrivateChatTopBar';
@@ -43,14 +43,74 @@ const normalizeMessage = (msg, chatType, currentUserId) => {
 };
 
 // Memoized message component to prevent unnecessary re-renders
-const MessageItem = React.memo(({ msg, currentUserId }) => {
+const MessageItem = React.memo(({ msg, currentUserId, onUnsendMessage }) => {
+    const [showActions, setShowActions] = useState(false);
+    const [isSelected, setIsSelected] = useState(false);
+    const messageRef = useRef(null);
+    const popupRef = useRef(null);
     const displaySender = msg.sender || (msg.senderId === currentUserId ? 'user' : 'other');
+
+    const handleMessageClick = (e) => {
+        e.stopPropagation();
+        setIsSelected(true);
+        setShowActions(true);
+    };
+
+    const handleCopyMessage = (e) => {
+        e.stopPropagation();
+        const content = msg.content.replace(/<[^>]*>/g, ''); // Strip HTML tags
+        navigator.clipboard.writeText(content);
+        setShowActions(false);
+        setIsSelected(false);
+    };
+
+    const handleUnsendMessage = (e) => {
+        e.stopPropagation();
+        if (onUnsendMessage) {
+            onUnsendMessage(msg.id);
+        }
+        setShowActions(false);
+        setIsSelected(false);
+    };
+
+    // Close popup when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (popupRef.current && !popupRef.current.contains(e.target) &&
+                messageRef.current && !messageRef.current.contains(e.target)) {
+                setShowActions(false);
+                setIsSelected(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Calculate popup position
+    const getPopupPosition = () => {
+        if (!messageRef.current) return { top: true, left: true };
+        const rect = messageRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const spaceRight = window.innerWidth - rect.right;
+        const spaceLeft = rect.left;
+
+        return {
+            top: spaceBelow >= 100 || spaceBelow > spaceAbove,
+            left: spaceRight >= 120 || spaceRight > spaceLeft
+        };
+    };
+
+    const position = getPopupPosition();
 
     return (
         <div
-            className={`message ${displaySender} ${msg.isError ? 'error' : ''} ${msg.isTemp ? 'pending' : ''}`}
+            ref={messageRef}
+            className={`message ${displaySender} ${msg.isError ? 'error' : ''} ${msg.isTemp ? 'pending' : ''} ${isSelected ? 'selected' : ''}`}
             role="log"
             aria-label={`Message from ${displaySender}`}
+            onClick={handleMessageClick}
         >
             {displaySender === 'other' && msg.profilePic && (
                 <img src={msg.profilePic} alt="Profile" className="message-avatar" />
@@ -75,6 +135,24 @@ const MessageItem = React.memo(({ msg, currentUserId }) => {
                     minute: '2-digit'
                 })}
             </span>
+
+            {showActions && (
+                <div
+                    ref={popupRef}
+                    className={`message-action-popup ${position.top ? 'bottom' : 'top'} ${position.left ? 'right' : 'left'}`}
+                >
+                    <div className="message-action-item" onClick={handleCopyMessage}>
+                        <FaCopy />
+                        <span>Copy</span>
+                    </div>
+                    {displaySender === 'user' && !msg.isTemp && (
+                        <div className="message-action-item delete" onClick={handleUnsendMessage}>
+                            <FaTrash />
+                            <span>Unsend</span>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 });
@@ -476,6 +554,25 @@ function ChatScreen({ activeChat }) {
 
     const clearError = useCallback(() => setError(null), []);
 
+    const handleUnsendMessage = useCallback(async (messageId) => {
+        if (!messageId || !activeChat) return;
+
+        try {
+            const endpoint = activeChat.type === 'private'
+                ? `${process.env.REACT_APP_API_URL}/api/chat/messages/${messageId}`
+                : `${process.env.REACT_APP_API_URL}/api/group-messages/${messageId}`;
+
+            await axios.delete(endpoint, {
+                headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+            });
+
+            removeMessage(messageId);
+        } catch (err) {
+            console.error('Error unsending message:', err);
+            setError('Failed to unsend message. Please try again.');
+        }
+    }, [activeChat, getAuthToken, removeMessage]);
+
     if (activeChat.type === 'none') {
         return (
             <div className="chat-screen-placeholder">
@@ -496,7 +593,14 @@ function ChatScreen({ activeChat }) {
                             ) : messages.length === 0 ? (
                                 <div className="welcome-message"><div><FaRobot className="empty-chat-icon" /><p>Start a conversation!</p></div></div>
                             ) : (
-                                messages.map(msg => <MessageItem key={msg.id} msg={msg} currentUserId={currentUserId} />)
+                                messages.map(msg => (
+                                    <MessageItem
+                                        key={msg.id}
+                                        msg={msg}
+                                        currentUserId={currentUserId}
+                                        onUnsendMessage={handleUnsendMessage}
+                                    />
+                                ))
                             )}
                             <div ref={messagesEndRef} />
                         </div>

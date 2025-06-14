@@ -107,25 +107,24 @@
 .button-container {
     display: flex;
     flex-direction: column;
-    /* Stack buttons by default */
     gap: 15px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    /* Center the buttons */
 }
 
 .auth-button {
-    padding: 12px 30px;
+    padding: 12px 30px !important;
     border: none;
     border-radius: 30px;
-    /* More rounded */
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
-    /* Transparent/blurred background */
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    /* White outline */
     backdrop-filter: blur(5px);
-    /* Apply blur */
     transition: all 0.3s ease;
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
@@ -316,8 +315,13 @@
 
     .button-container {
         flex-direction: row;
-        /* Display buttons in a row */
+        justify-content: center;
         gap: 20px;
+    }
+
+    .download-app-button {
+        margin-top: 0;
+        width: 100%;
     }
 
     .right-column {
