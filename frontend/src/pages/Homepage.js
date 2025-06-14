@@ -6,10 +6,11 @@ import Background from "../components/Background";
 
 function Homepage() {
   const [activeNavItem, setActiveNavItem] = useState(() => {
-    const savedNavItem = localStorage.getItem('activeNavItem');
-    return savedNavItem;
+    // Initialize from localStorage or default to 'home'
+    return localStorage.getItem('activeNavItem') || 'home';
   });
 
+  // Update localStorage when activeNavItem changes
   useEffect(() => {
     localStorage.setItem('activeNavItem', activeNavItem);
   }, [activeNavItem]);
