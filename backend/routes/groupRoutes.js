@@ -16,6 +16,7 @@ router.post('/:groupId/join-requests', groupController.handleJoinRequest);
 router.post('/:groupId/members', groupController.addMember);
 router.delete('/:groupId/members/:userId', groupController.removeMember);
 router.put('/:groupId/members/role', groupController.updateMemberRole);
+router.post('/:groupId/leave', groupController.leaveGroup);
 
 // Group settings routes
 router.put('/:groupId', groupController.updateGroupInfo);
