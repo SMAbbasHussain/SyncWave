@@ -33,12 +33,15 @@ function FriendsAction() {
     }, [activeBox, activeTab]);
 
     useEffect(() => {
+        let timer;
         if (sendRequestError) {
-            const timer = setTimeout(() => {
+            timer = setTimeout(() => {
                 setSendRequestError("");
             }, 5000);
-            return () => clearTimeout(timer);
         }
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
     }, [sendRequestError]);
 
     // Load friend requests
@@ -158,20 +161,16 @@ function FriendsAction() {
 
     // Handle sending friend request
     const handleSendRequest = async (userId) => {
+        setSendRequestError(""); // Clear any existing error
         try {
-            await friendService.sendFriendRequest(userId);
+            const response = await friendService.sendFriendRequest(userId);
             const user = searchResults.find(user => user._id === userId);
             const newRequest = { _id: Date.now().toString(), receiver: user, status: 'pending' };
             setSentRequests(prev => [...prev, newRequest]);
             setSearchResults(prev => prev.filter(user => user._id !== userId));
-            setSendRequestError("");
         } catch (error) {
-            console.error("Failed to send friend request:", error);
-            if (error.response && error.response.data) {
-                setSendRequestError(error.response.data.message);
-            } else {
-                setSendRequestError("An error occurred. Please try again.");
-            }
+            const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+            setSendRequestError(errorMessage);
         }
     };
 
@@ -349,6 +348,8 @@ function FriendsAction() {
                         </div>
                     </div>
 
+
+
                     {isSearchActive && searchQuery && (
                         <div className="search-results-container">
                             {searchStatus === 'notFound' ? (
@@ -356,15 +357,15 @@ function FriendsAction() {
                             ) : (
                                 searchResults.map(renderSearchResult)
                             )}
+                            {/* Error message - moved outside search results container */}
                             {sendRequestError && (
-                                <div className="friend-request-error">
+                                <div className="friend-request-error" style={{ animation: 'fadeOut 5s ease-out forwards' }}>
                                     {sendRequestError}
                                 </div>
                             )}
                         </div>
 
                     )}
-
                 </div>
             )}
 
