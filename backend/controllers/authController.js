@@ -1,32 +1,36 @@
+require('dotenv').config();
 const User = require('../models/User');
 const LoginAttempt = require('../models/LoginAttempt');
 const { generateToken } = require('../utils/jwtUtils');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('../utils/cloudinary');
+<<<<<<< HEAD
+=======
 const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
+>>>>>>> 367703a4c9a1e32ecd0a858d780641bbb26ad294
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60 * 1000; // 30 minutes
 
 const signup = async (req, res) => {
   const { username, email, password, phoneNo } = req.body;
-  
+
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({ 
-        error: existingUser.email === email 
-          ? 'Email is already registered' 
+      return res.status(400).json({
+        error: existingUser.email === email
+          ? 'Email is already registered'
           : 'Username is already taken'
       });
     }
 
-    const user = new User({ 
-      username, 
-      email, 
-      password, 
+    const user = new User({
+      username,
+      email,
+      password,
       phoneNo,
       status: 'online', // Set status to online on signup
       lastSeen: new Date()
@@ -34,7 +38,7 @@ const signup = async (req, res) => {
     await user.save();
 
     const token = generateToken(user._id);
-    
+
     const userData = {
       _id: user._id,
       username: user.username,
@@ -46,7 +50,7 @@ const signup = async (req, res) => {
       isLoggedIn: true
     };
 
-    res.status(201).json({ 
+    res.status(201).json({
       token,
       user: userData
     });
@@ -78,9 +82,15 @@ const login = async (req, res) => {
       );
 
       if (!verification.data.success) {
+<<<<<<< Updated upstream
+        return res.status(400).json({
+          error: 'reCAPTCHA verification failed',
+          details: verification.data['error-codes']
+=======
         return res.status(400).json({ 
           error: 'reCAPTCHA verification failed',
           details: verification.data['error-codes'] 
+>>>>>>> Stashed changes
         });
       }
     } catch (error) {
@@ -91,7 +101,7 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).select('+password');
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -169,14 +179,14 @@ const googleAuth = async (req, res) => {
           folder: "profile_pics",
           transformation: [{ width: 200, height: 200, crop: "fill" }],
         });
-        
+
         // Update user with the Cloudinary URL and status
         await User.findByIdAndUpdate(req.user._id, {
           profilePic: uploadedResponse.secure_url,
           status: 'online',
           lastSeen: new Date()
         });
-        
+
         // Update the req.user object with the new URL
         req.user.profilePic = uploadedResponse.secure_url;
       } catch (uploadError) {
@@ -196,10 +206,10 @@ const googleAuth = async (req, res) => {
     }
 
     const token = generateToken(req.user._id);
-    
+
     // Check if user was just created
     const isNewUser = req.user.isNew;
-    
+
     // Redirect to frontend with token instead of sending JSON
     res.redirect(`${process.env.CLIENT_URLS}/auth-success?token=${token}&isNewUser=${isNewUser}`);
   } catch (error) {
@@ -212,7 +222,7 @@ const logout = async (req, res) => {
   try {
     // Extract user ID from the JWT token or request
     const userId = req.user?._id || req.userId; // Assuming you have middleware that sets this
-    
+
     if (userId) {
       // Update user status to offline and lastSeen
       await User.findByIdAndUpdate(userId, {
@@ -221,14 +231,14 @@ const logout = async (req, res) => {
       });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: 'Logged out successfully' 
+      message: 'Logged out successfully'
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Logout failed' 
+      message: 'Logout failed'
     });
   }
 };
