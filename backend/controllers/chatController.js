@@ -3,8 +3,7 @@ const User = require('../models/User');
 const Chat = require('../models/Chat');
 const mongoose = require("mongoose");
 
-// Send a message (now requires chat initialization)
-
+// Send a message (with block and friendship checks)
 const sendMessage = async (req, res) => {
   try {
     const { receiverId, content, attachments = [] } = req.body;
@@ -14,8 +13,8 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
-    // --- NEW: BLOCK CHECKS ---
-    // Fetch both users to check their blocked lists
+    // --- VALIDATION CHECKS ---
+    // Fetch both users to check their status and relationship
     const sender = await User.findById(senderId);
     const receiver = await User.findById(receiverId);
 
@@ -23,17 +22,23 @@ const sendMessage = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if the sender has blocked the receiver
+    // 1. Block Check: Check if the sender has blocked the receiver
     if (sender.blockedUsers.includes(receiverId)) {
       return res.status(403).json({ error: 'Cannot send message. You have blocked this user.' });
     }
 
-    // Check if the receiver has blocked the sender
+    // 2. Block Check: Check if the receiver has blocked the sender
     if (receiver.blockedUsers.includes(senderId)) {
       // Use a generic message for privacy, don't reveal the block
       return res.status(403).json({ error: 'This user is not accepting messages.' });
     }
-    // --- END NEW BLOCK CHECKS ---
+
+    // 3. Friendship Check: Ensure the sender has the receiver in their friends list
+    // Since friendship is mutual, we only need to check one way.
+    if (!sender.friends.includes(receiverId)) {
+        return res.status(403).json({ error: 'You must be friends with this user to send them a message.' });
+    }
+    // --- END VALIDATION CHECKS ---
 
     // Find or create chat between users
     let chat = await Chat.findOne({
@@ -41,7 +46,6 @@ const sendMessage = async (req, res) => {
     });
 
     if (!chat) {
-      // We already fetched the receiver, no need to do it again
       chat = new Chat({
         participants: [senderId, receiverId],
         createdBy: senderId,
@@ -67,7 +71,6 @@ const sendMessage = async (req, res) => {
     // Emit the message to all participants in the chat
     if (req.io) {
       chat.participants.forEach(participantId => {
-        // Send to each participant's personal room
         req.io.to(participantId.toString()).emit('newMessage', populatedMessage);
       });
     }
@@ -79,6 +82,7 @@ const sendMessage = async (req, res) => {
     res.status(500).json({ error: 'Failed to send message.' });
   }
 };
+
 
 // Get conversation between two users (updated for chat-based system)
 const getConversation = async (req, res) => {
