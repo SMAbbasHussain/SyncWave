@@ -82,9 +82,15 @@ const login = async (req, res) => {
       );
 
       if (!verification.data.success) {
+<<<<<<< Updated upstream
         return res.status(400).json({
           error: 'reCAPTCHA verification failed',
           details: verification.data['error-codes']
+=======
+        return res.status(400).json({ 
+          error: 'reCAPTCHA verification failed',
+          details: verification.data['error-codes'] 
+>>>>>>> Stashed changes
         });
       }
     } catch (error) {
