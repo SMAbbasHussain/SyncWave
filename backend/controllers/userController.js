@@ -112,7 +112,7 @@ exports.updateProfile = async (req, res) => {
 exports.blockUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const currentUser = req.user._id;
+    const currentUser = req.user.userId;
 
     // Prevent self-block
     if (userId === currentUser.toString()) {
