@@ -4,74 +4,6 @@ const Chat = require('../models/Chat');
 const mongoose = require("mongoose");
 
 // Send a message (now requires chat initialization)
-// const sendMessage = async (req, res) => {
-//   try {
-//     const { receiverId, content, attachments = [] } = req.body;
-//     const senderId = req.user.userId;
-
-//     // Validate content
-//     if (!content || content.trim().length === 0) {
-//       return res.status(400).json({ error: 'Message content is required' });
-//     }
-
-//     // Find or create chat between users
-//     let chat = await Chat.findOne({
-//       participants: { 
-//         $all: [senderId, receiverId],
-//         $size: 2 
-//       }
-//     });
-
-
-//     if (!chat) {
-//       // Verify receiver exists
-//       const receiver = await User.findById(receiverId);
-//       if (!receiver) {
-//         return res.status(404).json({ error: 'Receiver not found' });
-//       }
-
-//       // Create new chat
-//       chat = new Chat({
-//         participants: [senderId, receiverId],
-//         createdBy: senderId,
-//         lastActivity: new Date()
-//       });
-      
-//       await chat.save();
-//     }
-
-//     // Create message with required chatId
-//     const message = new Message({
-//       chatId: chat._id,
-//       senderId,
-//       receiverId,
-//       content: content.trim(),
-//       attachments
-//     });
-
-//     await message.save();
-
-//     // Update chat's last activity
-//     chat.lastActivity = new Date();
-//     await chat.save();
-    
-//     // Populate sender info for response
-//     const populatedMessage = await Message.populate(message, {
-//       path: 'senderId',
-//       select: 'username profilePic'
-//     });
-
-//     res.status(201).json(populatedMessage);
-    
-//     // Emit to receiver via socket
-//     if (req.io) {
-//       req.io.to(receiverId.toString()).emit('newMessage', populatedMessage);
-//     }
-//   } catch (error) {
-//     console.error('Send message error:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 const sendMessage = async (req, res) => {
   try {
@@ -82,16 +14,34 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
+    // --- NEW: BLOCK CHECKS ---
+    // Fetch both users to check their blocked lists
+    const sender = await User.findById(senderId);
+    const receiver = await User.findById(receiverId);
+
+    if (!receiver || !sender) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the sender has blocked the receiver
+    if (sender.blockedUsers.includes(receiverId)) {
+      return res.status(403).json({ error: 'Cannot send message. You have blocked this user.' });
+    }
+
+    // Check if the receiver has blocked the sender
+    if (receiver.blockedUsers.includes(senderId)) {
+      // Use a generic message for privacy, don't reveal the block
+      return res.status(403).json({ error: 'This user is not accepting messages.' });
+    }
+    // --- END NEW BLOCK CHECKS ---
+
     // Find or create chat between users
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId], $size: 2 }
     });
 
     if (!chat) {
-      const receiver = await User.findById(receiverId);
-      if (!receiver) {
-        return res.status(404).json({ error: 'Receiver not found' });
-      }
+      // We already fetched the receiver, no need to do it again
       chat = new Chat({
         participants: [senderId, receiverId],
         createdBy: senderId,
@@ -114,7 +64,7 @@ const sendMessage = async (req, res) => {
       select: 'username profilePic'
     });
     
-    // <<< FIX: Emit the message to all participants in the chat
+    // Emit the message to all participants in the chat
     if (req.io) {
       chat.participants.forEach(participantId => {
         // Send to each participant's personal room
