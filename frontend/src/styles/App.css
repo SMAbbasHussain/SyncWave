@@ -23,7 +23,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto; /* Allows content to scroll if it's too tall */
+  overflow-y: hidden; /* Allows content to scroll if it's too tall */
 }
 
 /* Your original .container style remains the same */
