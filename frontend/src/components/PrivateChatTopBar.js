@@ -3,6 +3,7 @@ import { FaUserCircle } from 'react-icons/fa';
 import axios from 'axios';
 import ChatDropdownMenu from './ChatDropdownMenu';
 import ConfirmationModal from './ConfirmationModal';
+import PrivateProfileModal from './PrivateProfileModal';
 import '../styles/ChatScreen.css';
 
 // Add onBlockSuccess to the component's props
@@ -12,6 +13,7 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
     const [showBlockConfirm, setShowBlockConfirm] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -43,7 +45,7 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
     }, [activeChat]);
 
     const handleVisitProfile = () => {
-        // TODO: Implement visit profile functionality
+        setShowProfileModal(true);
         setIsDropdownOpen(false);
     };
 
@@ -100,7 +102,7 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
                     }
                 }
             );
-            
+
             // On success, call the callback from the parent component
             // This allows the parent to remove the chat from the list and close the window
             if (onBlockSuccess) {
@@ -163,12 +165,22 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
 
             <ConfirmationModal
                 isOpen={showBlockConfirm}
-                message={`Are you sure you want to block ${user.username}? You will no longer be able to send or receive messages from them.`}
+                message={`Are you sure to block ${user.username}? You'll not be able to communicate with them.`}
                 onConfirm={handleConfirmBlockUser}
                 onClose={() => setShowBlockConfirm(false)}
                 confirmText="Block User"
                 cancelText="Cancel"
             />
+
+            {showProfileModal && user && (
+                <PrivateProfileModal
+                    user={user}
+                    chatId={activeChat.chatId}
+                    isMuted={isMuted}
+                    onMuteToggle={() => setIsMuted((m) => !m)}
+                    onClose={() => setShowProfileModal(false)}
+                />
+            )}
         </div>
     );
 }
