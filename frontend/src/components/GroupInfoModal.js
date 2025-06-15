@@ -1,29 +1,60 @@
-import React, { useState } from 'react';
-import { FaUsers, FaUser, FaEnvelope, FaVolumeMute, FaVolumeUp, FaUserCircle } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaUsers, FaUser, FaEnvelope, FaVolumeMute, FaVolumeUp, FaUserCircle, FaEdit, FaCheck, FaTimes, FaCrown } from 'react-icons/fa';
 import ConfirmationModal from './ConfirmationModal';
 import '../styles/GroupInfoModal.css';
 
-function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
+function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }) {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const [leaveLoading, setLeaveLoading] = useState(false);
     const [leaveError, setLeaveError] = useState('');
 
-    // Placeholder data for group members and admin.
-    // In a real application, you would fetch this from your backend
-    const adminUser = {
-        username: group.adminUsername || 'Admin User',
-        email: group.adminEmail || 'admin@example.com',
-    };
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [newGroupName, setNewGroupName] = useState(group.name);
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
+    const [newGroupDescription, setNewGroupDescription] = useState(group.bio || '');
+    const [newGroupImage, setNewGroupImage] = useState(group.groupPic || '');
 
-    const members = group.members || [
-        { _id: '1', username: 'Member One', profilePic: '' },
-        { _id: '2', username: 'Member Two', profilePic: '' },
-        { _id: '3', username: 'Member Three', profilePic: '' },
-        { _id: '4', username: 'Member Four', profilePic: '' },
-        { _id: '5', username: 'Member Five', profilePic: '' },
-    ];
+    const [showTransferAdminConfirm, setShowTransferAdminConfirm] = useState(false);
+    const [selectedMemberToAdmin, setSelectedMemberToAdmin] = useState(null);
+    const [transferAdminLoading, setTransferAdminLoading] = useState(false);
+    const [transferAdminError, setTransferAdminError] = useState('');
+
+    const isAdmin = group.adminId === currentUserId;
+
+    // Placeholder for group members and admin - assuming group object has these
+    const adminUser = group.members?.find(member => member._id === group.adminId) || {
+        username: 'Admin User',
+        email: 'admin@example.com',
+    };
+    const members = group.members || [];
     const groupBio = group.bio || 'No group description provided.';
 
+
+    // Handlers for editable fields
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // In a real app, you'd upload this file and get a URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNewGroupImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+            // TODO: Call backend API to update group image
+        }
+    };
+
+    const handleNameSave = () => {
+        // TODO: Call backend API to update group name
+        console.log('Saving new group name:', newGroupName);
+        setIsEditingName(false);
+    };
+
+    const handleDescriptionSave = () => {
+        // TODO: Call backend API to update group description
+        console.log('Saving new group description:', newGroupDescription);
+        setIsEditingDescription(false);
+    };
 
     const handleLeaveGroup = async () => {
         setLeaveLoading(true);
@@ -47,6 +78,41 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
         }
     };
 
+    const handleMakeAdminClick = (member) => {
+        setSelectedMemberToAdmin(member);
+        setShowTransferAdminConfirm(true);
+    };
+
+    const handleConfirmTransferAdmin = async () => {
+        if (!selectedMemberToAdmin) return;
+
+        setTransferAdminLoading(true);
+        setTransferAdminError('');
+        try {
+            // TODO: Call backend API to transfer admin rights
+            console.log(`Transferring admin rights to: ${selectedMemberToAdmin.username}`);
+            // await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}/transfer-admin`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({ newAdminId: selectedMemberToAdmin._id }),
+            // });
+
+            // On success, you'd typically refetch group data or update local state
+            // For now, simulate by closing modal and refreshing (in real app, a parent prop update)
+            setShowTransferAdminConfirm(false);
+            onClose(); // Close modal, parent component should refresh group data
+        } catch (err) {
+            setTransferAdminError('Failed to transfer admin rights.');
+            console.error('Error transferring admin rights:', err);
+        } finally {
+            setTransferAdminLoading(false);
+        }
+    };
+
+
     return (
         <div className="group-info-modal-overlay" onClick={onClose}>
             <div className="group-info-modal" onClick={e => e.stopPropagation()}>
@@ -54,24 +120,81 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                     {/* Top Section: Group Icon, Name, Admin Info */}
                     <div className="group-modal-main-top">
                         <div className="group-modal-image-section">
-                            {group.groupPic ? (
-                                <img src={group.groupPic} alt="Group" className="group-modal-image" />
+                            {isAdmin && (
+                                <>
+                                    <label htmlFor="group-image-upload" className="group-image-edit-icon">
+                                        <FaEdit />
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="group-image-upload"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                </>
+                            )}
+                            {newGroupImage ? (
+                                <img src={newGroupImage} alt="Group" className="group-modal-image" />
                             ) : (
                                 <div className="group-modal-image placeholder"><FaUsers size={48} /></div>
                             )}
                         </div>
                         <div className="group-modal-info-section">
                             <div className="group-modal-info-main">
-                                <div className="group-modal-name">{group.name}</div>
-                                <div className="group-modal-admin-username"><FaUser /> Admin: {adminUser.username}</div>
+                                <div className="group-modal-name-container">
+                                    {isEditingName ? (
+                                        <input
+                                            type="text"
+                                            value={newGroupName}
+                                            onChange={(e) => setNewGroupName(e.target.value)}
+                                            className="editable-input"
+                                        />
+                                    ) : (
+                                        <div className="group-modal-name">{newGroupName}</div>
+                                    )}
+                                    {isAdmin && (
+                                        <button className="edit-button" onClick={() => isEditingName ? handleNameSave() : setIsEditingName(true)}>
+                                            {isEditingName ? <FaCheck /> : <FaEdit />}
+                                        </button>
+                                    )}
+                                    {isAdmin && isEditingName && (
+                                        <button className="cancel-button" onClick={() => { setIsEditingName(false); setNewGroupName(group.name); }}>
+                                            <FaTimes />
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="group-modal-admin-username"><FaUser /> Admin: {adminUser.username} {adminUser._id === currentUserId && "(You)"}</div>
+                                <div className="group-modal-admin-email"><FaEnvelope /> {adminUser.email}</div>
                             </div>
                         </div>
                     </div>
 
                     {/* Bio Section */}
                     <div className="group-modal-bio-section">
-                        <div className="group-modal-bio-label">Description</div>
-                        <div className="group-modal-bio">{groupBio}</div>
+                        <div className="group-modal-bio-label">
+                            Description
+                            {isAdmin && (
+                                <button className="edit-button" onClick={() => isEditingDescription ? handleDescriptionSave() : setIsEditingDescription(true)}>
+                                    {isEditingDescription ? <FaCheck /> : <FaEdit />}
+                                </button>
+                            )}
+                            {isAdmin && isEditingDescription && (
+                                <button className="cancel-button" onClick={() => { setIsEditingDescription(false); setNewGroupDescription(groupBio); }}>
+                                    <FaTimes />
+                                </button>
+                            )}
+                        </div>
+                        {isEditingDescription ? (
+                            <textarea
+                                value={newGroupDescription}
+                                onChange={(e) => setNewGroupDescription(e.target.value)}
+                                className="editable-textarea"
+                                rows="3"
+                            />
+                        ) : (
+                            <div className="group-modal-bio">{newGroupDescription}</div>
+                        )}
                     </div>
 
                     {/* Mute Toggle */}
@@ -101,6 +224,15 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                                         <div className="member-avatar placeholder"><FaUserCircle /></div>
                                     )}
                                     <span className="member-username">{member.username}</span>
+                                    {isAdmin && member._id !== currentUserId && (
+                                        <button
+                                            className="make-admin-btn"
+                                            onClick={() => handleMakeAdminClick(member)}
+                                            disabled={transferAdminLoading}
+                                        >
+                                            <FaCrown /> Make Admin
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -113,7 +245,7 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                 {/* Leave Group Section */}
                 <div className="group-modal-leave-section">
                     <button
-                        className="group-modal-action-btn block" // Using 'block' for styling similarity
+                        className="group-modal-action-btn block"
                         onClick={() => setShowLeaveConfirm(true)}
                         disabled={leaveLoading}
                     >
@@ -128,12 +260,24 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                 {/* Confirmation Modal for Leave Group */}
                 <ConfirmationModal
                     isOpen={showLeaveConfirm}
-                    message={`Are you sure you want to leave ${group.name}?`}
+                    message={`Are you sure you want to leave "${group.name}"?`}
                     onConfirm={handleLeaveGroup}
                     onClose={() => setShowLeaveConfirm(false)}
                     confirmText="Leave"
                     cancelText="Cancel"
                 />
+
+                {/* Confirmation Modal for Transfer Admin */}
+                {selectedMemberToAdmin && (
+                    <ConfirmationModal
+                        isOpen={showTransferAdminConfirm}
+                        message={`Are you sure you want to transfer admin rights to ${selectedMemberToAdmin.username}? You will no longer be the admin.`}
+                        onConfirm={handleConfirmTransferAdmin}
+                        onClose={() => setShowTransferAdminConfirm(false)}
+                        confirmText="Transfer"
+                        cancelText="Cancel"
+                    />
+                )}
 
                 {/* Close button */}
                 <button className="group-modal-close-btn" onClick={onClose}>&times;</button>
@@ -142,4 +286,4 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
     );
 }
 
-export default GroupInfoModal; 
+export default GroupInfoModal;
