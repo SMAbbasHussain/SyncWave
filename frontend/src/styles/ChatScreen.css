@@ -197,16 +197,13 @@
     flex: 1;
     padding: 15px 20px;
     overflow-y: scroll;
-    /* Force scrollbar to always be visible if content overflows */
     display: flex;
     flex-direction: column;
     gap: 10px;
     color: rgba(255, 255, 255, 0.9);
     background: transparent;
     scrollbar-width: thin;
-    /* For Firefox: Makes the scrollbar visible and thin */
     scrollbar-color: rgba(0, 255, 255, 0.4) transparent;
-    /* For Firefox: Sets thumb and track color */
     min-height: 0;
     position: relative;
 }
@@ -228,7 +225,6 @@
     padding: 16px 20px;
     border-top: 1px solid rgba(0, 119, 255, 0.15);
     background: linear-gradient(90deg, rgba(0, 153, 255, 0.03) 0%, rgba(0, 179, 255, 0.098) 30%, rgba(0, 162, 255, 0.081) 70%, rgba(0, 179, 255, 0.098) 100%);
-    z-index: 1;
 }
 
 /* Keep existing scrollbar styles for .chat-screen-messages */

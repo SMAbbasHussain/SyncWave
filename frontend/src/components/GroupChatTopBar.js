@@ -3,6 +3,7 @@ import { FaUsers } from 'react-icons/fa';
 import axios from 'axios';
 import ChatDropdownMenu from './ChatDropdownMenu';
 import ConfirmationModal from './ConfirmationModal';
+import GroupInfoModal from './GroupInfoModal';
 import '../styles/ChatScreen.css';
 
 // Add onLeaveSuccess to the component's props
@@ -12,6 +13,9 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
     const [showLeaveGroupConfirm, setShowLeaveGroupConfirm] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
+
+    const currentUserId = localStorage.getItem('userId'); // Retrieve current user ID
 
     useEffect(() => {
         const fetchGroupData = async () => {
@@ -36,7 +40,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
     }, [groupId]);
 
     const handleViewGroupInfo = () => {
-        // TODO: Implement view group info functionality
+        setShowGroupInfoModal(true);
         setIsDropdownOpen(false);
     };
 
@@ -86,7 +90,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
                     }
                 }
             );
-            
+
             // On success, call the callback function passed from the parent component.
             // This lets the parent know it should remove this group from the chat list.
             if (onLeaveSuccess) {
@@ -94,7 +98,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
             }
         } catch (error) {
             console.error('Error leaving group:', error);
-            
+
             // Display the specific error message from the backend (e.g., "You are the last admin...")
             // Or show a generic message if the specific one isn't available.
             const errorMessage = error.response?.data?.error || 'An unexpected error occurred. Please try again.';
@@ -121,7 +125,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
                     <span className="chat-partner-name">{group.name}</span>
                 </div>
             </div>
-            
+
             <div style={{ position: 'relative' }}>
                 <div className="hamburger-icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)} title="Group options">
                     <div className="hamburger-line"></div>
@@ -149,8 +153,18 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
                 confirmText="Leave Group"
                 cancelText="Cancel"
             />
+
+            {group && showGroupInfoModal && (
+                <GroupInfoModal
+                    group={group}
+                    onClose={() => setShowGroupInfoModal(false)}
+                    isMuted={isMuted}
+                    onMuteToggle={handleMuteNotifications}
+                    currentUserId={currentUserId}
+                />
+            )}
         </div>
     );
 }
 
-export default GroupChatTopBar;
+export default GroupChatTopBar; 
