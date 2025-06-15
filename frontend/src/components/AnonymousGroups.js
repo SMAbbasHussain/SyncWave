@@ -11,7 +11,7 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-     const [groups, setGroups] = useState([]);
+    const [groups, setGroups] = useState([]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -26,23 +26,23 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
 
     useEffect(() => {
         const fetchGroups = async () => {
-          try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/anonymous-groups`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-              }
-            });
-            setGroups(response.data);
-          } catch (err) {
-            console.error('Error fetching groups:', err);
-          } finally {
-          }
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/anonymous-groups`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                setGroups(response.data);
+            } catch (err) {
+                console.error('Error fetching groups:', err);
+            } finally {
+            }
         };
-    
-        fetchGroups();
-      }, []);
 
-   
+        fetchGroups();
+    }, []);
+
+
 
     const categories = [
         "Confessions & Secrets",
@@ -77,43 +77,43 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
     const handleAnonymousGroupClick = (groupId) => {
         setSelectedGroupId(groupId);
         if (onChatSelect) {
-            onChatSelect( groupId);
+            onChatSelect(groupId);
         }
     };
 
     const handleCreateGroup = async (groupData) => {
-    try {
+        try {
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/anonymous-groups`,
-        {
-          name: groupData.title,
-          description: groupData.description,
-          photo: groupData.photo,
-          category: groupData.category
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/anonymous-groups`,
+                {
+                    name: groupData.title,
+                    description: groupData.description,
+                    photo: groupData.photo,
+                    category: groupData.category
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (response.data) {
+                const newGroup = response.data;
+                setGroups(prevGroups => [...prevGroups, newGroup]);
+                setIsCreateModalOpen(false);
+            } else {
+                throw new Error('No data received from server');
+            }
+
+        } catch (err) {
+            console.error('Error creating anonymous group:', err);
         }
-      );
+    };
 
-      if (response.data) {
-        const newGroup = response.data;
-        setGroups(prevGroups => [...prevGroups, newGroup]);
-        setIsCreateModalOpen(false);
-      } else {
-        throw new Error('No data received from server');
-      }
 
-    } catch (err) {
-      console.error('Error creating anonymous group:', err);
-    }
-  };
-
-   
 
     const filteredGroups = selectedCategory
         ? groups.filter(group => group.category === selectedCategory)
@@ -178,12 +178,12 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
                                 className={`anon-group-item ${selectedGroupId === group._id ? 'active' : ''}`}
                                 onClick={() => handleAnonymousGroupClick(group._id)}
                             ><div className="group-pic">
-                                            {group.photo ? (
-                                              <img src={group.photo} alt={`${group.name}'s picture`} className="group-pic-img" />
-                                            ) : (
-                                              <FaUsers className="group-pic-icon" />
-                                            )}
-                                          </div>
+                                    {group.photo ? (
+                                        <img src={group.photo} alt={`${group.name}'s picture`} className="group-pic-img" />
+                                    ) : (
+                                        <FaUsers className="group-pic-icon" />
+                                    )}
+                                </div>
                                 <div className="anon-group-info">
                                     <span className="anon-group-name">{group.name}</span>
                                     <span className="anon-group-members">{group.members} members</span>

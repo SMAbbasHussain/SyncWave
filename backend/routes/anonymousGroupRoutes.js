@@ -9,7 +9,8 @@ const {
     getAllGroups,
     deleteGroup,
     sendGroupMessage,
-    getGroupById
+    getGroupById,
+    leaveGroup
 } = require('../controllers/anonymousGroupController.js');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.route('/')
     
 router.post('/message', sendGroupMessage);
 
+router.post('/:id/leave', leaveGroup);
 
 router.route('/:id')
     .get(getGroupById)     // ✅ Add this line
