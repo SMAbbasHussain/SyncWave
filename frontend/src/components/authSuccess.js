@@ -21,7 +21,7 @@ function AuthSuccess() {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch current user data
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/users/me`,
@@ -52,22 +52,22 @@ function AuthSuccess() {
         window.history.replaceState({}, document.title, window.location.pathname);
 
         // Redirect based on new user status
-        navigate(isNewUser ? '/profile-setup' : '/home', { 
-          replace: true 
+        navigate(isNewUser ? '/profile-setup' : '/home', {
+          replace: true
         });
 
       } catch (err) {
         console.error("Authentication error:", err);
-        
+
         // Clear any stored data
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        
+
         setError(err.response?.data?.error || err.message || "Authentication failed");
-        
-        navigate('/login', { 
+
+        navigate('/login', {
           replace: true,
-          state: { 
+          state: {
             error: err.response?.data?.error || err.message || "Authentication failed"
           }
         });
