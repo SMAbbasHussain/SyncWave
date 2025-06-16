@@ -60,6 +60,7 @@ const ProfileSettingsModal = ({
             photo: profileImageFile,
             status: showOnlineStatus ? 'online' : 'offline'
         };
+    
         onSave(updatedData);
         setIsEditing(false); // Exit editing mode after save
         onClose(); // Close the modal

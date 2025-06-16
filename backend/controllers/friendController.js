@@ -121,6 +121,8 @@ exports.acceptFriendRequest = async (req, res) => {
 
     res.json({ message: 'Friend request accepted successfully.' });
   } catch (error) {
+      console.error(error);
+
     // Abort transaction on error
     await session.abortTransaction();
     res.status(500).json({ message: 'An error occurred while accepting the request. Please try again.' });
