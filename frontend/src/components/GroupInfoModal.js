@@ -20,7 +20,6 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
     const [transferAdminError, setTransferAdminError] = useState('');
 
     const isAdmin = group.adminId === currentUserId;
-
     // Placeholder for group members and admin - assuming group object has these
     const adminUser = group.members?.find(member => member._id === group.adminId) || {
         username: 'Admin User',
@@ -199,7 +198,11 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
 
                     {/* Mute Toggle */}
                     <div className="group-modal-mute-toggle">
+                        <span className="mute-label">
+                            {isMuted ? <><FaVolumeMute /> <span className="mute-text">Mute Notifications</span></> : <><FaVolumeUp /> <span className="mute-text">Unmute Notifications</span></>}
+                        </span>
                         <label className="toggle-switch">
+
                             <input
                                 type="checkbox"
                                 checked={isMuted}
@@ -207,9 +210,7 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
                             />
                             <span className="slider round"></span>
                         </label>
-                        <span className="mute-label">
-                            {isMuted ? <><FaVolumeMute /> <span className="mute-text">Muted</span></> : <><FaVolumeUp /> <span className="mute-text">Unmuted</span></>}
-                        </span>
+
                     </div>
 
                     {/* Members List */}
@@ -271,7 +272,7 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
                 {selectedMemberToAdmin && (
                     <ConfirmationModal
                         isOpen={showTransferAdminConfirm}
-                        message={`Are you sure you want to transfer admin rights to ${selectedMemberToAdmin.username}? You will no longer be the admin.`}
+                        message={`Are you sure making ${selectedMemberToAdmin.username} Admin? You’ll lose Admin access.`}
                         onConfirm={handleConfirmTransferAdmin}
                         onClose={() => setShowTransferAdminConfirm(false)}
                         confirmText="Transfer"
