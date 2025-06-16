@@ -14,6 +14,7 @@ function Profile() {
     const profileRef = useRef(null);
     const heartbeatInterval = useRef(null);
     const navigate = useNavigate();
+    const [reload,setReload] = useState(false);
     const [showProfileSettingsModal, setShowProfileSettingsModal] = useState(false);
 
     const sendHeartbeat = async () => {
@@ -39,57 +40,64 @@ function Profile() {
     };
 
     useEffect(() => {
-        const loadUserData = async () => {
-            try {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    const parsedUser = JSON.parse(storedUser);
-                    if (parsedUser.username && parsedUser.email) {
-                        setUser(parsedUser);
-                        setUserStatus(parsedUser.status || 'online');
-                        setLoading(false);
+       const loadUserData = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
 
-                        if (parsedUser.isLoggedIn) {
-                            startHeartbeat();
-                        }
-                        return;
-                    }
-                }
-
-                const token = localStorage.getItem('token');
-                if (!token) {
+        // 🔥 Always fetch from server if reload is true
+        if (!reload) {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser.username && parsedUser.email) {
+                    setUser(parsedUser);
+                    setUserStatus(parsedUser.status || 'online');
                     setLoading(false);
+
+                    if (parsedUser.isLoggedIn) {
+                        startHeartbeat();
+                    }
                     return;
                 }
-
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const completeUserData = {
-                    isLoggedIn: true,
-                    username: response.data.username,
-                    email: response.data.email,
-                    profilePic: response.data.profilePic,
-                    bio: response.data.bio,
-                    status: response.data.status || 'online'
-                };
-
-                localStorage.setItem('user', JSON.stringify(completeUserData));
-                setUser(completeUserData);
-                setUserStatus(completeUserData.status);
-                startHeartbeat();
-            } catch (error) {
-                console.error("Failed to load user data:", error);
-                if (error.response?.status === 401) {
-                    handleLogout();
-                }
-            } finally {
-                setLoading(false);
             }
+        }
+
+        // ✅ Fetch latest user from backend
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+
+        const completeUserData = {
+            isLoggedIn: true,
+            username: response.data.user.username,
+            email: response.data.user.email,
+            profilePic: response.data.user.profilePic,
+            bio: response.data.user.bio,
+            status: response.data.user.status || 'online'
         };
+
+        localStorage.setItem('user', JSON.stringify(completeUserData));
+        setUser(completeUserData);
+        setUserStatus(completeUserData.status);
+        startHeartbeat();
+
+    } catch (error) {
+        console.error("Failed to load user data:", error);
+        if (error.response?.status === 401) {
+            handleLogout();
+        }
+    } finally {
+        setLoading(false);
+        setReload(false); // ✅ Move this to the end of the function
+    }
+};
 
         const startHeartbeat = () => {
             heartbeatInterval.current = setInterval(sendHeartbeat, 5 * 60 * 1000);
@@ -110,7 +118,7 @@ function Profile() {
                 clearInterval(heartbeatInterval.current);
             }
         };
-    }, []);
+    }, [reload]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -167,9 +175,65 @@ function Profile() {
         }
     };
 
-    const handleSaveProfileSettings = async (updatedData) => {
-        console.log('Saving profile with data:', updatedData);
-    };
+    const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
+
+ const handleSaveProfileSettings = async (updatedData) => {
+    try {
+        const token = localStorage.getItem('token');
+
+        // If there's a photo file, convert it to base64
+        let base64Image = null;
+        if (updatedData.photo instanceof File) {
+            base64Image = await convertToBase64(updatedData.photo);
+        }
+
+        const payload = {
+            username: updatedData.username,
+            bio: updatedData.bio,
+            status: updatedData.status,
+            profilePic: base64Image || user.profilePic // send previous one if unchanged
+        };
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile');
+        }
+
+
+        // ✅ Update localStorage and state directly
+        const updatedUser = {
+            ...user,
+            ...updatedData
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setUserStatus(updatedUser.status);
+        setReload(true);
+
+    } catch (error) {
+        console.error('Error updating profile:', error.message);
+        alert('Error updating profile: ' + error.message);
+    }
+};
+
 
     const getStatusDisplay = () => {
         if (!user) return "Offline";
