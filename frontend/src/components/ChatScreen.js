@@ -537,9 +537,9 @@ function ChatScreen({ activeChat }) {
         // Or if ChatScreen manages its own state, use the state setter directly.
         // The goal is to return to the placeholder view.
         if (activeChat) {
-             // This is a common pattern where a parent component controls the active chat
-             activeChat.type = "none";
-             activeChat.chatId = "null";
+            // This is a common pattern where a parent component controls the active chat
+            activeChat.type = "none";
+            activeChat.chatId = "null";
         } else {
             // If ChatScreen controls its own state, you'd have a local `setActiveChat`
             // For this example, we'll assume the prop is passed down.
@@ -562,10 +562,10 @@ function ChatScreen({ activeChat }) {
                 </div>
             );
             case 'group': return <GroupChatTopBar groupId={activeChat.chatId} />;
-            case 'anonymousGroup': 
+            case 'anonymousGroup':
                 return (
-                    <AnonymousGroupChatTopBar 
-                        groupId={activeChat.chatId} 
+                    <AnonymousGroupChatTopBar
+                        groupId={activeChat.chatId}
                         onLeaveSuccess={handleLeaveGroupSuccess} // ✅ Pass the handler down
                     />
                 );

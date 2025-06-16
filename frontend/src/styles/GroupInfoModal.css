@@ -513,3 +513,19 @@ input:checked+.slider:before {
         margin: 16px 0 0 0;
     }
 }
+
+.group-modal-category,
+.group-modal-members-count {
+    font-size: 0.98rem;
+    color: #b8e0ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.group-modal-category svg,
+.group-modal-members-count svg {
+    color: #7fd7ff;
+    font-size: 0.9rem;
+}

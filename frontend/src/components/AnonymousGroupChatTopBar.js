@@ -3,6 +3,7 @@ import { FaUsers } from 'react-icons/fa';
 import axios from 'axios';
 import ChatDropdownMenu from './ChatDropdownMenu';
 import ConfirmationModal from './ConfirmationModal';
+import AnonymousGroupInfoModal from './AnonymousGroupInfoModal';
 import '../styles/ChatScreen.css';
 
 function AnonymousGroupChatTopBar({ groupId }) {
@@ -11,6 +12,7 @@ function AnonymousGroupChatTopBar({ groupId }) {
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
     const [showLeaveGroupConfirm, setShowLeaveGroupConfirm] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
 
     useEffect(() => {
         const fetchGroupData = async () => {
@@ -35,13 +37,12 @@ function AnonymousGroupChatTopBar({ groupId }) {
     }, [groupId]);
 
     const handleViewGroupInfo = () => {
-        // TODO: Implement view group info functionality
+        setShowGroupInfoModal(true);
         setIsDropdownOpen(false);
     };
 
     const handleMuteNotifications = () => {
         setIsMuted(!isMuted);
-        // TODO: Implement mute notifications functionality
         setIsDropdownOpen(false);
     };
 
@@ -65,11 +66,10 @@ function AnonymousGroupChatTopBar({ groupId }) {
                     }
                 }
             );
-            // TODO: Update UI to reflect cleared chat
+            setShowClearChatConfirm(false);
         } catch (error) {
-            console.error('Error clearing anonymous group chat:', error);
+            console.error('Error clearing chat:', error);
         }
-        setShowClearChatConfirm(false);
     };
 
     const handleConfirmLeaveGroup = async () => {
@@ -83,11 +83,10 @@ function AnonymousGroupChatTopBar({ groupId }) {
                     }
                 }
             );
-            // TODO: Update UI to reflect leaving group
+            setShowLeaveGroupConfirm(false);
         } catch (error) {
-            console.error('Error leaving anonymous group:', error);
+            console.error('Error leaving group:', error);
         }
-        setShowLeaveGroupConfirm(false);
     };
 
     if (!group) return null;
@@ -105,6 +104,7 @@ function AnonymousGroupChatTopBar({ groupId }) {
                     </div>
                 </div>
             </div>
+
             <div style={{ position: 'relative' }}>
                 <div className="hamburger-icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)} title="More options">
                     <div className="hamburger-line"></div>
@@ -123,6 +123,24 @@ function AnonymousGroupChatTopBar({ groupId }) {
                     isMuted={isMuted}
                 />
             </div>
+
+            {group && showGroupInfoModal && (
+                <AnonymousGroupInfoModal
+                    group={group}
+                    onClose={() => setShowGroupInfoModal(false)}
+                    isMuted={isMuted}
+                    onMuteToggle={handleMuteNotifications}
+                />
+            )}
+
+            <ConfirmationModal
+                isOpen={showClearChatConfirm}
+                message="Are you sure you want to clear all messages in this chat?"
+                onConfirm={handleConfirmClearChat}
+                onClose={() => setShowClearChatConfirm(false)}
+                confirmText="Clear"
+                cancelText="Cancel"
+            />
 
             <ConfirmationModal
                 isOpen={showLeaveGroupConfirm}
