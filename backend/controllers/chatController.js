@@ -316,6 +316,7 @@ const initializeChat = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    
     // Create new chat
     const newChat = new Chat({
       participants: [
@@ -335,6 +336,7 @@ const initializeChat = async (req, res) => {
 
     // Emit socket event to both users
     if (req.io) {
+
       req.io.to(currentUserId.toString()).emit('chatInitialized', populatedChat);
       req.io.to(participantId.toString()).emit('chatInitialized', populatedChat);
     }
