@@ -6,7 +6,7 @@ import ConfirmationModal from './ConfirmationModal';
 import AnonymousGroupInfoModal from './AnonymousGroupInfoModal';
 import '../styles/ChatScreen.css';
 
-function AnonymousGroupChatTopBar({ groupId }) {
+function AnonymousGroupChatTopBar({ groupId, onLeaveSuccess }) {
     const [group, setGroup] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
@@ -84,6 +84,10 @@ function AnonymousGroupChatTopBar({ groupId }) {
                 }
             );
             setShowLeaveGroupConfirm(false);
+
+            if (onLeaveSuccess) {
+                onLeaveSuccess();
+            }
         } catch (error) {
             console.error('Error leaving group:', error);
         }
@@ -144,7 +148,7 @@ function AnonymousGroupChatTopBar({ groupId }) {
 
             <ConfirmationModal
                 isOpen={showLeaveGroupConfirm}
-                message={`Are you sure you want to leave "${group.name}"? You will no longer receive messages.`}
+                message={`If you leave you may not found "${group.name}" again. You'll also lose all chats of it.`}
                 onConfirm={handleConfirmLeaveGroup}
                 onClose={() => setShowLeaveGroupConfirm(false)}
                 confirmText="Leave Chat"
