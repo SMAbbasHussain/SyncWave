@@ -243,38 +243,37 @@ const markAsRead = async (req, res) => {
 const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.userId; // Assuming you have user's ID from auth middleware
 
+    // 1. Find the message to verify ownership and get chatId
     const message = await Message.findById(messageId);
+
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
 
-    // Check if user is authorized (sender or receiver can delete for themselves)
-    const isAuthorized = message.senderId.equals(userId) || message.receiverId.equals(userId);
-    if (!isAuthorized) {
-      return res.status(403).json({ error: 'Not authorized to delete this message' });
+    // 2. Authorization: Only the sender can delete the message
+    if (!message.senderId.equals(userId)) {
+      return res.status(403).json({ error: 'You can only delete messages you have sent.' });
     }
 
-    // Check if already deleted for this user
-    if (message.isDeletedFor(userId)) {
-      return res.status(400).json({ error: 'Message already deleted' });
+    // 3. Hard delete the message from the database
+    await Message.findByIdAndDelete(messageId);
+
+    // 4. Emit a real-time event to all clients in the chat room
+    // This tells both the sender's and receiver's UI to remove the message.
+    if (req.io && message.chatId) {
+       req.io.to(message.chatId.toString()).emit('messageDeleted', { 
+         messageId: message._id, 
+         chatId: message.chatId 
+       });
     }
 
-    // Soft delete for this user
-    message.deletedFor.push(userId);
-    
-    // If both users have deleted it, mark as fully deleted
-    if (message.deletedFor.length >= 2) {
-      message.isDeleted = true;
-    }
-    
-    await message.save();
+    res.status(200).json({ message: 'Message deleted successfully for all users.' });
 
-    res.json({ message: 'Message deleted successfully' });
   } catch (error) {
     console.error('Delete message error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 };
 
