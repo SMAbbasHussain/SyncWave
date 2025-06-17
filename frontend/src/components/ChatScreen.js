@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { FaPaperPlane, FaRobot, FaExchangeAlt, FaCopy, FaTrash } from 'react-icons/fa';
+import { FaPaperPlane, FaRobot, FaExchangeAlt, FaCopy, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/ChatScreen.css';
 import PrivateChatTopBar from './PrivateChatTopBar';
@@ -180,13 +180,14 @@ class ChatErrorBoundary extends React.Component {
     }
 }
 
-function ChatScreen({ activeChat }) {
+function ChatScreen({ activeChat, setActiveChat }) {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState(null);
     const [conversationMode, setConversationMode] = useState('normal');
+    const [showExitError, setShowExitError] = useState(false);
 
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
@@ -195,6 +196,41 @@ function ChatScreen({ activeChat }) {
     useEffect(() => {
         activeChatRef.current = activeChat;
     }, [activeChat]);
+
+    // Handle restricted background for Anonymous Groups
+    useEffect(() => {
+        if (activeChat.type === 'anonymousGroup') {
+            // Prevent body scroll when in anonymous group chat
+            document.body.style.overflow = 'hidden';
+
+            // Add click event listener to prevent clicking outside
+            const handleOutsideClick = (e) => {
+                // Check if click is outside the chat screen
+                const chatScreen = document.querySelector('.chat-screen-container');
+                if (chatScreen && !chatScreen.contains(e.target)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showExitErrorMessage();
+                }
+            };
+
+            document.addEventListener('click', handleOutsideClick, true);
+
+            return () => {
+                document.body.style.overflow = 'auto';
+                document.removeEventListener('click', handleOutsideClick, true);
+            };
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    }, [activeChat.type]);
+
+    const showExitErrorMessage = () => {
+        setShowExitError(true);
+        setTimeout(() => {
+            setShowExitError(false);
+        }, 3000);
+    };
 
     const currentUserId = useMemo(() => {
         try {
@@ -533,16 +569,10 @@ function ChatScreen({ activeChat }) {
     };
 
     const handleLeaveGroupSuccess = () => {
-        // Find the parent component's state update function (assuming it's passed as a prop)
-        // Or if ChatScreen manages its own state, use the state setter directly.
-        // The goal is to return to the placeholder view.
-        if (activeChat) {
-            // This is a common pattern where a parent component controls the active chat
-            activeChat.type = "none";
-            activeChat.chatId = "null";
+        // Reset the active chat to none when leaving a group
+        if (setActiveChat) {
+            setActiveChat({ type: 'none' });
         } else {
-            // If ChatScreen controls its own state, you'd have a local `setActiveChat`
-            // For this example, we'll assume the prop is passed down.
             console.warn("setActiveChat prop is needed to handle leaving a group.");
         }
     };
@@ -561,7 +591,7 @@ function ChatScreen({ activeChat }) {
                     </button>
                 </div>
             );
-            case 'group': return <GroupChatTopBar groupId={activeChat.chatId} />;
+            case 'group': return <GroupChatTopBar groupId={activeChat.chatId} onLeaveSuccess={handleLeaveGroupSuccess} />;
             case 'anonymousGroup':
                 return (
                     <AnonymousGroupChatTopBar
@@ -604,6 +634,13 @@ function ChatScreen({ activeChat }) {
 
     return (
         <ChatErrorBoundary>
+            {/* Restricted Background Overlay for Anonymous Groups */}
+            {activeChat.type === 'anonymousGroup' && (
+                <div className="anonymous-group-restricted-overlay">
+                    <div className="restricted-background-blur"></div>
+                </div>
+            )}
+
             <div className={`chat-screen-container ${activeChat.type}-chat-background`}>
                 <div className="chat-screen-content">
                     <div className="chat-screen-top-bar">{renderTopBar()}</div>
@@ -625,6 +662,13 @@ function ChatScreen({ activeChat }) {
                             )}
                             <div ref={messagesEndRef} />
                         </div>
+                        {/* Exit Error Message for Anonymous Groups */}
+                        {showExitError && (
+                            <div className="anonymous-group-exit-error">
+                                <FaExclamationTriangle className="error-icon" />
+                                <span>You can't exit Anonymous Groups like this. Leave the group to exit.</span>
+                            </div>
+                        )}
                     </div>
                     <div className="chat-screen-input">
                         {error && (
@@ -650,6 +694,8 @@ function ChatScreen({ activeChat }) {
                         </form>
                     </div>
                 </div>
+
+
             </div>
         </ChatErrorBoundary>
     );

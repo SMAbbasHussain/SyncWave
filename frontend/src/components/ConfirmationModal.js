@@ -10,13 +10,14 @@ const ConfirmationModal = ({
     confirmText = "Yes",
     cancelText = "No",
     confirmIcon = <FaCheck />,
-    cancelIcon = <FaTimes />
+    cancelIcon = <FaTimes />,
+    onCancel
 }) => {
     if (!isOpen) return null;
 
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
-            onClose();
+            onCancel();
         }
     };
 
@@ -36,7 +37,7 @@ const ConfirmationModal = ({
                     </button>
                     <button
                         className="confirmation-button cancel-button"
-                        onClick={onClose}
+                        onClick={onCancel}
                     >
                         {cancelIcon}
                         <span>{cancelText}</span>
