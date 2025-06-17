@@ -7,6 +7,7 @@ import Profile from "./Profile";
 import ChatScreen from "./ChatScreen";
 import Friends from "./Friends";
 import FriendsAction from "./FriendsAction";
+import Settings from "./Settings";
 import "../styles/Dashboard.css";
 import axios from "axios";
 
@@ -54,7 +55,7 @@ function Dashboard({ activeNavItem = 'home' }) {
                 </div>
             </div>
             {/* Render ChatScreen in the remaining space */}
-            <ChatScreen activeChat={activeChat} />
+            <ChatScreen activeChat={activeChat} setActiveChat={setActiveChat} />
         </div>
     );
 
@@ -79,7 +80,7 @@ function Dashboard({ activeNavItem = 'home' }) {
                 </div>
             </div>
             {/* Render ChatScreen in the remaining space */}
-            <ChatScreen activeChat={activeChat} />
+            <ChatScreen activeChat={activeChat} setActiveChat={setActiveChat} />
         </div>
     );
 
@@ -102,7 +103,7 @@ function Dashboard({ activeNavItem = 'home' }) {
                     </div>
                 );
             case 'settings':
-                return <div className="dashboard-content"><h2>Settings Coming Soon</h2></div>;
+                return <Settings />;
             default:
                 return <HomeView />;
         }

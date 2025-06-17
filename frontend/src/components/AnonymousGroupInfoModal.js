@@ -96,7 +96,7 @@ function AnonymousGroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                 {/* Confirmation Modal for Leave Group */}
                 <ConfirmationModal
                     isOpen={showLeaveConfirm}
-                    message={`Are you sure you want to leave "${group.name}"?`}
+                    message={`If you leave you may not found "${group.name}" again. You'll also lose all chats of it.`}
                     onConfirm={handleLeaveGroup}
                     onClose={() => setShowLeaveConfirm(false)}
                     confirmText="Leave"
