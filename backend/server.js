@@ -12,6 +12,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 const AnonymousGroup = require('./models/AnonymousGroup');
+const Chat = require('./models/Chat');
 
 
 const aiRoutes = require('./routes/aiRoutes');
@@ -182,11 +183,18 @@ io.use(async (socket, next) => {
 const socketToAnonymousGroupMap = new Map();
 
 // Connection event handler
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log(`✅ User connected: ${socket.user.username} (${socket.id})`);
 
   socket.join(socket.userId);
   console.log(`   > User ${socket.userId} joined their personal room.`);
+
+  const userChats = await Chat.find({ participants: socket.userId, isActive: true });
+  userChats.forEach(chat => {
+      const chatId = chat._id.toString();
+      socket.join(chatId);
+      console.log(`   > User ${socket.userId} joined chat room: ${chatId}`);
+    });
   
   // <<< NEW: Reusable logic for leaving an anonymous group >>>
   const handleAnonymousGroupLeave = async () => {

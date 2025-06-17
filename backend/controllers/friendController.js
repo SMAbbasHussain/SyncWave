@@ -69,8 +69,13 @@ exports.sendFriendRequest = async (req, res) => {
 
 // Accept a friend request
 exports.acceptFriendRequest = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // <<< START: CONDITIONAL TRANSACTION LOGIC >>>
+  const isProduction = process.env.NODE_ENV === 'production';
+  const session = isProduction ? await mongoose.startSession() : null;
+  if (isProduction) {
+    session.startTransaction();
+  }
+  // <<< END: CONDITIONAL TRANSACTION LOGIC >>>
 
   try {
     const { requestId } = req.params;
@@ -133,7 +138,6 @@ exports.acceptFriendRequest = async (req, res) => {
 };
 
 
-// ... (The rest of the functions: decline, cancel, remove, getFriends, etc., do not need changes) ...
 
 // Decline a friend request
 exports.declineFriendRequest = async (req, res) => {
