@@ -1,0 +1,785 @@
+/* Settings Container */
+.settings-container {
+    display: flex;
+    height: calc(80vh - 40px);
+    width: 100%;
+    background: transparent;
+    position: relative;
+}
+
+/* Left Section - Menu */
+.settings-left-section {
+    width: 240px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(0, 255, 255, 0.1);
+    padding: 25px 0;
+    flex-shrink: 0;
+}
+
+.settings-menu {
+    padding: 0 20px;
+}
+
+.settings-title {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 25px 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.settings-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.settings-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.settings-menu-item:hover {
+    background: rgba(0, 119, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateX(5px);
+}
+
+.settings-menu-item.active {
+    background: rgba(0, 119, 255, 0.15);
+    color: #fff;
+    border-left: 3px solid rgba(0, 255, 255, 0.8);
+}
+
+.settings-menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 119, 255, 0.6) 100%);
+    border-radius: 0 2px 2px 0;
+}
+
+.menu-icon {
+    font-size: 1rem;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.menu-label {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Vertical Separator */
+.settings-separator {
+    width: 1px;
+    background: linear-gradient(180deg,
+            transparent 0%,
+            rgba(0, 255, 255, 0.2) 20%,
+            rgba(0, 255, 255, 0.3) 50%,
+            rgba(0, 255, 255, 0.2) 80%,
+            transparent 100%);
+    margin: 0 10px;
+    flex-shrink: 0;
+}
+
+/* Right Section - Content */
+.settings-right-section {
+    flex: 1;
+    background: transparent;
+    padding: 30px 40px;
+    overflow-y: auto;
+}
+
+.settings-content {
+    max-width: 800px;
+    margin: 0;
+}
+
+.settings-placeholder {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 60px 20px;
+}
+
+.settings-placeholder h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.settings-placeholder p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Responsive Design */
+
+/* 1024px and above */
+@media (min-width: 1024px) {
+    .settings-left-section {
+        width: 240px;
+        padding: 28px 0;
+    }
+
+    .settings-menu {
+        padding: 0 22px;
+    }
+
+    .settings-title {
+        font-size: 1.3rem;
+        margin-bottom: 28px;
+    }
+
+    .settings-menu-item {
+        padding: 13px 17px;
+        font-size: 0.9rem;
+    }
+
+    .settings-right-section {
+        padding: 35px 45px;
+    }
+
+    .settings-placeholder {
+        padding: 70px 30px;
+    }
+
+    .settings-placeholder h3 {
+        font-size: 2rem;
+    }
+
+    .settings-placeholder p {
+        font-size: 1.05rem;
+    }
+
+    .settings-profile-content {
+        max-width: 550px;
+        margin: 0;
+    }
+}
+
+/* 1280px and above */
+@media (min-width: 1280px) {
+    .settings-left-section {
+        width: 260px;
+        padding: 32px 0;
+    }
+
+    .settings-menu {
+        padding: 0 26px;
+    }
+
+    .settings-title {
+        font-size: 1.4rem;
+        margin-bottom: 32px;
+    }
+
+    .settings-menu-item {
+        padding: 15px 19px;
+        font-size: 0.95rem;
+        gap: 11px;
+    }
+
+    .menu-icon {
+        font-size: 1.05rem;
+        width: 19px;
+        height: 19px;
+    }
+
+    .settings-right-section {
+        padding: 40px 50px;
+    }
+
+    .settings-content {
+        max-width: 900px;
+        margin: 0;
+    }
+
+    .settings-placeholder {
+        padding: 80px 40px;
+    }
+
+    .settings-placeholder h3 {
+        font-size: 2.2rem;
+    }
+
+    .settings-placeholder p {
+        font-size: 1.1rem;
+    }
+
+    .settings-profile-content {
+        max-width: 600px;
+        margin: 0;
+    }
+}
+
+/* 1440px and above */
+@media (min-width: 1440px) {
+    .settings-left-section {
+        width: 280px;
+        padding: 36px 0;
+    }
+
+    .settings-menu {
+        padding: 0 30px;
+    }
+
+    .settings-title {
+        font-size: 1.5rem;
+        margin-bottom: 36px;
+    }
+
+    .settings-menu-item {
+        padding: 17px 22px;
+        font-size: 1rem;
+        gap: 13px;
+        border-radius: 11px;
+    }
+
+    .menu-icon {
+        font-size: 1.1rem;
+        width: 20px;
+        height: 20px;
+    }
+
+    .settings-right-section {
+        padding: 45px 60px;
+    }
+
+    .settings-content {
+        max-width: 1000px;
+        margin: 0;
+    }
+
+    .settings-placeholder {
+        padding: 90px 50px;
+    }
+
+    .settings-placeholder h3 {
+        font-size: 2.4rem;
+    }
+
+    .settings-placeholder p {
+        font-size: 1.15rem;
+    }
+
+    .settings-profile-content {
+        max-width: 650px;
+        margin: 0;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .settings-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 80px);
+    }
+
+    .settings-left-section {
+        width: 100%;
+        padding: 20px 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    .settings-menu {
+        padding: 0 20px;
+    }
+
+    .settings-title {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+
+    .settings-nav {
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .settings-menu-item {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 16px;
+        min-width: 80px;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .settings-menu-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .settings-menu-item.active {
+        border-left: none;
+        border-bottom: 3px solid rgba(0, 255, 255, 0.8);
+    }
+
+    .settings-menu-item.active::before {
+        display: none;
+    }
+
+    .menu-icon {
+        font-size: 1rem;
+    }
+
+    .menu-label {
+        font-size: 0.8rem;
+    }
+
+    .settings-separator {
+        display: none;
+    }
+
+    .settings-right-section {
+        padding: 20px;
+    }
+
+    .settings-placeholder {
+        padding: 40px 20px;
+    }
+
+    .settings-placeholder h3 {
+        font-size: 1.5rem;
+    }
+
+    .settings-placeholder p {
+        font-size: 0.9rem;
+    }
+
+    .settings-edit-profile-btn {
+        position: static;
+        margin-top: 10px;
+    }
+}
+
+/* Scrollbar styles for settings content */
+.settings-right-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.settings-right-section::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settings-right-section::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.settings-right-section::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+}
+
+/* Profile Settings Content Styles */
+.settings-profile-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 500px;
+    padding: 0 20px;
+}
+
+.settings-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    width: 100%;
+    margin-left: 100px;
+}
+
+.settings-profile-image-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.settings-profile-image-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.settings-profile-name {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    text-align: center;
+}
+
+.settings-edit-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(0, 119, 255, 0.2) 0%, rgba(0, 255, 255, 0.1) 100%);
+    border: 1px solid rgba(0, 119, 255, 0.3);
+    border-radius: 25px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    top: auto;
+    right: auto;
+}
+
+.settings-edit-profile-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 119, 255, 0.3) 0%, rgba(0, 255, 255, 0.2) 100%);
+    border-color: rgba(0, 119, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 119, 255, 0.3);
+}
+
+.settings-edit-icon {
+    font-size: 0.9rem;
+}
+
+.settings-profile-display-section {
+    width: 50%;
+    margin-bottom: 40px;
+    margin-left: 100px;
+}
+
+.settings-profile-display {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.settings-display-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-display-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-left: 2px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.settings-display-value {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    line-height: 1.4;
+    min-height: 20px;
+    word-wrap: break-word;
+    margin-top: 5px;
+}
+
+.settings-profile-separator {
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(0, 255, 255, 0.2) 20%,
+            rgba(0, 255, 255, 0.3) 50%,
+            rgba(0, 255, 255, 0.2) 80%,
+            transparent 100%);
+    margin: 40px 0;
+    width: 100%;
+}
+
+.settings-logout-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    width: 100%;
+}
+
+.settings-logout-info {
+    text-align: center;
+}
+
+.settings-logout-info h4 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.settings-logout-info p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.settings-logout-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    color: #dc3545;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.settings-logout-button:hover {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+}
+
+.settings-logout-icon {
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments for profile content */
+@media (max-width: 768px) {
+    .settings-profile-content {
+        padding: 0 15px;
+    }
+
+    .settings-profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .settings-edit-profile-btn {
+        position: static;
+        margin-top: 10px;
+    }
+
+    .settings-profile-image-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .settings-profile-name {
+        font-size: 1.3rem;
+    }
+
+    .settings-display-value {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .settings-profile-content {
+        max-width: 550px;
+    }
+
+    .settings-profile-image-container {
+        width: 130px;
+        height: 130px;
+    }
+
+    .settings-profile-name {
+        font-size: 1.6rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .settings-profile-content {
+        max-width: 600px;
+    }
+
+    .settings-profile-image-container {
+        width: 140px;
+        height: 140px;
+    }
+
+    .settings-profile-name {
+        font-size: 1.7rem;
+    }
+}
+
+@media (min-width: 1440px) {
+    .settings-profile-content {
+        max-width: 650px;
+    }
+
+    .settings-profile-image-container {
+        width: 150px;
+        height: 150px;
+    }
+
+    .settings-profile-name {
+        font-size: 1.8rem;
+    }
+}
+
+/* Notifications Settings Content Styles */
+.settings-notifications-content {
+    padding: 20px 0;
+    width: 100%;
+}
+
+.settings-notifications-heading {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: left;
+    padding-left: 20px;
+    /* Aligns with the overall left-aligned content */
+}
+
+.settings-notification-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease;
+}
+
+.settings-notification-group:last-child {
+    border-bottom: none;
+}
+
+.settings-notification-group:hover {
+    background-color: rgba(0, 119, 255, 0.05);
+}
+
+.settings-notification-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.settings-notification-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.settings-notification-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Toggle Switch Styles */
+.settings-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 25px;
+}
+
+.settings-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    /* Off state background */
+    transition: 0.4s;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.settings-slider:before {
+    position: absolute;
+    content: '';
+    height: 17px;
+    width: 17px;
+    left: 4px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: 0.4s;
+}
+
+input:checked+.settings-slider {
+    background-color: rgba(0, 119, 255, 0.5);
+    /* On state background */
+    border-color: rgba(0, 255, 255, 0.5);
+}
+
+input:checked+.settings-slider:before {
+    transform: translateX(19px);
+}
+
+/* Rounded sliders */
+.settings-slider.settings-round {
+    border-radius: 25px;
+}
+
+.settings-slider.settings-round:before {
+    border-radius: 50%;
+}
+
+/* Disabled state for toggles */
+.settings-toggle-switch input:disabled+.settings-slider {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Lighter background for disabled */
+    border-color: rgba(0, 255, 255, 0.1);
+}
+
+.settings-toggle-switch input:disabled+.settings-slider:before {
+    background-color: rgba(255, 255, 255, 0.5);
+}
