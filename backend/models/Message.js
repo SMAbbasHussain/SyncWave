@@ -34,6 +34,15 @@ const messageSchema = new mongoose.Schema({
   readAt: {
     type: Date
   },
+    isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedFor: {
+    type: [mongoose.Schema.Types.ObjectId], // Fixed array default issue
+    ref: 'User',
+    default: []
+  },
   reactions: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
