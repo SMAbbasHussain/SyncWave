@@ -9,7 +9,7 @@
 
 /* Left Section - Menu */
 .settings-left-section {
-    width: 240px;
+    width: 270px;
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(0, 255, 255, 0.1);
@@ -140,7 +140,7 @@
 /* 1024px and above */
 @media (min-width: 1024px) {
     .settings-left-section {
-        width: 240px;
+        width: 270px;
         padding: 28px 0;
     }
 
@@ -160,6 +160,11 @@
 
     .settings-right-section {
         padding: 35px 45px;
+    }
+
+    .settings-content {
+        max-width: 900px;
+        margin: 0;
     }
 
     .settings-placeholder {
@@ -183,7 +188,7 @@
 /* 1280px and above */
 @media (min-width: 1280px) {
     .settings-left-section {
-        width: 260px;
+        width: 290px;
         padding: 32px 0;
     }
 
@@ -238,7 +243,7 @@
 /* 1440px and above */
 @media (min-width: 1440px) {
     .settings-left-section {
-        width: 280px;
+        width: 320px;
         padding: 36px 0;
     }
 
@@ -252,10 +257,9 @@
     }
 
     .settings-menu-item {
-        padding: 17px 22px;
+        padding: 16px 20px;
         font-size: 1rem;
-        gap: 13px;
-        border-radius: 11px;
+        gap: 12px;
     }
 
     .menu-icon {
@@ -265,7 +269,7 @@
     }
 
     .settings-right-section {
-        padding: 45px 60px;
+        padding: 45px 55px;
     }
 
     .settings-content {
@@ -782,4 +786,434 @@ input:checked+.settings-slider:before {
 
 .settings-toggle-switch input:disabled+.settings-slider:before {
     background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Account Settings Content */
+.settings-account-content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-account-heading {
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.settings-section-title {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-top: 25px;
+    margin-bottom: 8px;
+    letter-spacing: 0.4px;
+}
+
+.settings-section-title:first-of-type {
+    margin-top: 0;
+}
+
+.settings-section-description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+/* Privacy Group Styling (similar to notification group) */
+.settings-privacy-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background-color 0.3s ease;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.settings-privacy-group:hover {
+    background-color: rgba(0, 119, 255, 0.05);
+}
+
+.settings-privacy-group:last-of-type {
+    border-bottom: none;
+}
+
+.settings-privacy-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+.settings-privacy-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.settings-privacy-text {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.settings-privacy-dropdown {
+    background: rgba(0, 119, 255, 0.25);
+    /* Slightly lighter background */
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    /* Slightly more prominent border */
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    /* Remove default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-right: 30px;
+    /* Space for the icon */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.settings-privacy-dropdown:hover {
+    background: rgba(0, 119, 255, 0.35);
+    border-color: rgba(0, 255, 255, 0.6);
+}
+
+.settings-privacy-dropdown option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+/* Security section styling */
+.settings-security-section-content {
+    padding: 12px 10px;
+    margin-top: 25px;
+    /* Add some space from privacy */
+}
+
+.settings-security-info h5 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.settings-security-info p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.settings-security-info ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.settings-security-info li {
+    color: rgba(255, 255, 255, 0.7);
+
+    margin-bottom: 5px;
+    padding-left: 15px;
+    position: relative;
+}
+
+.settings-security-info li::before {
+    content: '\2022';
+    color: rgba(0, 255, 255, 0.7);
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* Delete Account Section */
+
+
+.settings-delete-account-info {
+    margin-bottom: 15px;
+    /* Space between text and button */
+}
+
+.settings-delete-account-info h4 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+}
+
+.settings-delete-account-info p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.settings-delete-account-button {
+    background: linear-gradient(45deg, #ff6b6b, #ee4c4c);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+.settings-delete-account-button:hover {
+    background: linear-gradient(45deg, #ee4c4c, #ff6b6b);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments for Account section */
+@media (max-width: 768px) {
+    .settings-account-content {
+        padding: 15px;
+    }
+
+    .settings-account-heading {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .settings-section-title {
+        font-size: 1.1rem;
+    }
+
+    .settings-section-description {
+        font-size: 0.85rem;
+    }
+
+    .settings-privacy-group {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .settings-privacy-info {
+        align-items: flex-start;
+        text-align: left;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .settings-privacy-info p {
+        margin-bottom: 10px;
+    }
+
+    .settings-privacy-dropdown {
+        width: 100%;
+    }
+
+    .settings-security-info {
+        font-size: 0.85rem;
+    }
+
+    .settings-security-info h5 {
+        font-size: 1rem;
+    }
+
+    .settings-delete-account-group {
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .settings-delete-account-info {
+        margin-bottom: 15px;
+    }
+
+    .settings-delete-account-button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (min-width: 1024px) {
+    .settings-account-content {
+        padding: 25px;
+    }
+
+    .settings-account-heading {
+        font-size: 2rem;
+    }
+
+    .settings-section-title {
+        font-size: 1.4rem;
+    }
+}
+
+/* Blocked Accounts Page Styles */
+.settings-blocked-accounts-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 20px 0 20px;
+}
+
+.settings-blocked-heading {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    border-bottom: 1.5px solid rgba(0, 255, 255, 0.18);
+    padding-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.settings-blocked-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    margin-bottom: 22px;
+    margin-top: 2px;
+}
+
+.settings-blocked-count {
+    color: rgba(0, 255, 255, 0.8);
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.settings-blocked-empty {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.05rem;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.settings-blocked-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0 0;
+}
+
+.settings-blocked-user {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0, 255, 255, 0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.settings-blocked-user-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 16px;
+    border: 2px solid rgba(0, 255, 255, 0.15);
+}
+
+.settings-blocked-user-name {
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+.settings-unblock-btn {
+    background: linear-gradient(45deg, #00e6e6, #0099ff);
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 255, 255, 0.08);
+}
+
+.settings-unblock-btn:hover {
+    background: linear-gradient(45deg, #0099ff, #00e6e6);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 255, 255, 0.18);
+}
+
+.settings-unblock-btn svg {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 600px) {
+    .settings-blocked-accounts-content {
+        padding: 16px 4vw 0 4vw;
+    }
+
+    .settings-blocked-user {
+        padding: 10px 8px;
+    }
+
+    .settings-blocked-user-pic {
+        width: 34px;
+        height: 34px;
+        margin-right: 10px;
+    }
+
+    .settings-blocked-user-name {
+        font-size: 1rem;
+    }
+
+    .settings-unblock-btn {
+        padding: 6px 10px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Unblock label button (like make-admin-btn) */
+.settings-unblock-label-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 18px 6px 14px;
+    border-radius: 18px;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(0, 119, 255, 0.08);
+    border: 1.5px solid #2ecbfa;
+    color: #b8e0ff;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    box-shadow: 0 0 8px 0 rgba(46, 203, 250, 0.08);
+    cursor: pointer;
+    outline: none;
+}
+
+.settings-unblock-label-btn:hover {
+    background: rgba(0, 119, 255, 0.18);
+    color: #f5f5f5;
+    border: 1.5px solid #00e6e6;
+    box-shadow: 0 0 16px 0 rgba(46, 203, 250, 0.18);
+}
+
+.settings-unblock-label-btn .unblock-icon {
+    font-size: 1.15em;
+    color: #2ecbfa;
+    margin-right: 4px;
+    margin-bottom: 1px;
+}
+
+.settings-unblock-label-btn span {
+    color: inherit;
+    font-weight: 500;
+    letter-spacing: 0.2px;
 }

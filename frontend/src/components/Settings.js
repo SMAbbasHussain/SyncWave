@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaComments, FaBell, FaCog, FaEdit, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaComments, FaBell, FaCog, FaEdit, FaSignOutAlt, FaUnlock } from 'react-icons/fa';
 import '../styles/Settings.css';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import ConfirmationModal from './ConfirmationModal';
@@ -9,6 +9,13 @@ const Settings = () => {
     const [activeSection, setActiveSection] = useState('profile');
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+    const [privacySettings, setPrivacySettings] = useState({
+        lastSeen: 'Everyone',
+        profilePhoto: 'Everyone',
+        about: 'Everyone',
+        addToGroups: 'Everyone'
+    });
     const [userData, setUserData] = useState({
         profilePic: '/PFP.png',
         name: 'User Name',
@@ -22,13 +29,19 @@ const Settings = () => {
     const [privateChatNotificationsOn, setPrivateChatNotificationsOn] = useState(true);
     const [groupNotificationsOn, setGroupNotificationsOn] = useState(true);
 
+    const [blockedUsers, setBlockedUsers] = useState([
+        { id: 1, name: 'Blocked User 1', profilePic: '/PFP2.png' },
+        { id: 2, name: 'Blocked User 2', profilePic: '/PFP.png' },
+    ]);
+    const [unblockConfirmUser, setUnblockConfirmUser] = useState(null);
+
     const navigate = useNavigate();
 
     const menuItems = [
         { id: 'profile', label: 'Profile', icon: FaUser },
-        { id: 'chats', label: 'Chats', icon: FaComments },
-        { id: 'notifs', label: 'Notifs', icon: FaBell },
-        { id: 'account', label: 'Account', icon: FaCog }
+        { id: 'blocked', label: 'Blocked Accounts', icon: FaComments },
+        { id: 'notifs', label: 'Notifications', icon: FaBell },
+        { id: 'account', label: 'Account Settings', icon: FaCog }
     ];
 
     const handleMenuClick = (sectionId) => {
@@ -53,6 +66,31 @@ const Settings = () => {
 
     const cancelLogout = () => {
         setShowLogoutConfirm(false);
+    };
+
+    const handleDeleteAccount = () => {
+        setShowDeleteAccountConfirm(true);
+    };
+
+    const confirmDeleteAccount = () => {
+        console.log('Deleting account...');
+        // Here you would typically make an API call to delete the user's account
+        // After successful deletion, clear local storage and redirect to login/signup
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setShowDeleteAccountConfirm(false);
+        navigate('/signup'); // Or navigate to a confirmation page
+    };
+
+    const cancelDeleteAccount = () => {
+        setShowDeleteAccountConfirm(false);
+    };
+
+    const handlePrivacyChange = (setting, value) => {
+        setPrivacySettings(prev => ({
+            ...prev,
+            [setting]: value
+        }));
     };
 
     useEffect(() => {
@@ -108,6 +146,19 @@ const Settings = () => {
         console.log('Saving profile data:', updatedData);
 
         setShowProfileModal(false);
+    };
+
+    const handleUnblock = (userId) => {
+        setBlockedUsers(prev => prev.filter(user => user.id !== userId));
+        setUnblockConfirmUser(null);
+    };
+
+    const handleAskUnblock = (user) => {
+        setUnblockConfirmUser(user);
+    };
+
+    const handleCancelUnblock = () => {
+        setUnblockConfirmUser(null);
     };
 
     const renderProfileContent = () => (
@@ -166,6 +217,42 @@ const Settings = () => {
         </div>
     );
 
+    const renderBlockedAccountsContent = () => (
+        <div className="settings-blocked-accounts-content">
+            <h3 className="settings-blocked-heading">Blocked Accounts</h3>
+            <div className="settings-blocked-description">
+                You can manage the accounts you have blocked here. Blocked users cannot send you messages or add you to groups.
+            </div>
+            <div className="settings-blocked-count">
+                Blocked Users ({blockedUsers.length}):
+            </div>
+            {blockedUsers.length === 0 ? (
+                <div className="settings-blocked-empty">You have not blocked any accounts.</div>
+            ) : (
+                <ul className="settings-blocked-list">
+                    {blockedUsers.map(user => (
+                        <li key={user.id} className="settings-blocked-user">
+                            <img src={user.profilePic} alt={user.name} className="settings-blocked-user-pic" />
+                            <span className="settings-blocked-user-name">{user.name}</span>
+                            <button className="settings-unblock-label-btn" title="Unblock" onClick={() => handleAskUnblock(user)}>
+                                <FaUnlock className="unblock-icon" />
+                                <span>Unblock</span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+            {unblockConfirmUser && (
+                <ConfirmationModal
+                    isOpen={!!unblockConfirmUser}
+                    message={`Are you sure you want to unblock ${unblockConfirmUser.name}?`}
+                    onConfirm={() => handleUnblock(unblockConfirmUser.id)}
+                    onCancel={handleCancelUnblock}
+                />
+            )}
+        </div>
+    );
+
     const renderNotificationsContent = () => (
         <div className="settings-notifications-content">
             <h3 className="settings-notifications-heading">Notifications Settings</h3>
@@ -219,26 +306,118 @@ const Settings = () => {
         </div>
     );
 
+    const renderAccountContent = () => (
+        <div className="settings-account-content">
+            <h3 className="settings-account-heading">Account Settings</h3>
+
+            <div className="settings-privacy-section-content">
+                <h4 className="settings-section-title">Privacy</h4>
+                <p className="settings-section-description">Managed on your phone</p>
+
+                <div className="settings-privacy-group">
+                    <div className="settings-privacy-left">
+                        <label className="settings-privacy-label">Last seen and online</label>
+                        <p className="settings-privacy-text">Choose who can see when you were last online and if you are currently online.</p>
+                    </div>
+                    <div className="settings-privacy-right">
+                        <select
+                            value={privacySettings.lastSeen}
+                            onChange={(e) => handlePrivacyChange('lastSeen', e.target.value)}
+                            className="settings-privacy-dropdown"
+                        >
+                            <option value="Everyone">Everyone</option>
+                            <option value="Only Friends">Only Friends</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="settings-privacy-group">
+                    <div className="settings-privacy-left">
+                        <label className="settings-privacy-label">Profile photo</label>
+                        <p className="settings-privacy-text">Choose who can see your profile photo.</p>
+                    </div>
+                    <div className="settings-privacy-right">
+                        <select
+                            value={privacySettings.profilePhoto}
+                            onChange={(e) => handlePrivacyChange('profilePhoto', e.target.value)}
+                            className="settings-privacy-dropdown"
+                        >
+                            <option value="Everyone">Everyone</option>
+                            <option value="Only Friends">Only Friends</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="settings-privacy-group">
+                    <div className="settings-privacy-left">
+                        <label className="settings-privacy-label">About</label>
+                        <p className="settings-privacy-text">Choose who can see your 'About' information (e.g., your bio).</p>
+                    </div>
+                    <div className="settings-privacy-right">
+                        <select
+                            value={privacySettings.about}
+                            onChange={(e) => handlePrivacyChange('about', e.target.value)}
+                            className="settings-privacy-dropdown"
+                        >
+                            <option value="Everyone">Everyone</option>
+                            <option value="Only Friends">Only Friends</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="settings-privacy-group">
+                    <div className="settings-privacy-left">
+                        <label className="settings-privacy-label">Add to groups</label>
+                        <p className="settings-privacy-text">Choose who can add you to new groups.</p>
+                    </div>
+                    <div className="settings-privacy-right">
+                        <select
+                            value={privacySettings.addToGroups}
+                            onChange={(e) => handlePrivacyChange('addToGroups', e.target.value)}
+                            className="settings-privacy-dropdown"
+                        >
+                            <option value="Everyone">Everyone</option>
+                            <option value="Only Friends">Only Friends</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div className="settings-security-section-content">
+                <h4 className="settings-section-title">Security</h4>
+                <div className="settings-security-info">
+                    <h5>Your chats are private</h5>
+                    <p>End-to-end encryption keeps your personal messages between you and the people you choose. No one outside of the chat, not even SyncWave, can read or share them. This includes your: </p>
+                    <ul>
+                        <li>Text messages</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div className="settings-profile-separator"></div>
+
+            <div className="settings-delete-account-section-container">
+                <div className="settings-delete-account-info">
+                    <h4>Delete Account</h4>
+                    <p>Deleting your account will permanently remove your account data and chat history. This action is irreversible.</p>
+                </div>
+                <button className="settings-logout-button" onClick={handleDeleteAccount}>
+                    <span>Delete Account</span>
+                </button>
+            </div>
+        </div>
+    );
+
     const renderContent = () => {
         switch (activeSection) {
             case 'profile':
                 return renderProfileContent();
-            case 'chats':
-                return (
-                    <div className="settings-placeholder">
-                        <h3>Chats Settings</h3>
-                        <p>Content for chats settings will be implemented here.</p>
-                    </div>
-                );
+            case 'blocked':
+                return renderBlockedAccountsContent();
             case 'notifs':
-                return renderNotificationsContent(); // Render notifications content
+                return renderNotificationsContent();
             case 'account':
-                return (
-                    <div className="settings-placeholder">
-                        <h3>Account Settings</h3>
-                        <p>Content for account settings will be implemented here.</p>
-                    </div>
-                );
+                return renderAccountContent();
             default:
                 return renderProfileContent();
         }
@@ -296,6 +475,15 @@ const Settings = () => {
                     message="Are you sure you want to log out? Your chat history will be cleared."
                     onConfirm={confirmLogout}
                     onCancel={cancelLogout}
+                />
+            )}
+
+            {showDeleteAccountConfirm && (
+                <ConfirmationModal
+                    isOpen={showDeleteAccountConfirm}
+                    message="are you sure you want to delete your account? This action is permanent."
+                    onConfirm={confirmDeleteAccount}
+                    onCancel={cancelDeleteAccount}
                 />
             )}
         </div>

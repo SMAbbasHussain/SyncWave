@@ -6,7 +6,7 @@ import '../styles/AnonymousGroups.css';
 import axios from 'axios';
 import { FaUsers } from 'react-icons/fa';
 
-const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
+const AnonymousGroups = ({ onChatSelect, onToggle, isVisible, socket }) => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
@@ -74,8 +74,20 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
         setShowCategoryDropdown(false);
     };
 
-    const handleAnonymousGroupClick = (groupId) => {
+     const handleAnonymousGroupClick = (groupId) => {
+        if (selectedGroupId === groupId) return;
+        
         setSelectedGroupId(groupId);
+
+        // MODIFIED: Use the socket instance passed via props.
+        // We also check if the socket exists and is connected before emitting.
+        if (socket && socket.connected && groupId) {
+            socket.emit('joinAnonymousGroup', groupId);
+            console.log(`Emitted joinAnonymousGroup for group: ${groupId}`);
+        } else {
+            console.error("Socket is not connected or groupId is missing. Cannot join group.");
+        }
+
         if (onChatSelect) {
             onChatSelect(groupId);
         }
@@ -83,7 +95,6 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
 
     const handleCreateGroup = async (groupData) => {
         try {
-
             const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/anonymous-groups`,
                 {
@@ -104,10 +115,11 @@ const AnonymousGroups = ({ onChatSelect, onToggle, isVisible }) => {
                 const newGroup = response.data;
                 setGroups(prevGroups => [...prevGroups, newGroup]);
                 setIsCreateModalOpen(false);
+                // Automatically join the group after creating it
+                handleAnonymousGroupClick(newGroup._id);
             } else {
                 throw new Error('No data received from server');
             }
-
         } catch (err) {
             console.error('Error creating anonymous group:', err);
         }

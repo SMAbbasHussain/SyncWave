@@ -204,19 +204,33 @@ io.on('connection', async (socket) => {
         socket.leave(groupId);
         socketToAnonymousGroupMap.delete(socket.id);
 
+        // This is the safe way: decrement the count and get the NEW document back.
         const updatedGroup = await AnonymousGroup.findByIdAndUpdate(
           groupId,
           { $inc: { activeMembersCount: -1 } },
-          { new: true }
+          { new: true } // This option is VITAL. It returns the document *after* the update.
         );
 
-        console.log(`   > User ${socket.user.username} left group ${groupId}. New count: ${updatedGroup ? updatedGroup.activeMembersCount : 'N/A'}`);
+        // If the group was deleted by another process while we were working, exit gracefully.
+        if (!updatedGroup) {
+            console.log(`   > Group ${groupId} was already deleted.`);
+            // Also emit a delete event in case clients missed it.
+            io.emit('groupDeleted', { groupId });
+            return;
+        }
+        
+        console.log(`   > User ${socket.user.username} left group ${groupId}. New count: ${updatedGroup.activeMembersCount}`);
         io.to(groupId).emit('userLeft', { userId: socket.userId, username: socket.user.username });
 
-        if (updatedGroup && updatedGroup.activeMembersCount <= 0 && updatedGroup.isTemporary) {
+        // **** ROBUST DELETION CHECK ****
+        // This block will now only run if the group's member count is 0 OR LESS
+        // AND the isTemporary flag is explicitly true.
+        // Because of our fix in createGroup, user-created groups will have isTemporary: false,
+        // so this block will NOT run for them.
+        if (updatedGroup.activeMembersCount <= 0 && updatedGroup.isTemporary) {
           await AnonymousGroup.findByIdAndDelete(groupId);
           console.log(`   > Deleted empty temporary group: ${groupId}`);
-          // Optionally, you can emit an event to the clients to remove this group from their list
+          // Let all clients know this group is gone so they can remove it from their lists.
           io.emit('groupDeleted', { groupId });
         }
       } catch (error) {
@@ -227,9 +241,6 @@ io.on('connection', async (socket) => {
 
   // <<< NEW: Listener for joining an anonymous group >>>
   socket.on('joinAnonymousGroup', async (groupId) => {
-    // First, leave any anonymous group the user might currently be in
-    await handleAnonymousGroupLeave();
-
     try {
       socket.join(groupId);
       socketToAnonymousGroupMap.set(socket.id, groupId);
