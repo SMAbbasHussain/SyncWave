@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import PrivateChats from "./PrivateChats";
 import AiChat from "./AiChat";
 import Groups from "./Groups";
@@ -12,79 +13,112 @@ import "../styles/Dashboard.css";
 import axios from "axios";
 
 function Dashboard({ activeNavItem = 'home' }) {
-    const [activeChat, setActiveChat] = useState({ type: 'none' }); // { type: 'none' | 'private' | 'ai' | 'group' | 'anonymousGroup', chatId: '...' }
-
+    const [socket, setSocket] = useState(null);
+    const [activeChat, setActiveChat] = useState({ type: 'none' });
     const [showAnonymousGroups, setShowAnonymousGroups] = useState(false);
 
-    // Reset active chat when switching views
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("Authentication token not found. Cannot establish socket connection.");
+            return;
+        }
+
+        const newSocket = io(process.env.REACT_APP_API_URL, {
+            auth: {
+                token: `Bearer ${token}`
+            }
+        });
+
+        setSocket(newSocket);
+
+        newSocket.on('connect', () => {
+            console.log('Socket connected:', newSocket.id);
+        });
+
+        newSocket.on('disconnect', () => {
+            console.log('Socket disconnected.');
+        });
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, []);
+
     useEffect(() => {
         if (activeNavItem === 'home' && ['group', 'anonymousGroup'].includes(activeChat.type)) {
             setActiveChat({ type: 'none' });
-            setShowAnonymousGroups(false); // Reset anonymous groups visibility when switching views
+            setShowAnonymousGroups(false);
         } else if (activeNavItem === 'groups' && ['private', 'ai'].includes(activeChat.type)) {
             setActiveChat({ type: 'none' });
         }
-    }, [activeNavItem]);
+    }, [activeNavItem, activeChat.type]);
 
-    // Function to handle chat selection
     const handleChatSelect = (chatType, chatId, pid) => {
         setActiveChat({ type: chatType, chatId: chatId, pid: pid });
-        console.log(activeChat);
     };
 
-
-    // Function to handle anonymous groups toggle
     const handleAnonymousGroupsToggle = (isVisible) => {
         setShowAnonymousGroups(isVisible);
-        // Reset active chat when toggling to prevent background issues
         if (isVisible) {
             setActiveChat({ type: 'none' });
         }
     };
 
-    // Home View Component
     const HomeView = () => (
         <div className="dashboard-content">
-            {/* Wrapper for left-side content in Home View */}
             <div className="left-sidebar-content">
                 <div className="chat-section">
                     <div className="private-chats-container">
-                        <PrivateChats onChatSelect={(chatId, pid) => handleChatSelect('private', chatId, pid)} />
+                        <PrivateChats
+                            socket={socket}
+                            onChatSelect={(chatId, pid) => handleChatSelect('private', chatId, pid)}
+                        />
                     </div>
-                    <AiChat onChatSelect={() => handleChatSelect('ai')} />
+                    <AiChat
+                        socket={socket}
+                        onChatSelect={() => handleChatSelect('ai')}
+                    />
                 </div>
             </div>
-            {/* Render ChatScreen in the remaining space */}
-            <ChatScreen activeChat={activeChat} setActiveChat={setActiveChat} />
+            <ChatScreen
+                socket={socket}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+            />
         </div>
     );
 
-    // Groups View Component
     const GroupsView = () => (
         <div className="dashboard-content">
-            {/* Wrapper for left-side content in Groups View */}
             <div className="left-sidebar-content">
                 <div className="groups-view">
                     <div className="top-section">
                         {!showAnonymousGroups ? (
-                            <Groups onChatSelect={(groupId) => handleChatSelect('group', groupId)} />
+                            <Groups
+                                socket={socket}
+                                onChatSelect={(groupId) => handleChatSelect('group', groupId)}
+                            />
                         ) : (
                             <div className="groups-container-placeholder" style={{ height: 'calc(80vh - 120px)' }}></div>
                         )}
                     </div>
                     <AnonymousGroups
+                        socket={socket}
                         onChatSelect={(groupId) => handleChatSelect('anonymousGroup', groupId)}
                         onToggle={handleAnonymousGroupsToggle}
                         isVisible={showAnonymousGroups}
                     />
                 </div>
             </div>
-            {/* Render ChatScreen in the remaining space */}
-            <ChatScreen activeChat={activeChat} setActiveChat={setActiveChat} />
+            <ChatScreen
+                socket={socket}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+            />
         </div>
     );
 
-    // Render the appropriate view based on activeNavItem
     const renderContent = () => {
         switch (activeNavItem) {
             case 'home':
@@ -131,4 +165,4 @@ function Dashboard({ activeNavItem = 'home' }) {
     );
 }
 
-export default Dashboard; 
+export default Dashboard;
