@@ -21,6 +21,7 @@ const createGroup = async (req, res) => {
             description,
             category,
             photo,
+            isTemporary: false,
         });
 
         const createdGroup = await group.save();
@@ -73,32 +74,28 @@ const deleteGroup = async (req, res) => {
 };
 
 const sendGroupMessage = async (req, res) => {
-  try {
+    try {
 
-    const { content, groupId} = req.body;
-            const currentUserId = req.user._id;
+        const { content, groupId } = req.body;
+        const currentUserId = req.user._id;
+        const messagePayload = {
+            content,
+            groupId,
+            senderId: currentUserId,
+            timestamp: new Date()
+        };
 
+        // Emit to all connected clients
+        if (req.io) {
+            req.io.emit('newAnonymousGroupMessage', messagePayload);
+        }
 
-   
+        // Optional: Add logic here to store the message in DB, etc.
 
-    const messagePayload = {
-      content,
-      groupId,
-      senderId: currentUserId,
-      timestamp: new Date()
-    };
-
-    // Emit to all connected clients
-    if (req.io) {
-      req.io.emit('newAnonymousGroupMessage', messagePayload);
+        res.status(201).json({ message: 'Message sent successfully', data: messagePayload });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    // Optional: Add logic here to store the message in DB, etc.
-
-    res.status(201).json({ message: 'Message sent successfully', data: messagePayload });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
 
 const getGroupById = async (req, res) => {
@@ -122,12 +119,11 @@ const getGroupById = async (req, res) => {
 const leaveGroup = async (req, res) => {
     try {
         const groupId = req.params.id;
-        const currentUserId = req.user._id; // Assuming authMiddleware provides this
 
         // Atomically decrement the activeMembersCount and get the updated group
         // Using $inc is safer than a read-then-write to prevent race conditions.
         const updatedGroup = await AnonymousGroup.findByIdAndUpdate(
-            groupId, 
+            groupId,
             { $inc: { activeMembersCount: -1 } },
             { new: true } // This option returns the document after the update
         );
@@ -141,14 +137,14 @@ const leaveGroup = async (req, res) => {
         if (updatedGroup.activeMembersCount <= 0 && updatedGroup.isTemporary) {
             // The last member has left, so delete the group
             await updatedGroup.deleteOne();
-            return res.status(200).json({ 
+            return res.status(200).json({
                 message: 'Successfully left group. The group has been deleted as it was empty.',
-                groupDeleted: true 
+                groupDeleted: true
             });
         }
 
         // If we reach here, the user left but the group still has members
-        res.status(200).json({ 
+        res.status(200).json({
             message: 'Successfully left the group.',
             groupDeleted: false
         });
