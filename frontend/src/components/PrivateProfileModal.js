@@ -10,7 +10,7 @@ function PrivateProfileModal({ user, chatId, isMuted, onMuteToggle, onClose }) {
     const [blockError, setBlockError] = useState('');
 
     // For demo, phone/email/bio fallback
-    const phone = user.phone || 'N/A';
+    const phone = user.phoneNo || 'N/A';
     const email = user.email || 'N/A';
     const bio = user.bio || 'No bio provided.';
 
