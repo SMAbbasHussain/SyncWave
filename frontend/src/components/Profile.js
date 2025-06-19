@@ -137,41 +137,74 @@ function Profile() {
     }, [showDropdown, showProfileSettingsModal]);
 
     const handleLogout = async () => {
+        console.log("Starting full logout process...");
+
+        // Stop any ongoing processes like the heartbeat
+        if (heartbeatInterval.current) {
+            clearInterval(heartbeatInterval.current);
+        }
+
         try {
-            if (heartbeatInterval.current) {
-                clearInterval(heartbeatInterval.current);
-            }
-
-            const response = await axios.get(
-                `${process.env.REACT_APP_API_URL}/api/auth/logout`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
+            // --- 1. Unsubscribe from Push Notifications ---
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+    
+                if (subscription) {
+                    console.log("Found active push subscription. Unsubscribing...");
+    
+                    // A. Tell the backend to delete the subscription from the DB
+                    await axios.post(
+                        `${process.env.REACT_APP_API_URL}/api/notifications/unsubscribe`,
+                        { endpoint: subscription.endpoint }, // Send the unique identifier
+                        {
+                            headers: {
+                                // Send the token to authenticate this request
+                                Authorization: `Bearer ${localStorage.getItem('token')}`
+                            }
+                        }
+                    );
+    
+                    // B. Unsubscribe the browser itself
+                    await subscription.unsubscribe();
+                    console.log("Successfully unsubscribed from browser push service.");
+                } else {
+                    console.log("No active push subscription to unsubscribe from.");
                 }
-            );
-
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setUser(null);
-            setUserStatus('offline');
-
-            navigate('/login', { replace: true });
-
-            window.location.reload();
-
+            }
         } catch (error) {
-            console.error("Logout error:", error);
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setUser(null);
-            setUserStatus('offline');
-
-            if (heartbeatInterval.current) {
-                clearInterval(heartbeatInterval.current);
+            // Don't let a failed unsubscribe stop the user from logging out.
+            // The main goal is to log them out of the UI.
+            console.error("Could not unsubscribe from push notifications, but proceeding with logout:", error);
+        } finally {
+            // --- 2. Proceed with Standard API and Local Logout ---
+            try {
+                // Call the backend logout endpoint (optional but good practice)
+                await axios.get(
+                    `${process.env.REACT_APP_API_URL}/api/auth/logout`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
+            } catch (apiLogoutError) {
+                // Log the error but don't stop the local logout
+                console.error("API logout call failed, continuing with local logout:", apiLogoutError);
             }
 
-            navigate('/login');
+            console.log("Clearing local session and redirecting.");
+            // Clear all user data from local storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Update local state
+            setUser(null);
+            setUserStatus('offline');
+            
+            // Force a full page reload to the login screen to ensure all state is cleared.
+            // This is often more reliable than just using navigate().
+            window.location.href = '/login';
         }
     };
 

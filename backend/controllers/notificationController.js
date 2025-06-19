@@ -54,7 +54,33 @@ const getVapidPublicKey = (req, res) => {
     res.status(200).json({ publicKey: process.env.VAPID_PUBLIC_KEY });
 };
 
+const unsubscribe = async (req, res) => {
+    try {
+        // The endpoint is a unique identifier for a subscription.
+        const { endpoint } = req.body;
+        const userId = req.user.userId;
+
+        if (!endpoint) {
+            return res.status(400).json({ error: 'Subscription endpoint is required.' });
+        }
+
+        // Use $pull to remove the matching subscription object from the array.
+        // We match based on the unique 'endpoint' property.
+        await User.findByIdAndUpdate(userId, {
+            $pull: { pushSubscriptions: { endpoint: endpoint } }
+        });
+
+        console.log(`[UNSUB] Subscription with endpoint ${endpoint.substring(0,30)}... removed for user ${userId}`);
+        res.status(200).json({ message: 'Unsubscribed successfully.' });
+        
+    } catch (error) {
+        console.error('Error unsubscribing:', error);
+        res.status(500).json({ error: 'Failed to unsubscribe.' });
+    }
+};
+
 module.exports = {
     subscribe,
-    getVapidPublicKey
+    getVapidPublicKey,
+    unsubscribe
 };
