@@ -3,7 +3,7 @@ import { FaUsers, FaUser, FaEnvelope, FaVolumeMute, FaVolumeUp, FaUserCircle, Fa
 import ConfirmationModal from './ConfirmationModal';
 import '../styles/GroupInfoModal.css';
 
-function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }) {
+function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId, setReload }) {
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
     const [leaveLoading, setLeaveLoading] = useState(false);
     const [leaveError, setLeaveError] = useState('');
@@ -11,48 +11,156 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
     const [isEditingName, setIsEditingName] = useState(false);
     const [newGroupName, setNewGroupName] = useState(group.name);
     const [isEditingDescription, setIsEditingDescription] = useState(false);
-    const [newGroupDescription, setNewGroupDescription] = useState(group.bio || '');
-    const [newGroupImage, setNewGroupImage] = useState(group.groupPic || '');
+    const [newGroupDescription, setNewGroupDescription] = useState(group.description || '');
+    const [newGroupImage, setNewGroupImage] = useState(group.photo || '');
 
     const [showTransferAdminConfirm, setShowTransferAdminConfirm] = useState(false);
     const [selectedMemberToAdmin, setSelectedMemberToAdmin] = useState(null);
     const [transferAdminLoading, setTransferAdminLoading] = useState(false);
     const [transferAdminError, setTransferAdminError] = useState('');
 
-    const isAdmin = group.adminId === currentUserId;
-    // Placeholder for group members and admin - assuming group object has these
-    const adminUser = group.members?.find(member => member._id === group.adminId) || {
-        username: 'Admin User',
-        email: 'admin@example.com',
-    };
+    const adminUsers = group.members?.filter(member => member.role === 'admin') || [];
+
+const isAdmin = adminUsers.some(admin => admin.userId._id === currentUserId);
     const members = group.members || [];
-    const groupBio = group.bio || 'No group description provided.';
+    const groupBio = group.description || 'No group description provided.';
 
 
     // Handlers for editable fields
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            // In a real app, you'd upload this file and get a URL
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewGroupImage(reader.result);
-            };
-            reader.readAsDataURL(file);
-            // TODO: Call backend API to update group image
+       
+                let photoData = null;
+
+     if (file) {
+                    const reader = new FileReader();
+                    photoData = await new Promise((resolve, reject) => {
+                        reader.onload = () => {resolve(reader.result);                setNewGroupImage(reader.result);
+}
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+
+                
+        
+
+         try {
+        const token = localStorage.getItem('token');
+
+        // If there's a photo file, convert it to base64
+        
+
+        const payload = {
+           
+            photo: photoData 
+        };
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile pic');
         }
+
+        setReload(prev=> !prev);
+
+     } catch (error) {
+        console.error('Error updating profile:', error.message);
+        alert('Error updating profile: ' + error.message);
+    }
+
+}else{
+    alert("Add an image first !")
+    return;
+}
+
     };
 
-    const handleNameSave = () => {
+    const handleNameSave =async () => {
         // TODO: Call backend API to update group name
-        console.log('Saving new group name:', newGroupName);
-        setIsEditingName(false);
+     //   console.log('Saving new group name:', newGroupName);
+
+        try {
+        const token = localStorage.getItem('token');
+
+        // If there's a photo file, convert it to base64
+        
+
+        const payload = {
+           
+            name: newGroupName
+        };
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile pic');
+        }
+
+                setIsEditingName(false);
+                        setReload(prev=> !prev);
+
+
+
+     } catch (error) {
+        console.error('Error updating profile:', error.message);
+        alert('Error updating profile: ' + error.message);
+    }
     };
 
-    const handleDescriptionSave = () => {
+    const handleDescriptionSave = async() => {
         // TODO: Call backend API to update group description
-        console.log('Saving new group description:', newGroupDescription);
+       // console.log('Saving new group description:', newGroupDescription);
+
+        try {
+        const token = localStorage.getItem('token');
+
+        // If there's a photo file, convert it to base64
+        
+
+        const payload = {
+           
+            description: newGroupDescription
+        };
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile pic');
+        }
+
         setIsEditingDescription(false);
+                        setReload(prev=> !prev);
+
+
+
+     } catch (error) {
+        console.error('Error updating profile:', error.message);
+        alert('Error updating profile: ' + error.message);
+    }
     };
 
     const handleLeaveGroup = async () => {
@@ -60,18 +168,17 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
         setLeaveError('');
         try {
             // Replace with actual API call to leave group
-            console.log(`Leaving group: ${group.name}`);
-            // await fetch(`${process.env.REACT_APP_API_URL}/api/groups/leave/${group._id}`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            //     },
-            // });
+            await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}/leave`, {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+               },
+            });
             setShowLeaveConfirm(false);
             onClose(); // Close modal after leaving
             // Potentially redirect or update UI to reflect leaving the group
         } catch (err) {
-            setLeaveError('Failed to leave group.');
+            setLeaveError(err.message);
         } finally {
             setLeaveLoading(false);
         }
@@ -89,19 +196,32 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
         setTransferAdminError('');
         try {
             // TODO: Call backend API to transfer admin rights
-            console.log(`Transferring admin rights to: ${selectedMemberToAdmin.username}`);
-            // await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}/transfer-admin`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ newAdminId: selectedMemberToAdmin._id }),
-            // });
+            console.log(`Transferring admin rights to: ${selectedMemberToAdmin.userId.username}`);
+            const token = localStorage.getItem('token');
 
-            // On success, you'd typically refetch group data or update local state
-            // For now, simulate by closing modal and refreshing (in real app, a parent prop update)
-            setShowTransferAdminConfirm(false);
+        // If there's a photo file, convert it to base64
+        
+
+        const payload = {
+           
+            userId: selectedMemberToAdmin.userId._id
+        };
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/groups/${group._id}/members/role`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile pic');
+        }
+                       setShowTransferAdminConfirm(false);
+
             onClose(); // Close modal, parent component should refresh group data
         } catch (err) {
             setTransferAdminError('Failed to transfer admin rights.');
@@ -163,8 +283,28 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
                                         </button>
                                     )}
                                 </div>
-                                <div className="group-modal-admin-username"><FaUser /> Admin: {adminUser.username} {adminUser._id === currentUserId && "(You)"}</div>
-                                <div className="group-modal-admin-email"><FaEnvelope /> {adminUser.email}</div>
+                                {adminUsers.length > 0 ? (
+  adminUsers.map((admin, index) => (
+    <div key={admin.userId._id || index}>
+      <div className="group-modal-admin-username">
+        <FaUser /> Admin: {admin.userId.username} {admin.userId._id === currentUserId && "(You)"}
+      </div>
+      <div className="group-modal-admin-email">
+        <FaEnvelope /> {admin.userId.email}
+      </div>
+    </div>
+  ))
+) : (
+  <div>
+    <div className="group-modal-admin-username">
+      <FaUser /> Admin: Admin User
+    </div>
+    <div className="group-modal-admin-email">
+      <FaEnvelope /> admin@example.com
+    </div>
+  </div>
+)}
+
                             </div>
                         </div>
                     </div>
@@ -218,14 +358,14 @@ function GroupInfoModal({ group, onClose, isMuted, onMuteToggle, currentUserId }
                         <div className="group-modal-members-label">Members ({members.length})</div>
                         <div className="group-modal-members-list">
                             {members.map(member => (
-                                <div key={member._id} className="group-modal-member-item">
-                                    {member.profilePic ? (
-                                        <img src={member.profilePic} alt={member.username} className="member-avatar" />
+                                <div key={member.userId._id} className="group-modal-member-item">
+                                    {member.userId.profilePic ? (
+                                        <img src={member.userId.profilePic} alt={member.username} className="member-avatar" />
                                     ) : (
                                         <div className="member-avatar placeholder"><FaUserCircle /></div>
                                     )}
-                                    <span className="member-username">{member.username}</span>
-                                    {isAdmin && member._id !== currentUserId && (
+                                    <span className="member-username">{member.userId.username}</span>
+                                    {isAdmin && member.userId._id !== currentUserId && member.role !=="admin" &&(
                                         <button
                                             className="make-admin-btn"
                                             onClick={() => handleMakeAdminClick(member)}

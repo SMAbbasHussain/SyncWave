@@ -107,7 +107,7 @@ const getGroupDetails = async (req, res) => {
   try {
     const group = await Group.findById(req.params.groupId)
       .populate('createdBy', 'username profilePic')
-      .populate('members.userId', 'username profilePic')
+      .populate('members.userId', 'username profilePic email')
       .populate('pinnedMessages.messageId')
       .populate('pinnedMessages.pinnedBy', 'username profilePic');
 
@@ -256,7 +256,7 @@ const removeMember = async (req, res) => {
 // Update member role
 const updateMemberRole = async (req, res) => {
   try {
-    const { userId, role } = req.body;
+    const { userId } = req.body;
     const group = await Group.findById(req.params.groupId);
 
     if (!group) {
@@ -274,12 +274,12 @@ const updateMemberRole = async (req, res) => {
       return res.status(404).json({ error: 'Member not found' });
     }
 
-    member.role = role;
+    member.role = "admin";
     await group.save();
 
     // Emit socket event
     if (req.io) {
-      req.io.to(userId.toString()).emit('roleUpdated', { groupId: group._id, newRole: role });
+      req.io.to(userId.toString()).emit('roleUpdated', { groupId: group._id, newRole: "admin" });
     }
 
     res.json(group);
@@ -293,6 +293,7 @@ const updateGroupInfo = async (req, res) => {
   try {
     const { name, description, photo } = req.body;
     const group = await Group.findById(req.params.groupId);
+
 
     if (!group) {
       return res.status(404).json({ error: 'Group not found' });

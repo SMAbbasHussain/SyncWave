@@ -361,7 +361,7 @@ const getOtherParticipant = async (req, res) => {
       return res.status(400).json({ error: 'Invalid chat ID' });
     }
 
-    const chat = await Chat.findById(chatId).populate('participants', 'username profilePic status');
+    const chat = await Chat.findById(chatId).populate('participants', 'username profilePic status phoneNo email bio');
     
     if (!chat) {
       return res.status(404).json({ error: 'Chat not found' });
@@ -389,7 +389,11 @@ const getOtherParticipant = async (req, res) => {
       _id: other._id,
       username: other.username,
       profilePic: other.profilePic || '',
-      status: other.status || 'offline'
+      status: other.status || 'offline',
+      email: other.email,
+      phoneNo: other.phoneNo,
+      bio: other.bio
+
     });
 
   } catch (error) {
