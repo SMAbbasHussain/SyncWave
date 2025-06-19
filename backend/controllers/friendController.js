@@ -1,6 +1,13 @@
 const FriendRequest = require('../models/FriendRequest');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const webpush = require('web-push');
+
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Send a friend request
 exports.sendFriendRequest = async (req, res) => {
@@ -61,6 +68,31 @@ exports.sendFriendRequest = async (req, res) => {
     });
 
     await friendRequest.save();
+     // --- 3. NOTIFICATION LOGIC ---
+    if (req.io) {
+      // A. Foreground (Toast) Notification
+      const toastPayload = {
+        type: 'friend_request_received',
+        title: 'New Friend Request',
+        body: `${sender.username} sent you a friend request.`,
+        sender: { _id: sender._id, username: sender.username, profilePic: sender.profilePic }
+      };
+      req.io.to(receiverId.toString()).emit('notification', toastPayload);
+
+      // B. Background (Push) Notification
+      if (receiver.pushSubscriptions && receiver.pushSubscriptions.length > 0) {
+        const pushPayload = JSON.stringify({
+          title: 'New Friend Request',
+          body: `${sender.username} sent you a friend request.`,
+          icon: sender.profilePic || '/logo192.png',
+          data: { url: '/homepage?nav=friends' } // Direct user to the friends tab
+        });
+        receiver.pushSubscriptions.forEach(sub => {
+          webpush.sendNotification(sub, pushPayload).catch(error => console.error('Push error:', error.statusCode));
+        });
+      }
+    }
+    // --- END NOTIFICATION LOGIC ---
     res.status(201).json(friendRequest);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -123,6 +155,37 @@ exports.acceptFriendRequest = async (req, res) => {
     
     // Commit the transaction
     await session.commitTransaction();
+
+     // --- 4. NOTIFICATION LOGIC (AFTER a successful commit) ---
+    if (req.io) {
+        const originalSenderId = friendRequest.sender;
+
+        // A. Foreground (Toast) Notification
+        const toastPayload = {
+            type: 'friend_request_accepted',
+            title: 'Friend Request Accepted',
+            body: `${receiver.username} accepted your friend request.`,
+            sender: { _id: receiver._id, username: receiver.username, profilePic: receiver.profilePic }
+        };
+        req.io.to(originalSenderId.toString()).emit('notification', toastPayload);
+
+        // B. Background (Push) Notification
+        // We need to fetch the original sender again to get their subscriptions
+        const originalSender = await User.findById(originalSenderId).select('pushSubscriptions');
+        if (originalSender && originalSender.pushSubscriptions && originalSender.pushSubscriptions.length > 0) {
+            const pushPayload = JSON.stringify({
+                title: 'Friend Request Accepted!',
+                body: `You are now friends with ${receiver.username}.`,
+                icon: receiver.profilePic || '/logo192.png',
+                data: { url: `/profile/${receiver._id}` } // Link to the new friend's profile
+            });
+            originalSender.pushSubscriptions.forEach(sub => {
+                webpush.sendNotification(sub, pushPayload).catch(error => console.error('Push error:', error.statusCode));
+            });
+        }
+    }
+    // --- END NOTIFICATION LOGIC ---
+
 
     res.json({ message: 'Friend request accepted successfully.' });
   } catch (error) {

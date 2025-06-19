@@ -55,7 +55,11 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: []
-  }]
+  }],
+  pushSubscriptions: {
+    type: [Object],// Store the raw subscription objects from the browser
+    default: []
+  }
 }, { timestamps: true });
 
 // Hash password before saving
