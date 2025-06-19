@@ -9,6 +9,8 @@ router.use(verifyToken);
 // User endpoints
 router.get("/me", userController.getCurrentUser); // New endpoint for current user
 router.get("/", userController.getProfile);
+router.get("/blocked", userController.getBlockedUsers);
+
 router.put("/profile", userController.updateProfile);
 
 // Block management

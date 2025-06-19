@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+// 1. Import ToastContainer and toast from react-toastify
+import { ToastContainer, toast } from 'react-toastify';
+// 2. Import the CSS for styling
+import 'react-toastify/dist/ReactToastify.css';
+
 import PrivateChats from "./PrivateChats";
 import AiChat from "./AiChat";
 import Groups from "./Groups";
@@ -39,11 +44,54 @@ function Dashboard({ activeNavItem = 'home' }) {
         newSocket.on('disconnect', () => {
             console.log('Socket disconnected.');
         });
+        
+        // 3. Listen for the 'notification' event from the server
+        newSocket.on('notification', (notification) => {
+            console.log('New Notification Received:', notification);
+
+            // Display a different toast style based on the notification type
+            switch (notification.type) {
+                case 'private':
+                    toast.info(`New message from ${notification.title}`, {
+                        onClick: () => handleNotificationClick(notification)
+                    });
+                    break;
+                case 'group':
+                    toast.success(`New message in ${notification.title}`, {
+                        onClick: () => handleNotificationClick(notification)
+                    });
+                    break;
+                case 'mention':
+                    toast.warn(`You were mentioned in ${notification.title}`, {
+                        // Mentions can have a longer auto-close time
+                        autoClose: 10000,
+                        onClick: () => handleNotificationClick(notification)
+                    });
+                    break;
+                default:
+                    toast(notification.body);
+            }
+        });
 
         return () => {
+            newSocket.off('notification'); // Clean up the listener
             newSocket.disconnect();
         };
     }, []);
+
+    const handleNotificationClick = (notification) => {
+        // This function is called when a user clicks a toast.
+        // It should navigate the user to the correct chat.
+        console.log("Notification clicked, navigating to:", notification);
+        if (notification.type === 'private') {
+            // navigate('/dashboard/private');
+            handleChatSelect('private', notification.chatId, notification.sender._id);
+        } else if (notification.type === 'group' || notification.type === 'mention') {
+            // You may need to switch the main view to 'groups' if it's not already active
+            // navigate('/dashboard/groups'); // Example if you have routing inside dashboard
+            handleChatSelect('group', notification.groupId);
+        }
+    };
 
     useEffect(() => {
         if (activeNavItem === 'home' && ['group', 'anonymousGroup'].includes(activeChat.type)) {
@@ -145,6 +193,19 @@ function Dashboard({ activeNavItem = 'home' }) {
 
     return (
         <div className="dashboard-container">
+            {/* 4. Render the ToastContainer component here. It's invisible until a toast is triggered. */}
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+            />
             <div className="dashboard-top-bar">
                 <div className="wave-container">
                     <div className="wave-bg">

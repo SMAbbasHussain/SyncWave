@@ -8,18 +8,16 @@ const sendGroupMessage = async (req, res) => {
     const { groupId, content, attachments = [], mentions = [] } = req.body;
     const senderId = req.user._id;
 
-    // Check if user is member
     const group = await Group.findById(groupId);
     if (!group || !group.isMember(senderId)) {
       return res.status(403).json({ error: 'Not a member of this group' });
     }
 
-    // Check permissions
     if (group.permissions.onlyAdminsCanPost && !group.isAdmin(senderId)) {
       return res.status(403).json({ error: 'Only admins can post in this group' });
     }
 
-    // Check if group is muted
+    // This check is already here and is correct. If the group is muted, we stop.
     if (group.permissions.isMuted && !group.isAdmin(senderId)) {
       return res.status(403).json({ error: 'Group is currently muted' });
     }
@@ -33,37 +31,63 @@ const sendGroupMessage = async (req, res) => {
     });
 
     await message.save();
-
-    // Update group's last activity
     group.lastActivity = new Date();
     await group.save();
 
     const populatedMessage = await GroupMessage.populate(message, [
-      {
-        path: 'senderId',
-        select: 'username profilePic'
-      },
-      {
-        path: 'mentions',
-        select: 'username profilePic'
-      }
+      { path: 'senderId', select: 'username profilePic' },
+      { path: 'mentions', select: 'username profilePic' }
     ]);
 
-    // Emit to all group members
     if (req.io) {
+      // 1. Emit 'newGroupMessage' to ALL members to update their chat UI.
       group.members.forEach(member => {
         req.io.to(member.userId.toString()).emit('newGroupMessage', populatedMessage);
       });
 
-      // Send special notification to mentioned users
+      // 2. **** NOTIFICATION LOGIC ****
+      // A. Send a special, high-priority notification to MENTIONED users.
       mentions.forEach(mentionedUserId => {
-        req.io.to(mentionedUserId.toString()).emit('mentioned', {
-          type: 'group',
-          groupId,
-          messageId: message._id,
-          sender: req.user
-        });
+        // Don't send a mention notification if a user mentions themselves.
+        if (mentionedUserId.toString() !== senderId.toString()) {
+            req.io.to(mentionedUserId.toString()).emit('notification', {
+              type: 'mention', // A specific type for mentions
+              title: `You were mentioned in ${group.name}`,
+              body: `${req.user.username}: ${content.trim().substring(0, 100)}...`,
+              sender: {
+                _id: req.user._id,
+                username: req.user.username,
+                profilePic: req.user.profilePic
+              },
+              groupId: group._id,
+              messageId: message._id
+            });
+        }
       });
+
+      // B. Send a standard notification to OTHER group members (not the sender, not the mentioned).
+      const notificationPayload = {
+        type: 'group',
+        title: group.name,
+        body: `${req.user.username}: ${content.trim().substring(0, 100)}...`,
+        sender: {
+          _id: req.user._id,
+          username: req.user.username,
+          profilePic: req.user.profilePic
+        },
+        groupId: group._id,
+        messageId: message._id
+      };
+      
+      group.members.forEach(member => {
+        const memberIdStr = member.userId.toString();
+        // Condition: Is this member NOT the sender AND NOT already mentioned?
+        if (memberIdStr !== senderId.toString() && !mentions.includes(memberIdStr)) {
+          // A more advanced implementation would check for per-user group mute settings here.
+          req.io.to(memberIdStr).emit('notification', notificationPayload);
+        }
+      });
+      // **** END NOTIFICATION LOGIC ****
     }
 
     res.status(201).json(populatedMessage);
