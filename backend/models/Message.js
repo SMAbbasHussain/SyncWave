@@ -34,7 +34,7 @@ const messageSchema = new mongoose.Schema({
   readAt: {
     type: Date
   },
-  isDeleted: {
+    isDeleted: {
     type: Boolean,
     default: false
   },
