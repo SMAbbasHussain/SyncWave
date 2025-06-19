@@ -14,7 +14,6 @@ const sendMessage = async (req, res) => {
     }
 
     // --- VALIDATION CHECKS ---
-    // Fetch both users to check their status and relationship
     const sender = await User.findById(senderId);
     const receiver = await User.findById(receiverId);
 
@@ -22,25 +21,19 @@ const sendMessage = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // 1. Block Check: Check if the sender has blocked the receiver
     if (sender.blockedUsers.includes(receiverId)) {
       return res.status(403).json({ error: 'Cannot send message. You have blocked this user.' });
     }
 
-    // 2. Block Check: Check if the receiver has blocked the sender
     if (receiver.blockedUsers.includes(senderId)) {
-      // Use a generic message for privacy, don't reveal the block
       return res.status(403).json({ error: 'This user is not accepting messages.' });
     }
-
-    // 3. Friendship Check: Ensure the sender has the receiver in their friends list
-    // Since friendship is mutual, we only need to check one way.
+    
     if (!sender.friends.includes(receiverId)) {
         return res.status(403).json({ error: 'You must be friends with this user to send them a message.' });
     }
     // --- END VALIDATION CHECKS ---
 
-    // Find or create chat between users
     let chat = await Chat.findOne({
       participants: { $all: [senderId, receiverId], $size: 2 }
     });
@@ -68,11 +61,35 @@ const sendMessage = async (req, res) => {
       select: 'username profilePic'
     });
     
-    // Emit the message to all participants in the chat
+    // Emit the 'newMessage' event to update chat windows for both users in real-time
     if (req.io) {
       chat.participants.forEach(participantId => {
         req.io.to(participantId.toString()).emit('newMessage', populatedMessage);
       });
+
+      // **** NOTIFICATION LOGIC ****
+      // Only send a notification if the chat is not muted by the participants.
+      // Note: This assumes the 'muteNotifications' setting applies to the whole chat.
+      // A more advanced implementation might have per-user mute settings.
+      if (!chat.settings.muteNotifications) {
+        // Prepare a notification payload for the receiver.
+        const notificationPayload = {
+          type: 'private',
+          title: sender.username,
+          body: content.trim().substring(0, 100) + (content.trim().length > 100 ? '...' : ''),
+          sender: {
+            _id: sender._id,
+            username: sender.username,
+            profilePic: sender.profilePic
+          },
+          chatId: chat._id,
+          messageId: message._id
+        };
+
+        // Emit the 'notification' event ONLY to the receiver.
+        req.io.to(receiverId.toString()).emit('notification', notificationPayload);
+      }
+      // **** END NOTIFICATION LOGIC ****
     }
 
     res.status(201).json(populatedMessage);
