@@ -1,6 +1,13 @@
 const Group = require('../models/Group');
 const GroupMessage = require('../models/GroupMessage');
 const User = require('../models/User');
+const webpush = require('web-push');
+
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Send group message
 const sendGroupMessage = async (req, res) => {
@@ -88,6 +95,54 @@ const sendGroupMessage = async (req, res) => {
         }
       });
       // **** END NOTIFICATION LOGIC ****
+
+      // **** 2. BACKGROUND PUSH NOTIFICATION LOGIC ****
+
+      // A. Get all member IDs from the group, excluding the sender
+      const recipientIds = group.members
+        .map(member => member.userId.toString())
+        .filter(id => id !== senderId.toString());
+
+      // B. Find all user documents for these recipients in a single query
+      const recipients = await User.find({
+        '_id': { $in: recipientIds }
+      }).select('pushSubscriptions');
+
+      // C. Prepare the notification payloads
+      const mentionPayload = JSON.stringify({
+        title: `You were mentioned in ${group.name}`,
+        body: `${req.user.username}: ${content.trim()}`,
+        icon: req.user.profilePic || '/logo192.png',
+        data: { url: `/homepage?chatId=${group._id}&type=group` }
+      });
+
+      const groupPayload = JSON.stringify({
+        title: group.name,
+        body: `${req.user.username}: ${content.trim()}`,
+        icon: group.groupIcon || '/logo192.png', // Use group icon if available
+        data: { url: `/homepage?chatId=${group._id}&type=group` }
+      });
+
+      // D. Loop through the recipients and send notifications
+      recipients.forEach(recipient => {
+        // Skip if this recipient has no subscriptions
+        if (!recipient.pushSubscriptions || recipient.pushSubscriptions.length === 0) {
+          return;
+        }
+
+        // Determine which payload to send
+        const isMentioned = mentions.includes(recipient._id.toString());
+        const payloadToSend = isMentioned ? mentionPayload : groupPayload;
+
+        // Send the notification to all of the user's registered devices
+        recipient.pushSubscriptions.forEach(sub => {
+          webpush.sendNotification(sub, payloadToSend).catch(error => {
+            console.error(`Error sending push to ${recipient._id}:`, error.statusCode);
+            // In a production app, you would handle expired subscriptions (410) here
+            // by removing them from the user's document.
+          });
+        });
+      });
     }
 
     res.status(201).json(populatedMessage);
