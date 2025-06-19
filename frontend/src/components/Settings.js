@@ -4,6 +4,7 @@ import '../styles/Settings.css';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import ConfirmationModal from './ConfirmationModal';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Settings = () => {
     const [activeSection, setActiveSection] = useState('profile');
@@ -29,10 +30,7 @@ const Settings = () => {
     const [privateChatNotificationsOn, setPrivateChatNotificationsOn] = useState(true);
     const [groupNotificationsOn, setGroupNotificationsOn] = useState(true);
 
-    const [blockedUsers, setBlockedUsers] = useState([
-        { id: 1, name: 'Blocked User 1', profilePic: '/PFP2.png' },
-        { id: 2, name: 'Blocked User 2', profilePic: '/PFP.png' },
-    ]);
+    const [blockedUsers, setBlockedUsers] = useState([]);
     const [unblockConfirmUser, setUnblockConfirmUser] = useState(null);
 
     const navigate = useNavigate();
@@ -43,6 +41,32 @@ const Settings = () => {
         { id: 'notifs', label: 'Notifications', icon: FaBell },
         { id: 'account', label: 'Account Settings', icon: FaCog }
     ];
+
+    useEffect(() => {
+    const fetchBlockedUsers = async () => {
+      try {
+                const token = localStorage.getItem('token');
+
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/blocked`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const formattedData = response.data.map(user => ({
+          id: user._id,
+          name: user.username,
+          profilePic: user.profilePic
+        }));
+
+        setBlockedUsers(formattedData);
+      } catch (error) {
+        console.error('Error fetching blocked users:', error);
+      }
+    };
+
+    fetchBlockedUsers();
+  }, []);
 
     const handleMenuClick = (sectionId) => {
         setActiveSection(sectionId);
@@ -148,10 +172,31 @@ const Settings = () => {
         setShowProfileModal(false);
     };
 
-    const handleUnblock = (userId) => {
+    const handleUnblock = async (userId) => {
+
+        try {
+                const token = localStorage.getItem('token');
+
+        const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/users/unblock/${userId}`,
+      {}, // no request body
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    console.log('✅ Unblocked:', response.data);
+
+        
+
         setBlockedUsers(prev => prev.filter(user => user.id !== userId));
         setUnblockConfirmUser(null);
-    };
+    }catch(error){
+        alert(error.message);
+    }
+}
 
     const handleAskUnblock = (user) => {
         setUnblockConfirmUser(user);
@@ -170,11 +215,11 @@ const Settings = () => {
                     </div>
                     <h3 className="settings-profile-name">{userData.name}</h3>
                 </div>
-
+{/*
                 <button className="settings-edit-profile-btn" onClick={handleEditProfile}>
                     <FaEdit className="settings-edit-icon" />
                     <span>Edit Profile</span>
-                </button>
+                </button> */}
             </div>
 
             <div className="settings-profile-display-section">
@@ -196,7 +241,7 @@ const Settings = () => {
                     <div className="settings-display-group">
                         <label>Phone Number</label>
                         <div className="settings-display-value">
-                            {userData.phone || 'No phone number available'}
+                            {userData.phoneNo || 'No phone number available'}
                         </div>
                     </div>
                 </div>

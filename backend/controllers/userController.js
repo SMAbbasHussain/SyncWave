@@ -45,6 +45,29 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+exports.getBlockedUsers = async (req, res) => {
+  try {
+    const userId = req.user.userId; // assuming you're using middleware to set req.user
+
+    // Find current user and populate blocked users with only username and profilePic
+    const user = await User.findById(userId)
+      .populate({
+        path: 'blockedUsers',
+        select: 'username profilePic' // Only fetch username and profilePic
+      });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user.blockedUsers);
+
+  } catch (error) {
+    console.error('Error fetching blocked users:', error);
+    res.status(500).json({ message: 'Failed to fetch blocked users' });
+  }
+};
+
 // Update user profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -184,11 +207,11 @@ exports.blockUser = async (req, res) => {
 exports.unblockUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const currentUser = req.user._id;
+    const currentUser = req.user.userId;
 
     const user = await User.findByIdAndUpdate(
       currentUser,
-      { $pull: { blockedUsers: userId } },
+      { $pull: { blockedUsers: new mongoose.Types.ObjectId(userId) } },
       { new: true }
     );
 
