@@ -14,8 +14,10 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
     const [showLeaveGroupConfirm, setShowLeaveGroupConfirm] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [showGroupInfoModal, setShowGroupInfoModal] = useState(false);
+    const [reload, setReload] = useState(false);
 
-    const currentUserId = localStorage.getItem('userId'); // Retrieve current user ID
+
+    const currentUserId = JSON.parse(localStorage.getItem('user'))._id; // Retrieve current user ID
 
     useEffect(() => {
         const fetchGroupData = async () => {
@@ -37,7 +39,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
         if (groupId) {
             fetchGroupData();
         }
-    }, [groupId]);
+    }, [groupId,reload]);
 
     const handleViewGroupInfo = () => {
         setShowGroupInfoModal(true);
@@ -161,6 +163,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
                     isMuted={isMuted}
                     onMuteToggle={handleMuteNotifications}
                     currentUserId={currentUserId}
+                    setReload={setReload}
                 />
             )}
         </div>
