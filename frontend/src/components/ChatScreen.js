@@ -349,6 +349,14 @@ function ChatScreen({ activeChat, setActiveChat }) {
                 addAnonymousMessage(content);
             }
         });
+        socketRef.current.on('messageDeleted', ({ messageId, chatId }) => {
+            const currentChat = activeChatRef.current;
+            
+            // Make sure the deletion event is for the currently active chat
+            if (currentChat && currentChat.chatId === chatId) {
+                removeMessage(messageId);
+            }
+        });
 
 
 
@@ -357,7 +365,7 @@ function ChatScreen({ activeChat, setActiveChat }) {
                 socketRef.current.disconnect();
             }
         };
-    }, [getAuthToken, addMessage, currentUserId]);
+    }, [getAuthToken, addMessage, currentUserId, removeMessage]);
 
     useEffect(() => {
         fetchConversation(activeChat);
