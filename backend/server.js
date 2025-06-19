@@ -15,6 +15,7 @@ const AnonymousGroup = require('./models/AnonymousGroup');
 const Chat = require('./models/Chat');
 
 
+
 const aiRoutes = require('./routes/aiRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -23,6 +24,7 @@ const chatRoutes = require('./routes/chatRoutes');
 const friendRoutes = require('./routes/friendRoutes');
 const groupMessageRoutes = require('./routes/groupMessageRoutes');
 const anonymousGroupRoutes = require('./routes/anonymousGroupRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const { initializeSocket } = require('./services/socket');
 require('./services/passport');
 
@@ -129,6 +131,7 @@ app.use('/api/group-messages', groupMessageRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/anonymous-groups', anonymousGroupRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -2,6 +2,13 @@ const Message = require('../models/Message');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 const mongoose = require("mongoose");
+const webpush = require('web-push');
+
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Send a message (with block and friendship checks)
 const sendMessage = async (req, res) => {
@@ -28,9 +35,9 @@ const sendMessage = async (req, res) => {
     if (receiver.blockedUsers.includes(senderId)) {
       return res.status(403).json({ error: 'This user is not accepting messages.' });
     }
-    
+
     if (!sender.friends.includes(receiverId)) {
-        return res.status(403).json({ error: 'You must be friends with this user to send them a message.' });
+      return res.status(403).json({ error: 'You must be friends with this user to send them a message.' });
     }
     // --- END VALIDATION CHECKS ---
 
@@ -46,7 +53,7 @@ const sendMessage = async (req, res) => {
     }
     chat.lastActivity = new Date();
     await chat.save();
-    
+
     const message = new Message({
       chatId: chat._id,
       senderId,
@@ -60,7 +67,7 @@ const sendMessage = async (req, res) => {
       path: 'senderId',
       select: 'username profilePic'
     });
-    
+
     // Emit the 'newMessage' event to update chat windows for both users in real-time
     if (req.io) {
       chat.participants.forEach(participantId => {
@@ -90,6 +97,51 @@ const sendMessage = async (req, res) => {
         req.io.to(receiverId.toString()).emit('notification', notificationPayload);
       }
       // **** END NOTIFICATION LOGIC ****
+      // **** DEEP DEBUGGING FOR PUSH NOTIFICATIONS ****
+      console.log('\n--- [PUSH] Starting Push Notification Logic ---');
+      
+      if (chat.settings.muteNotifications) {
+        console.log('[PUSH DEBUG] Aborted: Chat is muted.');
+      } else {
+        console.log(`[PUSH DEBUG] 1. Finding receiver (ID: ${receiverId}) with their subscriptions.`);
+        
+        const receiverWithSubs = await User.findById(receiverId).select('pushSubscriptions');
+        
+        if (!receiverWithSubs) {
+            console.error('[PUSH DEBUG] FAILED: Receiver document not found in database.');
+        } else if (!receiverWithSubs.pushSubscriptions || receiverWithSubs.pushSubscriptions.length === 0) {
+            console.warn('[PUSH DEBUG] FAILED: Receiver was found, but they have NO push subscriptions saved in the database.');
+        } else {
+            console.log(`[PUSH DEBUG] 2. Success! Found ${receiverWithSubs.pushSubscriptions.length} subscriptions for the receiver.`);
+            
+            const payload = JSON.stringify({
+                title: sender.username,
+                body: content.trim(),
+                icon: sender.profilePic || '/logo192.png', // Default icon in your public folder
+                data: {
+                    url: `/homepage?chatId=${chat._id}&type=private`
+                }
+            });
+
+            console.log('[PUSH DEBUG] 3. Payload to be sent:', payload);
+            
+            receiverWithSubs.pushSubscriptions.forEach(sub => {
+                console.log(`[PUSH DEBUG] 4. Sending notification to endpoint: ${sub.endpoint.substring(0, 40)}...`);
+                webpush.sendNotification(sub, payload).catch(error => {
+                    console.error('[PUSH DEBUG] 5. FAILED! The web-push library returned an error.');
+                    console.error('   > Status Code:', error.statusCode);
+                    console.error('   > Error Body:', error.body);
+                    if (error.statusCode === 403) {
+                         console.error("   > This is a VAPID key mismatch! Check your .env keys.");
+                    }
+                    if (error.statusCode === 410 || error.statusCode === 404) {
+                        console.warn("   > This subscription is expired or invalid and should be deleted from the DB.");
+                    }
+                });
+            });
+        }
+      }
+      console.log('--- [PUSH] Finished Push Notification Logic ---\n');
     }
 
     res.status(201).json(populatedMessage);
@@ -111,9 +163,9 @@ const getConversation = async (req, res) => {
 
     // Find the chat between these users
     const chat = await Chat.findOne({
-      participants: { 
+      participants: {
         $all: [currentUserId, userId],
-        $size: 2 
+        $size: 2
       }
     });
 
@@ -147,9 +199,9 @@ const getAllConversations = async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
 
     // Use the static method from Chat schema
-    const chats = await Chat.findUserChats(currentUserId, { 
-      page: parseInt(page), 
-      limit: parseInt(limit) 
+    const chats = await Chat.findUserChats(currentUserId, {
+      page: parseInt(page),
+      limit: parseInt(limit)
     }).populate('participants', 'username profilePic');
 
     const conversations = await Promise.all(
@@ -231,9 +283,9 @@ const markAsRead = async (req, res) => {
         isRead: false,
         isDeleted: false
       },
-      { 
+      {
         isRead: true,
-        readAt: new Date() 
+        readAt: new Date()
       }
     );
 
@@ -246,7 +298,7 @@ const markAsRead = async (req, res) => {
       });
     }
 
-    res.json({ 
+    res.json({
       message: 'Messages marked as read',
       count: result.modifiedCount
     });
@@ -280,10 +332,10 @@ const deleteMessage = async (req, res) => {
     // 4. Emit a real-time event to all clients in the chat room
     // This tells both the sender's and receiver's UI to remove the message.
     if (req.io && message.chatId) {
-       req.io.to(message.chatId.toString()).emit('messageDeleted', { 
-         messageId: message._id, 
-         chatId: message.chatId 
-       });
+      req.io.to(message.chatId.toString()).emit('messageDeleted', {
+        messageId: message._id,
+        chatId: message.chatId
+      });
     }
 
     res.status(200).json({ message: 'Message deleted successfully for all users.' });
@@ -296,7 +348,7 @@ const deleteMessage = async (req, res) => {
 
 // Initialize chat between two users
 const initializeChat = async (req, res) => {
-  
+
   try {
     const { participantId } = req.body;
     const currentUserId = req.user.userId;
@@ -313,9 +365,9 @@ const initializeChat = async (req, res) => {
 
     // Check if chat already exists between these users
     const existingChat = await Chat.findOne({
-      participants: { 
+      participants: {
         $all: [currentUserId, participantId],
-        $size: 2 
+        $size: 2
       }
     }).populate('participants', 'username profilePic');
 
@@ -332,7 +384,7 @@ const initializeChat = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    
+
     // Create new chat
     const newChat = new Chat({
       participants: [
@@ -379,7 +431,7 @@ const getOtherParticipant = async (req, res) => {
     }
 
     const chat = await Chat.findById(chatId).populate('participants', 'username profilePic status phoneNo email bio');
-    
+
     if (!chat) {
       return res.status(404).json({ error: 'Chat not found' });
     }
@@ -441,7 +493,7 @@ const getChatById = async (req, res) => {
 
     // Get other participant using schema method
     const otherParticipant = chat.getOtherParticipant(userId);
-    const otherParticipantData = chat.participants.find(p => 
+    const otherParticipantData = chat.participants.find(p =>
       p._id.toString() === otherParticipant.toString()
     );
 
@@ -576,9 +628,9 @@ const updateChatActivity = async (req, res) => {
     chat.lastActivity = new Date();
     await chat.save();
 
-    res.json({ 
-      message: 'Chat activity updated', 
-      lastActivity: chat.lastActivity 
+    res.json({
+      message: 'Chat activity updated',
+      lastActivity: chat.lastActivity
     });
   } catch (error) {
     console.error('Update chat activity error:', error);

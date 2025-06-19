@@ -17,6 +17,19 @@ import Settings from "./Settings";
 import "../styles/Dashboard.css";
 import axios from "axios";
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 function Dashboard({ activeNavItem = 'home' }) {
     const [socket, setSocket] = useState(null);
     const [activeChat, setActiveChat] = useState({ type: 'none' });
@@ -44,6 +57,8 @@ function Dashboard({ activeNavItem = 'home' }) {
         newSocket.on('disconnect', () => {
             console.log('Socket disconnected.');
         });
+
+        
         
         // 3. Listen for the 'notification' event from the server
         newSocket.on('notification', (notification) => {
@@ -78,6 +93,54 @@ function Dashboard({ activeNavItem = 'home' }) {
             newSocket.disconnect();
         };
     }, []);
+
+    // **** NEW: useEffect for Push Notification Subscription ****
+    useEffect(() => {
+        const subscribeToPushNotifications = async () => {
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    
+                    // Check if we already have a subscription
+                    let subscription = await registration.pushManager.getSubscription();
+                    
+                    if (subscription === null) {
+                        // We don't have a subscription, so create one
+                        console.log('No subscription found, subscribing...');
+                        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/notifications/vapid-public-key`);
+                        const vapidPublicKey = response.data.publicKey;
+                        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+                        subscription = await registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: convertedVapidKey
+                        });
+
+                        // Send the new subscription to the backend
+                        await axios.post(`${process.env.REACT_APP_API_URL}/api/notifications/subscribe`, subscription, {
+                            headers: {
+                                Authorization: `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+                        console.log('User subscribed successfully.');
+                    } else {
+                        console.log('User is already subscribed.');
+                    }
+                } catch (error) {
+                    console.error('Failed to subscribe the user: ', error);
+                }
+            }
+        };
+
+        // Ask for permission and subscribe
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                subscribeToPushNotifications();
+            } else {
+                console.warn('Notification permission denied.');
+            }
+        });
+    }, []); // Run this once when the dashboard loads
 
     const handleNotificationClick = (notification) => {
         // This function is called when a user clicks a toast.
