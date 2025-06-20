@@ -139,7 +139,7 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
                 <div className="user-status-info">
                     <span className="chat-partner-name">{user.username}</span>
                     <div className="user-status-row">
-                        <div className={`status-indicator ${user.status}`} />
+                        
                         <span className="user-status-text">{user.status}</span>
                     </div>
                 </div>
