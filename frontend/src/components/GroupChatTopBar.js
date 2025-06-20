@@ -39,7 +39,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
         if (groupId) {
             fetchGroupData();
         }
-    }, [groupId,reload]);
+    }, [groupId, reload]);
 
     const handleViewGroupInfo = () => {
         setShowGroupInfoModal(true);
@@ -152,6 +152,7 @@ function GroupChatTopBar({ groupId, onLeaveSuccess }) {
                 message={`Are you sure you want to leave "${group.name}"? You will no longer receive messages.`}
                 onConfirm={handleConfirmLeaveGroup}
                 onClose={() => setShowLeaveGroupConfirm(false)}
+                onCancel={() => setShowLeaveGroupConfirm(false)}
                 confirmText="Leave Group"
                 cancelText="Cancel"
             />
