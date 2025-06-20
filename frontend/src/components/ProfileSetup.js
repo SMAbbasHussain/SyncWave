@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify'; // 1. Import toast
+import 'react-toastify/dist/ReactToastify.css';
 import "../styles/ProfileSetup.css";
 import Background from "./Background";
 
@@ -9,7 +11,20 @@ function ProfileSetup() {
   const [isFormFilled, setIsFormFilled] = useState(false);
   const navigate = useNavigate();
 
-  // Monitor form state changes
+  // 2. ADD AUTHENTICATION GUARD
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // If no token, redirect to login with a message
+      navigate('/login', {
+        replace: true,
+        state: { message: "You need an account to set up a profile." }
+      });
+    }
+  }, [navigate]);
+
+
+  // Monitor form state changes to enable/disable buttons
   useEffect(() => {
     setIsFormFilled(!!(profilePic || bio.trim()));
   }, [profilePic, bio]);
@@ -17,6 +32,11 @@ function ProfileSetup() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Basic validation for file size (e.g., 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image file is too large! Please choose a file smaller than 5MB.");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePic(reader.result);
@@ -35,8 +55,10 @@ function ProfileSetup() {
     const token = localStorage.getItem("token");
     const storedUser = JSON.parse(localStorage.getItem('user'));
 
+    // This check is redundant due to the useEffect guard, but good for safety
     if (!token) {
-      alert("You must be logged in to complete your profile.");
+      toast.error("Authentication session expired. Please log in again.");
+      navigate('/login');
       return;
     }
 
@@ -53,6 +75,7 @@ function ProfileSetup() {
       const data = await response.json();
 
       if (response.ok) {
+        toast.success("Profile updated successfully!");
         const updatedUser = {
           ...storedUser,
           username: data.username || storedUser.username,
@@ -64,11 +87,13 @@ function ProfileSetup() {
         window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
         navigate("/home", { replace: true });
       } else {
-        alert(data.error || "Failed to update profile.");
+        // 3. UPGRADE ALERT TO TOAST
+        toast.error(data.error || "Failed to update profile.");
       }
     } catch (error) {
       console.error("Profile update error:", error);
-      alert("An error occurred while updating your profile.");
+      // 3. UPGRADE ALERT TO TOAST
+      toast.error("An error occurred while updating your profile.");
     }
   };
 
@@ -80,6 +105,10 @@ function ProfileSetup() {
   return (
     <div className="profile-setup-wrapper">
       <Background />
+      {/* 
+        A ToastContainer is not strictly needed here if App.js or another
+        parent already has one, but it doesn't hurt to include it for standalone use.
+      */}
       <div className="profile-setup-container container">
         <h2 className="profile-setup-head-text">Complete Your Profile</h2>
 
