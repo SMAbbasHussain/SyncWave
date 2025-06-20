@@ -9,8 +9,6 @@ import axios from 'axios';
 const Settings = () => {
     const [activeSection, setActiveSection] = useState('profile');
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-    const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
     const [privacySettings, setPrivacySettings] = useState({
         lastSeen: 'Everyone',
         profilePhoto: 'Everyone',
@@ -25,48 +23,43 @@ const Settings = () => {
         phone: '+1 234 567 8900'
     });
 
-    // Notification settings states
-    const [allNotificationsOn, setAllNotificationsOn] = useState(true);
-    const [privateChatNotificationsOn, setPrivateChatNotificationsOn] = useState(true);
-    const [groupNotificationsOn, setGroupNotificationsOn] = useState(true);
-
     const [blockedUsers, setBlockedUsers] = useState([]);
     const [unblockConfirmUser, setUnblockConfirmUser] = useState(null);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const navigate = useNavigate();
 
     const menuItems = [
         { id: 'profile', label: 'Profile', icon: FaUser },
         { id: 'blocked', label: 'Blocked Accounts', icon: FaComments },
-        { id: 'notifs', label: 'Notifications', icon: FaBell },
         { id: 'account', label: 'Account Settings', icon: FaCog }
     ];
 
     useEffect(() => {
-    const fetchBlockedUsers = async () => {
-      try {
+        const fetchBlockedUsers = async () => {
+            try {
                 const token = localStorage.getItem('token');
 
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/blocked`, {
-            headers: {
-                Authorization: `Bearer ${token}`
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/blocked`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const formattedData = response.data.map(user => ({
+                    id: user._id,
+                    name: user.username,
+                    profilePic: user.profilePic
+                }));
+
+                setBlockedUsers(formattedData);
+            } catch (error) {
+                console.error('Error fetching blocked users:', error);
             }
-        });
+        };
 
-        const formattedData = response.data.map(user => ({
-          id: user._id,
-          name: user.username,
-          profilePic: user.profilePic
-        }));
-
-        setBlockedUsers(formattedData);
-      } catch (error) {
-        console.error('Error fetching blocked users:', error);
-      }
-    };
-
-    fetchBlockedUsers();
-  }, []);
+        fetchBlockedUsers();
+    }, []);
 
     const handleMenuClick = (sectionId) => {
         setActiveSection(sectionId);
@@ -81,7 +74,6 @@ const Settings = () => {
     };
 
     const confirmLogout = () => {
-        console.log('Logging out...');
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         setShowLogoutConfirm(false);
@@ -90,24 +82,6 @@ const Settings = () => {
 
     const cancelLogout = () => {
         setShowLogoutConfirm(false);
-    };
-
-    const handleDeleteAccount = () => {
-        setShowDeleteAccountConfirm(true);
-    };
-
-    const confirmDeleteAccount = () => {
-        console.log('Deleting account...');
-        // Here you would typically make an API call to delete the user's account
-        // After successful deletion, clear local storage and redirect to login/signup
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setShowDeleteAccountConfirm(false);
-        navigate('/signup'); // Or navigate to a confirmation page
-    };
-
-    const cancelDeleteAccount = () => {
-        setShowDeleteAccountConfirm(false);
     };
 
     const handlePrivacyChange = (setting, value) => {
@@ -139,26 +113,6 @@ const Settings = () => {
         fetchUserData();
     }, []);
 
-    // Effect to control dependent toggles based on allNotificationsOn
-    useEffect(() => {
-        if (!allNotificationsOn) {
-            setPrivateChatNotificationsOn(false);
-            setGroupNotificationsOn(false);
-        }
-    }, [allNotificationsOn]);
-
-    const handleAllNotificationsToggle = () => {
-        setAllNotificationsOn(prev => !prev);
-    };
-
-    const handlePrivateChatNotificationsToggle = () => {
-        setPrivateChatNotificationsOn(prev => !prev);
-    };
-
-    const handleGroupNotificationsToggle = () => {
-        setGroupNotificationsOn(prev => !prev);
-    };
-
     const handleProfileSave = (updatedData) => {
         setUserData(prev => ({
             ...prev,
@@ -173,30 +127,27 @@ const Settings = () => {
     };
 
     const handleUnblock = async (userId) => {
-
         try {
-                const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
 
-        const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/users/unblock/${userId}`,
-      {}, // no request body
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/users/unblock/${userId}`,
+                {}, // no request body
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            console.log('✅ Unblocked:', response.data);
+
+            setBlockedUsers(prev => prev.filter(user => user.id !== userId));
+            setUnblockConfirmUser(null);
+        } catch (error) {
+            alert(error.message);
         }
-      }
-    );
-
-    console.log('✅ Unblocked:', response.data);
-
-        
-
-        setBlockedUsers(prev => prev.filter(user => user.id !== userId));
-        setUnblockConfirmUser(null);
-    }catch(error){
-        alert(error.message);
     }
-}
 
     const handleAskUnblock = (user) => {
         setUnblockConfirmUser(user);
@@ -215,7 +166,7 @@ const Settings = () => {
                     </div>
                     <h3 className="settings-profile-name">{userData.name}</h3>
                 </div>
-{/*
+                {/*
                 <button className="settings-edit-profile-btn" onClick={handleEditProfile}>
                     <FaEdit className="settings-edit-icon" />
                     <span>Edit Profile</span>
@@ -298,59 +249,6 @@ const Settings = () => {
         </div>
     );
 
-    const renderNotificationsContent = () => (
-        <div className="settings-notifications-content">
-            <h3 className="settings-notifications-heading">Notifications Settings</h3>
-
-            <div className="settings-notification-group">
-                <div className="settings-notification-info">
-                    <label className="settings-notification-label">Notifications</label>
-                    <p className="settings-notification-text">You can mute all types of notifications at once.</p>
-                </div>
-                <label className="settings-toggle-switch">
-                    <input
-                        type="checkbox"
-                        checked={allNotificationsOn}
-                        onChange={handleAllNotificationsToggle}
-                    />
-                    <span className="settings-slider settings-round"></span>
-                </label>
-            </div>
-
-            <div className="settings-notification-group">
-                <div className="settings-notification-info">
-                    <label className="settings-notification-label">Private Chats</label>
-                    <p className="settings-notification-text">You can mute the notifications for all private chats at once.</p>
-                </div>
-                <label className="settings-toggle-switch">
-                    <input
-                        type="checkbox"
-                        checked={privateChatNotificationsOn}
-                        onChange={handlePrivateChatNotificationsToggle}
-                        disabled={!allNotificationsOn} // Disabled if allNotificationsOn is false
-                    />
-                    <span className="settings-slider settings-round"></span>
-                </label>
-            </div>
-
-            <div className="settings-notification-group">
-                <div className="settings-notification-info">
-                    <label className="settings-notification-label">Groups</label>
-                    <p className="settings-notification-text">You can mute notifications for all groups at once.</p>
-                </div>
-                <label className="settings-toggle-switch">
-                    <input
-                        type="checkbox"
-                        checked={groupNotificationsOn}
-                        onChange={handleGroupNotificationsToggle}
-                        disabled={!allNotificationsOn} // Disabled if allNotificationsOn is false
-                    />
-                    <span className="settings-slider settings-round"></span>
-                </label>
-            </div>
-        </div>
-    );
-
     const renderAccountContent = () => (
         <div className="settings-account-content">
             <h3 className="settings-account-heading">Account Settings</h3>
@@ -365,14 +263,7 @@ const Settings = () => {
                         <p className="settings-privacy-text">Choose who can see when you were last online and if you are currently online.</p>
                     </div>
                     <div className="settings-privacy-right">
-                        <select
-                            value={privacySettings.lastSeen}
-                            onChange={(e) => handlePrivacyChange('lastSeen', e.target.value)}
-                            className="settings-privacy-dropdown"
-                        >
-                            <option value="Everyone">Everyone</option>
-                            <option value="Only Friends">Only Friends</option>
-                        </select>
+                        <span className="settings-privacy-static">Everyone</span>
                     </div>
                 </div>
 
@@ -382,14 +273,7 @@ const Settings = () => {
                         <p className="settings-privacy-text">Choose who can see your profile photo.</p>
                     </div>
                     <div className="settings-privacy-right">
-                        <select
-                            value={privacySettings.profilePhoto}
-                            onChange={(e) => handlePrivacyChange('profilePhoto', e.target.value)}
-                            className="settings-privacy-dropdown"
-                        >
-                            <option value="Everyone">Everyone</option>
-                            <option value="Only Friends">Only Friends</option>
-                        </select>
+                        <span className="settings-privacy-static">Everyone</span>
                     </div>
                 </div>
 
@@ -399,14 +283,7 @@ const Settings = () => {
                         <p className="settings-privacy-text">Choose who can see your 'About' information (e.g., your bio).</p>
                     </div>
                     <div className="settings-privacy-right">
-                        <select
-                            value={privacySettings.about}
-                            onChange={(e) => handlePrivacyChange('about', e.target.value)}
-                            className="settings-privacy-dropdown"
-                        >
-                            <option value="Everyone">Everyone</option>
-                            <option value="Only Friends">Only Friends</option>
-                        </select>
+                        <span className="settings-privacy-static">Everyone</span>
                     </div>
                 </div>
 
@@ -416,14 +293,7 @@ const Settings = () => {
                         <p className="settings-privacy-text">Choose who can add you to new groups.</p>
                     </div>
                     <div className="settings-privacy-right">
-                        <select
-                            value={privacySettings.addToGroups}
-                            onChange={(e) => handlePrivacyChange('addToGroups', e.target.value)}
-                            className="settings-privacy-dropdown"
-                        >
-                            <option value="Everyone">Everyone</option>
-                            <option value="Only Friends">Only Friends</option>
-                        </select>
+                        <span className="settings-privacy-static">Everyone</span>
                     </div>
                 </div>
             </div>
@@ -440,16 +310,6 @@ const Settings = () => {
             </div>
 
             <div className="settings-profile-separator"></div>
-
-            <div className="settings-delete-account-section-container">
-                <div className="settings-delete-account-info">
-                    <h4>Delete Account</h4>
-                    <p>Deleting your account will permanently remove your account data and chat history. This action is irreversible.</p>
-                </div>
-                <button className="settings-logout-button" onClick={handleDeleteAccount}>
-                    <span>Delete Account</span>
-                </button>
-            </div>
         </div>
     );
 
@@ -459,8 +319,6 @@ const Settings = () => {
                 return renderProfileContent();
             case 'blocked':
                 return renderBlockedAccountsContent();
-            case 'notifs':
-                return renderNotificationsContent();
             case 'account':
                 return renderAccountContent();
             default:
@@ -520,15 +378,6 @@ const Settings = () => {
                     message="Are you sure you want to log out? Your chat history will be cleared."
                     onConfirm={confirmLogout}
                     onCancel={cancelLogout}
-                />
-            )}
-
-            {showDeleteAccountConfirm && (
-                <ConfirmationModal
-                    isOpen={showDeleteAccountConfirm}
-                    message="are you sure you want to delete your account? This action is permanent."
-                    onConfirm={confirmDeleteAccount}
-                    onCancel={cancelDeleteAccount}
                 />
             )}
         </div>
