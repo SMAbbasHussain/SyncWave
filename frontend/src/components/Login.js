@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
+// 1. IMPORT TOAST AND ITS CSS
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import "../styles/login.css";
 import Background from "./Background";
 
 function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -20,19 +20,31 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Only handle login errors from redirect
+  // Handle login errors from OAuth redirect (this is fine)
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     if (query.get('error')) {
       setError(query.get('error'));
     }
-  }, [location]);
+  }, [location.search]);
+
+
+  // **** 2. ADD THIS NEW USEEFFECT TO HANDLE REDIRECT MESSAGES ****
+  useEffect(() => {
+    // Check if the location state object exists and has our specific message property
+    if (location.state?.message) {
+      // Display the message from the state as an error toast
+      toast.error(location.state.message);
+      
+      // Clear the state from the history so the message doesn't reappear
+      // if the user navigates back and forth.
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]); // Dependencies ensure this runs only when location or navigate changes
+
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFocus = (fieldName) => {
@@ -78,20 +90,15 @@ function Login() {
 
     try {
       const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/auth/login`,
-      {
-        email: formData.email,  // Send fields individually
-        password: formData.password,
-        recaptchaToken: token   // Send token at root level
-      },
-      {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        {
+          email: formData.email,
+          password: formData.password,
+          recaptchaToken: token
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      // Create complete user object with defaults
       const user = {
         _id: response.data.user._id,
         username: response.data.user.username,
@@ -115,10 +122,7 @@ function Login() {
       } else {
         setError("Unexpected error occurred. Please try again.");
       }
-
-      if (captchaRef.current) {
-        captchaRef.current.reset();
-      }
+      if (captchaRef.current) captchaRef.current.reset();
       setCaptchaVerified(false);
     } finally {
       setLoading(false);
@@ -128,6 +132,20 @@ function Login() {
   return (
     <>
       <Background />
+      {/* 3. RENDER THE TOASTCONTAINER */}
+      {/* This component is invisible but is required for toasts to appear. */}
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="login-page-container">
         <div className="login-decorative-oval">
           <div className="oval-content">
@@ -146,7 +164,8 @@ function Login() {
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div className="login-input-container">
+            {/* ... Your form JSX ... */}
+             <div className="login-input-container">
               <input
                 type="email"
                 name="email"
