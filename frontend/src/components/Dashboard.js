@@ -49,7 +49,6 @@ function Dashboard({ activeNavItem = 'home' }) {
         });
 
         setSocket(newSocket);
-        window.socket = newSocket;
 
         newSocket.on('connect', () => {
             console.log('Socket connected:', newSocket.id);
