@@ -203,6 +203,10 @@ function Friends() {
                     setShowConfirmModal(false);
                     setFriendToRemove(null);
                 }}
+                onCancel={() => {
+                    setShowConfirmModal(false);
+                    setFriendToRemove(null);
+                }}
                 confirmText="Remove"
                 cancelText="Cancel"
             />

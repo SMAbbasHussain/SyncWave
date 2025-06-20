@@ -4,11 +4,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(25, 25, 25, 0.152);
+    background-color: rgba(67, 67, 67, 0.066);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2001 !important;
     backdrop-filter: blur(4px);
     border-radius: 20px;
 }
@@ -19,7 +19,7 @@
     flex-direction: column;
     width: 95%;
     max-width: 400px;
-    height: calc(80vh - 100px);
+    height: calc(80vh - 100px) !important;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid rgba(0, 119, 255, 0.3);

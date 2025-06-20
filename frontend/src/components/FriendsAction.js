@@ -419,6 +419,10 @@ function FriendsAction() {
                     setShowRejectConfirm(false);
                     setRequestToHandle(null);
                 }}
+                onCancel={() => {
+                    setShowRejectConfirm(false);
+                    setRequestToHandle(null);
+                }}
                 confirmText="Reject"
                 cancelText="Cancel"
             />
@@ -428,6 +432,10 @@ function FriendsAction() {
                 message={`Are you sure you want to cancel this friend request?`}
                 onConfirm={handleConfirmCancel}
                 onClose={() => {
+                    setShowCancelConfirm(false);
+                    setRequestToHandle(null);
+                }}
+                onCancel={() => {
                     setShowCancelConfirm(false);
                     setRequestToHandle(null);
                 }}

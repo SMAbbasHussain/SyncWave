@@ -99,6 +99,7 @@ function AnonymousGroupInfoModal({ group, onClose, isMuted, onMuteToggle }) {
                     message={`If you leave you may not found "${group.name}" again. You'll also lose all chats of it.`}
                     onConfirm={handleLeaveGroup}
                     onClose={() => setShowLeaveConfirm(false)}
+                    onCancel={() => setShowLeaveConfirm(false)}
                     confirmText="Leave"
                     cancelText="Cancel"
                 />
