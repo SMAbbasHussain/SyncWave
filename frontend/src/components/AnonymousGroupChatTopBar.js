@@ -99,13 +99,13 @@ function AnonymousGroupChatTopBar({ groupId, onLeaveSuccess }) {
         <div className="chat-screen-top-bar-content">
             <div className="chat-info">
                 <div className="chat-avatar-icon-container anonymous">
-                  {group.photo ? (
-                                      <img src={group.photo} alt={`${group.name}'s avatar`} className="chat-avatar" />
-                                  ) : (
-                                      <div className="chat-avatar-icon-container">
-                                          <FaUsers className="chat-avatar-icon" />
-                                      </div>
-                                  )}
+                    {group.photo ? (
+                        <img src={group.photo} alt={`${group.name}'s avatar`} className="chat-avatar" />
+                    ) : (
+                        <div className="chat-avatar-icon-container">
+                            <FaUsers className="chat-avatar-icon" />
+                        </div>
+                    )}
                 </div>
                 <div className="user-status-info">
                     <span className="chat-partner-name">{group.name}</span>
@@ -148,6 +148,7 @@ function AnonymousGroupChatTopBar({ groupId, onLeaveSuccess }) {
                 message="Are you sure you want to clear all messages in this chat?"
                 onConfirm={handleConfirmClearChat}
                 onClose={() => setShowClearChatConfirm(false)}
+                onCancel={() => setShowClearChatConfirm(false)}
                 confirmText="Clear"
                 cancelText="Cancel"
             />
@@ -157,6 +158,7 @@ function AnonymousGroupChatTopBar({ groupId, onLeaveSuccess }) {
                 message={`If you leave you may not found "${group.name}" again. You'll also lose all chats of it.`}
                 onConfirm={handleConfirmLeaveGroup}
                 onClose={() => setShowLeaveGroupConfirm(false)}
+                onCancel={() => setShowLeaveGroupConfirm(false)}
                 confirmText="Leave Chat"
                 cancelText="Cancel"
             />

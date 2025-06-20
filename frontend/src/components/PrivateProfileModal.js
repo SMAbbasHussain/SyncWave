@@ -113,6 +113,7 @@ function PrivateProfileModal({ user, chatId, isMuted, onMuteToggle, onClose }) {
                         : `Are you sure to block ${user.username}? You'll not be able to send or receive messages.`}
                     onConfirm={handleBlockToggle}
                     onClose={() => setShowBlockConfirm(false)}
+                    onCancel={() => setShowBlockConfirm(false)}
                     confirmText={isBlocked ? 'Unblock' : 'Block'}
                     cancelText="Cancel"
                 />

@@ -168,6 +168,7 @@ function PrivateChatTopBar({ activeChat, onBlockSuccess }) {
                 message={`Are you sure to block ${user.username}? You'll not be able to communicate with them.`}
                 onConfirm={handleConfirmBlockUser}
                 onClose={() => setShowBlockConfirm(false)}
+                onCancel={() => setShowBlockConfirm(false)}
                 confirmText="Block User"
                 cancelText="Cancel"
             />
