@@ -201,7 +201,7 @@ const [chats, setChats] = useState([]); // initially empty
                 ) : (
                   <FaUserCircle className="avatar-icon" />
                 )}
-                <div className={`status-indicator ${chat.status}`} />
+                
               </div>
               <div className="chat-info">
                 <h3 className="chat-name">

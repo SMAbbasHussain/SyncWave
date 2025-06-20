@@ -32,7 +32,7 @@ const Settings = () => {
     const menuItems = [
         { id: 'profile', label: 'Profile', icon: FaUser },
         { id: 'blocked', label: 'Blocked Accounts', icon: FaComments },
-        { id: 'account', label: 'Account Settings', icon: FaCog }
+
     ];
 
     useEffect(() => {
