@@ -21,7 +21,7 @@ const createGroup = async (req, res) => {
             description,
             category,
             photo,
-            isTemporary: false,
+            isTemporary: true,
         });
 
         const createdGroup = await group.save();
